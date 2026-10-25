@@ -4,6 +4,17 @@ A small, complete **2D game engine and scene studio** with Lua 5.3 scripting,
 Box2D-based physics, an editable scene hierarchy, and standalone game export.
 The included game, **Dead Signal**, is built with the same Lua API available to your own projects.
 
+## Downloads
+
+Open the [downloads workflow](https://github.com/wrozny/OpenEngine/actions/workflows/downloads.yml),
+choose the latest successful run, and scroll to **Artifacts**. Download
+**OpenEngineStudio-Windows** for the ready-to-run Studio ZIP and **DeadSignal-source**
+for the Lua scripts, scene, sprites, and a self-contained project you can open in Studio.
+Sign in to GitHub to download artifacts. Builds run automatically on main pushes; you
+can also use **Run workflow**. Downloads are retained for 90 days.
+
+For the entire repository source, use **Code → Download ZIP** on the repository page.
+
 ## Start here
 
 **Windows, no development tools:** unzip `OpenEngineStudio-win32-x64.zip` from the

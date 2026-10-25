@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:production": "npm run build && node tools/smoke-production.mjs",
-    "test:desktop": "node tools/smoke-desktop.mjs"
+    "test:desktop": "node tools/smoke-desktop.mjs",
+    "package:source": "node tools/package-source.mjs"
   },
   "repository": {
     "type": "git",

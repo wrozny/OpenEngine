@@ -1,0 +1,47 @@
+name: Download Studio and game source
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  game-source:
+    name: Dead Signal source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run package:source
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DeadSignal-source
+          path: release/DeadSignal-source/
+          if-no-files-found: error
+          retention-days: 90
+
+  windows-studio:
+    name: Windows Studio
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run package:studio -- --platform win32
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OpenEngineStudio-Windows
+          path: release/OpenEngineStudio-win32-x64/
+          if-no-files-found: error
+          retention-days: 90

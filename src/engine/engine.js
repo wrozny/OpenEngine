@@ -1,6 +1,6 @@
 import * as planck from 'planck';
 import { Signal } from './signal.js';
-import { SceneNode, deserializeNode, validateProject } from './scene.js';
+import { SceneNode, deserializeNode, validateProject, isRunnableScript } from './scene.js';
 import { Vector2, math } from './math.js';
 import { LuaRuntime } from './lua.js';
 import { InputService } from './input.js';
@@ -194,7 +194,7 @@ export class Engine {
       node.OnCollision.onError = node.OnCollisionEnd.onError = (error) =>
         this.log('error', error.message);
 
-      if (this.running && node.ClassName === 'Script' && node.Enabled) this.lua.run(node);
+      if (this.running && isRunnableScript(node) && node.Enabled) this.lua.run(node);
     }
     if (node.ClassName === 'Object2D') {
       if (this.isInWorkspace(node) && !node._body) this.createBody(node);
@@ -206,7 +206,7 @@ export class Engine {
     for (const child of node.GetChildren()) this.attach(child);
   }
   detach(node) {
-    if (node.ClassName === 'Script') this.lua?.stopScript(node);
+    if (isRunnableScript(node)) this.lua?.stopScript(node);
     for (const child of node.GetChildren()) this.detach(child);
     if (node._body) this.world.destroyBody(node._body);
     node._body = null;
@@ -268,7 +268,7 @@ export class Engine {
     this.running = true;
     this.lua = new LuaRuntime(this);
     // Snapshot: scripts spawned during startup are started by attach, not twice here.
-    const scripts = [...this.nodes].filter((node) => node.ClassName === 'Script' && node.Enabled);
+    const scripts = [...this.nodes].filter((node) => isRunnableScript(node) && node.Enabled);
     for (const script of scripts) if (!script.Destroyed) this.lua.run(script);
   }
   update(elapsed) {

@@ -319,3 +319,51 @@ test('attribute collections retain nested data and vector values through saves a
   );
   engine.dispose();
 });
+
+test('PlayerController2D moves in top-down mode using configurable keys and speed', () => {
+  const p = blank();
+  const actor = new SceneNode('Object2D', 'Actor');
+  actor.Anchored = false;
+  const control = new SceneNode('PlayerController2D');
+  control.Speed = 120;
+  control.RightKey = 'l';
+  control.Parent = actor;
+  p.services[0].children.push(serializeNode(actor));
+  const engine = new Engine(p);
+  engine.start();
+  engine.input.keys.add('l');
+  for (let i = 0; i < 30; i++) engine.update(1 / 60);
+  assert.ok(Math.abs(engine.workspace.FindFirstChild('Actor').Position.X - 60) < 0.01);
+  assert.deepEqual(
+    engine.logs.filter((l) => l.level === 'error'),
+    [],
+  );
+  engine.dispose();
+});
+
+test('PlayerController2D platformer grounds, jumps and lands without air jumping', () => {
+  const p = blank();
+  const actor = new SceneNode('Object2D', 'Actor');
+  actor.Size = { X: 30, Y: 40 };
+  actor.Position = new Vector2(0, -20);
+  const floor = new SceneNode('Object2D', 'Ground');
+  floor.Size = { X: 1000, Y: 40 };
+  floor.Position = new Vector2(0, 20);
+  const control = new SceneNode('PlayerController2D');
+  control.Mode = 'Platformer';
+  control.Parent = actor;
+  p.services[0].children.push(serializeNode(actor), serializeNode(floor));
+  const engine = new Engine(p);
+  engine.start();
+  for (let i = 0; i < 30; i++) engine.update(1 / 60);
+  engine.input.keys.add(' ');
+  engine.update(1 / 60);
+  assert.ok(engine.workspace.FindFirstChild('Actor').Velocity.Y < -400);
+  for (let i = 0; i < 100; i++) engine.update(1 / 60);
+  assert.ok(Math.abs(engine.workspace.FindFirstChild('Actor').Position.Y + 20) < 2);
+  assert.deepEqual(
+    engine.logs.filter((l) => l.level === 'error'),
+    [],
+  );
+  engine.dispose();
+});

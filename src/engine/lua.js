@@ -1,6 +1,6 @@
 import fengari from 'fengari';
 import interop from 'fengari-interop';
-import { SceneNode } from './scene.js';
+import { SceneNode, isRunnableScript } from './scene.js';
 import { Vector2 } from './math.js';
 import { Signal } from './signal.js';
 
@@ -169,7 +169,7 @@ export class LuaRuntime {
         Reflect.set(target, key, runtime.unwrap(value), target);
         if (
           target instanceof SceneNode &&
-          target.ClassName === 'Script' &&
+          isRunnableScript(target) &&
           key === 'Enabled' &&
           previousValue !== target.Enabled &&
           target._engine?.running

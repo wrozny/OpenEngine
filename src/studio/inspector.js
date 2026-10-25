@@ -1,4 +1,6 @@
 import { el, icon } from './dom.js';
+import { isScriptNode } from '../engine/scene.js';
+import { CONTROLLER_DEFAULTS_2D } from '../engine/controllers.js';
 import { Vector2 } from '../engine/math.js';
 
 export function renderInspector(container, store, onError) {
@@ -217,7 +219,7 @@ export function renderInspector(container, store, onError) {
       'number',
     );
   }
-  if (node.ClassName.endsWith('Script')) {
+  if (isScriptNode(node)) {
     section('SCRIPT');
     field(
       'Enabled',
@@ -236,6 +238,24 @@ export function renderInspector(container, store, onError) {
           : 'Scripts run when Play starts, or when parented into a running scene.',
       ),
     );
+  }
+  if (node.ClassName === 'PlayerController2D') {
+    section('CONTROLLER');
+    for (const [key, fallback] of Object.entries(CONTROLLER_DEFAULTS_2D)) {
+      field(
+        key,
+        node[key],
+        (value) => {
+          node[key] = value;
+        },
+        typeof fallback === 'number'
+          ? 'number'
+          : typeof fallback === 'boolean'
+            ? 'checkbox'
+            : 'text',
+        key === 'Mode' ? ['TopDown', 'Platformer'] : undefined,
+      );
+    }
   }
   section('ATTRIBUTES');
   for (const [name, value] of Object.entries(node.GetAttributes())) {

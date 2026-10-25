@@ -1,10 +1,14 @@
+import { CONTROLLER_2D, CONTROLLER_DEFAULTS_2D } from './controllers.js';
 import { Signal } from './signal.js';
 import { encodeAttribute, decodeAttribute } from './attributes.js';
 import { Vector2 } from './math.js';
 
 let nextId = 1;
 export const canonicalClass = (name) => (name === 'PhysicsObject' ? 'Object2D' : name);
-export const CLASSES = ['Folder', 'Object2D', 'Script', 'ModuleScript'];
+export const CLASSES = ['Folder', 'Object2D', 'Script', 'ModuleScript', 'PlayerController2D'];
+export const isScriptNode = (node) =>
+  ['Script', 'ModuleScript', 'PlayerController2D'].includes(node.ClassName);
+export const isRunnableScript = (node) => isScriptNode(node) && node.ClassName !== 'ModuleScript';
 export const OBJECT_DEFAULTS = {
   Texture: '',
   ShowHealthBar: false,
@@ -40,9 +44,13 @@ export class SceneNode {
     this.OnCollision = new Signal();
     this.OnCollisionEnd = new Signal();
     if (className === 'Object2D') Object.assign(this, structuredClone(OBJECT_DEFAULTS));
-    if (className.endsWith('Script')) {
+    if (isScriptNode(this)) {
       this.Source = '';
       this.Enabled = true;
+    }
+    if (className === 'PlayerController2D') {
+      Object.assign(this, CONTROLLER_DEFAULTS_2D);
+      this.Source = CONTROLLER_2D;
     }
   }
   get Parent() {
@@ -93,7 +101,11 @@ export class SceneNode {
     return this._children.find((child) => child.ClassName === className);
   }
   IsA(className) {
-    return this.ClassName === canonicalClass(className) || className === 'Instance';
+    return (
+      this.ClassName === canonicalClass(className) ||
+      className === 'Instance' ||
+      (className === 'Script' && isRunnableScript(this))
+    );
   }
   GetAttribute(name) {
     return this._attributes[name];
@@ -136,10 +148,12 @@ export function serializeNode(node) {
     for (const key of Object.keys(OBJECT_DEFAULTS)) data[key] = node[key];
     data.Position = { X: node.Position.X, Y: node.Position.Y };
   }
-  if (node.ClassName.endsWith('Script')) {
+  if (isScriptNode(node)) {
     data.Source = node.Source;
     data.Enabled = node.Enabled;
   }
+  if (node.ClassName === 'PlayerController2D')
+    for (const key of Object.keys(CONTROLLER_DEFAULTS_2D)) data[key] = node[key];
   return data;
 }
 export function deserializeNode(data, preserveIds = true) {
@@ -150,10 +164,13 @@ export function deserializeNode(data, preserveIds = true) {
       if (data[key] !== undefined) node[key] = structuredClone(data[key]);
     node.Position = data.Position || new Vector2();
   }
-  if (node.ClassName.endsWith('Script')) {
+  if (isScriptNode(node)) {
     node.Source = data.Source || '';
     node.Enabled = data.Enabled !== false;
   }
+  if (node.ClassName === 'PlayerController2D')
+    for (const key of Object.keys(CONTROLLER_DEFAULTS_2D))
+      if (data[key] !== undefined) node[key] = data[key];
   for (const child of data.children || []) deserializeNode(child, preserveIds).Parent = node;
   return node;
 }
@@ -198,7 +215,7 @@ export function validateProject(project) {
         throw new Error('Texture must be a string');
       if (!['Circle', 'Box'].includes(node.Shape)) throw new Error('Unknown shape');
     }
-    if (node.className.endsWith('Script') && typeof node.Source !== 'string')
+    if (isScriptNode({ ClassName: node.className }) && typeof node.Source !== 'string')
       throw new Error('Script source must be text');
     if (!Array.isArray(node.children)) throw new Error('Children must be an array');
     for (const child of node.children) visit(child, depth + 1);

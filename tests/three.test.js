@@ -102,3 +102,47 @@ test('3D free camera flies through geometry and fallen objects are destroyed wit
   );
   engine.dispose();
 });
+
+test('Parcel Panic tasks, football recovery, player respawn, goal and restart run in Lua', async () => {
+  const { loadProject } = await import('../tools/project.mjs');
+  const engine = new Engine(await loadProject('examples/parcel-panic/project.openengine'));
+  engine.start();
+  const player = engine.workspace.FindFirstChild('Player');
+  for (const parcel of engine.workspace.FindFirstChild('Parcels').GetChildren()) {
+    player.Position = parcel.Position;
+    engine.update(1 / 60);
+  }
+  assert.match(engine.ui.widgets.task.text, /2 \/ 4/);
+  player.Position = engine.workspace.FindFirstChild('PostBox').Position.Add(new Vector3(0, 1, 2));
+  engine.input.keys.add('e');
+  engine.update(1 / 60);
+  engine.input.keys.clear();
+  engine.update(1 / 60);
+  assert.match(engine.ui.widgets.task.text, /3 \/ 4/);
+  let ball = engine.workspace.FindFirstChild('Football');
+  ball.Position = new Vector3(0, -20, 0);
+  engine.update(1 / 60);
+  assert.equal(ball.Destroyed, true);
+  ball = engine.workspace.FindFirstChild('Football');
+  assert.ok(ball.Position.Y > 0);
+  player.Position = new Vector3(0, -20, 0);
+  engine.update(1 / 60);
+  assert.ok(player.Position.Y > 0);
+  ball.Position = new Vector3(0, 1, -16);
+  engine.update(1 / 60);
+  assert.equal(engine.workspace.GetAttribute('GoalScored'), true);
+  assert.match(engine.ui.widgets.task.text, /4 \/ 4/);
+  player.Position = engine.workspace.FindFirstChild('Bell').Position.Add(new Vector3(0, 1, 2));
+  engine.input.keys.add('e');
+  engine.update(1 / 60);
+  assert.equal(engine.ui.State, 'complete');
+  engine.ui.OnAction.Fire('restart');
+  assert.equal(engine.ui.State, 'playing');
+  assert.match(engine.ui.widgets.task.text, /1 \/ 4/);
+  assert.equal(engine.workspace.FindFirstChild('Parcels').GetChildren().length, 3);
+  assert.deepEqual(
+    engine.logs.filter((l) => l.level === 'error'),
+    [],
+  );
+  engine.dispose();
+});

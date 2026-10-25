@@ -1,60 +1,54 @@
-# Validation and platform coverage
+# Validation and platform coverage — 0.2
 
-This release was developed and verified in the Linux cloud workspace. The production
-runtime, editor, game logic, and native export path have been exercised; Windows
-executables were cross-packaged, not run on Windows.
+Verification was performed in the Linux cloud workspace. Windows executables are
+cross-packaged, not launch-tested on Windows.
 
-## Checks performed
+| Check                                             | Result                                                                                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                                        | 29 tests passed, with no skips. Covers hierarchy, clone/history, legacy Object2D migration, nested/typed attributes and callbacks, Lua modules/budgets, contacts/rays, 2D and 3D controllers, physics, world bounds, zombie waves/upgrades/death/restart, Parcel Panic tasks/football/respawn/restart, per-face UV repeats, recent-file permissions, and native assembly. |
+| `npm run test:browser`                            | All 8 Chromium integration tests passed in one run. Covers explicit startup and missing recents, dragging/attributes/portable save, context insertion and batch deletion, Monaco highlighting/completion/diagnostics/source saving, resized and rearranged panel persistence, actual 3D editing and custom sky upload, and execution of offline 2D/3D exports.            |
+| `npm run build`                                   | Production Studio, worker/font assets, game runtime and offline runtime template built.                                                                                                                                                                                                                                                                                   |
+| `node tools/smoke-production.mjs`                 | Production launcher, Monaco, Studio Play and standalone runtime ran under desktop CSP.                                                                                                                                                                                                                                                                                    |
+| Packaged Linux Studio plus `npm run test:desktop` | Real packaged executables exercised launcher, Monaco, file save/open/recents, 2D/3D Play, in-app native exports, then launched both exported games with their own bundled data.                                                                                                                                                                                           |
+| `npm run package:examples`                        | ZIP unpacked and both named project documents validated; editable Lua and embedded artwork verified present.                                                                                                                                                                                                                                                              |
+| `npm run format:check`                            | Pinned Prettier checks passed.                                                                                                                                                                                                                                                                                                                                            |
 
-| Check                                                            | Result / scope                                                                                                                                                                                                                                                                                                                                                       |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`                                                       | 14 passing tests: hierarchy/clone/destruction, event dispatch, Lua modules/hierarchy/nil parenting, instruction budgets, collision callbacks, raycasts, real zombie game death/restart, projectile rewards and wave upgrades, subscription cleanup, custom UI/gravity, input movement, Workspace physics ownership, module cycles, and native distribution assembly. |
-| `npm run test:browser`                                           | 4 passing Chromium integration tests: transforms/undo/redo, Lua editing and Play, portable save/reload, viewport drag, game HUD, actual exported offline game execution, new projects/modules and invalid file handling.                                                                                                                                             |
-| `npm run build`                                                  | Production Studio, standalone runtime and offline export template built successfully.                                                                                                                                                                                                                                                                                |
-| `node tools/smoke-production.mjs`                                | Production Studio Play and standalone runtime execute under the same CSP as desktop.                                                                                                                                                                                                                                                                                 |
-| `npm run desktop:prepare`                                        | Official Linux Electron runtime installed with checksum verification.                                                                                                                                                                                                                                                                                                |
-| Headless Electron source startup                                 | Actual desktop Studio loaded, Play executed Lua, and the health HUD appeared.                                                                                                                                                                                                                                                                                        |
-| `npm run package:studio -- --platform linux` plus `test:desktop` | Actual packaged Studio opened/saved a project via IPC, played Lua, exported a native game in-app, and that exported game started with its custom bundled project.                                                                                                                                                                                                    |
-| Windows game and Studio packaging                                | Both x64 packages produced with their `.exe`, Electron runtime, compiled application, project data where applicable, and license files.                                                                                                                                                                                                                              |
-| Offline web packaging                                            | Self-contained ZIP produced; the browser integration test unpacks a generated export and executes its HTML runtime.                                                                                                                                                                                                                                                  |
-| `npm run format:check`                                           | Source formatting checked with pinned Prettier.                                                                                                                                                                                                                                                                                                                      |
+Browser tests use system Chromium when available, otherwise Playwright's installed
+Chromium. The headless Linux native runner uses `--ozone-platform=headless`, software
+WebGL and `--no-sandbox` for the container only, with temporary writable XDG config/cache
+paths. Distributed applications do not force those flags or paths. Temporary exports
+and profiles are removed after the native test.
 
-The native end-to-end smoke test uses the real packaged Linux executables, a sandboxed
-renderer/preload, and programmatically selected temporary dialog paths. Its headless
-Linux runner passes `--no-sandbox` and `--ozone-platform=headless` only for the test
-container. Distributed applications do not set those flags. All temporary test exports
-are removed afterwards.
+The editor and both games were also visually inspected. Built-in materials, scene
+selection and story HUD were checked in rendered screenshots. Idle 3D views invalidate
+only when camera, objects, selection, controls, size or textures change.
 
-## Reproduce native export validation on Linux
+## Reproduce
 
 ```sh
 npm ci
+npm test
+npm run build
+npx playwright install chromium
+npm run test:browser
+npm run test:production
+npm run package:examples
 npm run package:studio -- --platform linux
 npm run test:desktop -- --executable release/OpenEngineStudio-linux-x64/OpenEngineStudio
 ```
 
-Production browser validation:
+## Limits
 
-```sh
-npx playwright install chromium
-npm run test:production
-```
-
-## Coverage limits
-
-- Windows binaries are valid cross-packaging outputs; Windows launch, graphics/audio
-  device behavior, unsigned-app reputation prompts, and native file dialogs still
-  require a Windows machine for platform-specific verification.
-- The actual Linux desktop export round-trip is tested, including launching the
-  exported game. macOS, ARM64 and signing/notarization are not validated here.
-- Chromium tests validate the shared browser runtime. Firefox/Safari, touch/gamepad,
-  and accessibility with assistive technology were not tested.
-- Physics is provided by Planck. Engine tests cover representative contacts, motion
-  and rays, not every possible Box2D configuration.
-- The zombie game uses deliberately simple direct-chase AI. Cover can block zombies;
-  there is no navigation mesh/pathfinding system.
-- No long-duration soak test or formal performance target is claimed.
-
-The GitHub Actions workflow runs formatting, headless tests, production build, browser
-integration and offline packaging on future pushes. It has been added to the repository;
-no remote CI run or publication is claimed from this workspace.
+- Windows-specific launch, native dialogs, drivers/audio devices and unsigned-app
+  reputation prompts require verification on Windows. macOS/ARM/signing are unvalidated.
+- Browser tests use Chromium; Firefox/Safari, touch/gamepad and assistive technologies
+  are not tested. 3D needs WebGL and a functional graphics driver/software implementation.
+- Monaco completion is engine-aware assistance with basic alias/scene inference, not
+  a full Lua language server or type checker. Syntax diagnostics compile without running.
+- Primitive physics is tested in representative scenarios, not every possible Box2D or
+  Cannon configuration. Circular primitives should use matching circular dimensions.
+- No long-duration soak test, arbitrary imported-mesh collider support, inherited
+  transforms, skeletal animation, networking or formal large-world performance target
+  is claimed. Direct-chase zombie AI can be blocked by cover.
+- GitHub Actions runs checks/builds after pushes. A locally successful build or pushed
+  version tag does not itself prove that the remote release upload completed.

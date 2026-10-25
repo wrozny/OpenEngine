@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag to publish (for example v0.1.0)
+        description: Existing version tag to publish (for example v0.2.0)
         required: true
-        default: v0.1.0
+        default: v0.2.0
         type: string
 
 permissions:
@@ -45,13 +45,12 @@ jobs:
       - run: npm run format:check
       - run: npm test
       - run: npm run package:studio -- --platform win32
-      - run: npm run package:source
+      - run: npm run package:examples
       - name: Create downloadable ZIPs and checksums
         run: |
           (cd release/OpenEngineStudio-win32-x64 && zip -q -r ../OpenEngineStudio-Windows.zip .)
-          (cd release/DeadSignal-source && zip -q -r ../DeadSignal-source.zip .)
           cd release
-          sha256sum OpenEngineStudio-Windows.zip DeadSignal-source.zip > SHA256SUMS.txt
+          sha256sum OpenEngineStudio-Windows.zip "Example Projects.zip" > SHA256SUMS.txt
       - name: Upload assets and publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,6 +61,6 @@ jobs:
           fi
           gh release upload "$RELEASE_TAG" \
             release/OpenEngineStudio-Windows.zip \
-            release/DeadSignal-source.zip \
+            "release/Example Projects.zip" \
             release/SHA256SUMS.txt --clobber
           gh release edit "$RELEASE_TAG" --draft=false --latest

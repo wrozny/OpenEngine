@@ -1,156 +1,159 @@
 # OpenEngine
 
-A small, complete **2D game engine and scene studio** with Lua 5.3 scripting,
-Box2D-based physics, an editable scene hierarchy, and standalone game export.
-The included game, **Dead Signal**, is built with the same Lua API available to your own projects.
+A Lua game engine and desktop Studio for **2D and 3D** projects. Build scenes, write
+scripts, run physics, and export a game with its own runtime. The authoring scene is
+separate from every Play session.
 
-## Downloads
+## Download and run
 
-Open the [latest release](https://github.com/wrozny/OpenEngine/releases/latest) and
-expand **Assets**. Download **OpenEngineStudio-Windows.zip** for the ready-to-run
-Windows Studio and **DeadSignal-source.zip** for the Lua scripts, scene, sprites,
-and a self-contained project you can open in Studio. These are release assets,
-with no Actions artifact expiration. Each release also includes checksums and
-GitHub's complete source-code archives.
+Open the [latest GitHub release](https://github.com/wrozny/OpenEngine/releases/latest)
+and expand **Assets**:
 
-Releases publish automatically when a version tag matching package.json is pushed
-(for example, v0.1.0). The release workflow can also be run manually for an existing
-tag. It uploads both ZIPs before publishing a new release.
+- **OpenEngineStudio-Windows.zip** — extract the entire ZIP and run `OpenEngineStudio.exe`.
+  Keep the executable beside its runtime files. No Node.js or Lua installation is needed.
+- **Example Projects.zip** — extract, then use Studio's **Open** button to select
+  `Dead Signal/Dead Signal.openengine` or `Parcel Panic/Parcel Panic.openengine`.
+- **SHA256SUMS.txt** — checksums for the downloads. GitHub's **Source code** links contain
+  the complete engine source for the release.
 
-For the current repository source, use **Code → Download ZIP** on the repository page.
+The Studio launcher offers **New**, **Open**, recent projects, and explicit example
+buttons. It never silently starts a game. Missing recent files are crossed out and
+can be removed with the × button. Desktop recents show actual project file paths;
+browser recents are local browser copies.
 
-## Start here
+Choose **2D** or **3D** when creating a project. Use a starter with a player controller,
+a 2D platformer starter, or an empty scene. Click the project title to change its
+name, description, and in-game control hint.
 
-**Windows, no development tools:** unzip `OpenEngineStudio-Windows.zip` from GitHub Releases and run `OpenEngineStudio.exe`. The example opens automatically.
-Press **Play** to run Dead Signal. Keep the executable with all the other files
-in its extracted folder. Standalone game packaging instructions are below.
-These unsigned portable packages may trigger Windows reputation prompts.
+## Studio workflow
 
-**From source:** install [Node.js 24 or newer](https://nodejs.org), then:
+- **Panels:** drag tabs to rearrange/dock them, drag dividers to resize, and double-click
+  a tab to maximize it. Layout is remembered. **Reset layout** restores the defaults.
+- **Scene:** right-click to insert objects or operate on the selection. Ctrl/Cmd-click
+  selects multiple objects; deletion and duplication are undoable as a group.
+- **2D viewport:** drag objects to move them, middle/Alt-drag to pan, wheel to zoom.
+  Drag empty space for rectangular selection; **Snap** uses a 25-unit grid.
+- **3D viewport:** use Move/Rotate/Scale gizmos. Right-drag orbits, middle-drag pans,
+  and the wheel zooms. Hold right mouse with WASD to fly; Space/Control change height
+  and Shift increases speed. **F** frames the active object. Snap uses 1-meter movement,
+  15-degree rotation, and 0.25 scale increments.
+- **Properties:** edit transforms, shapes, appearance, physics, textures, controller
+  settings, and named attributes. Select Workspace in 3D to edit the sky and fallen height.
+- **Lua:** select a Script, ModuleScript, or controller. Monaco supplies syntax coloring,
+  engine-aware autocomplete (Ctrl+Space), signatures, hover help, and syntax diagnostics.
+  These completions describe engine APIs and basic local service aliases; they are not
+  a full Lua language server or static type checker.
+- **Play:** F5 starts/stops a disposable session. Edit-time data survives unchanged.
+- **Save:** desktop Studio writes a .openengine project file; the browser downloads one.
+  Ctrl/Cmd+Shift+S uses Save As. Browser copies are convenient, not permanent backups.
+- **Build:** export a fully offline web ZIP, or use packaged desktop Studio to export
+  a standalone native game for the current operating system.
+
+Ctrl/Cmd+S saves; Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo/redo scene changes; Ctrl/Cmd+D
+duplicates; Delete removes the selection. Monaco retains standard text editing shortcuts.
+
+## Engine features
+
+- Object2D boxes/circles and Object3D boxes/spheres/cylinders, with configurable physics.
+- Planck/Box2D 2D physics and Cannon 3D physics: contacts, sensors, filtering and rays.
+- Three.js rendering, lights/shadows, tiled materials and textures, configurable sky images.
+- Workspace and ScriptService hierarchy, script.Parent, events, cloning, and modules.
+- Editable data attributes: SetAttribute, GetAttribute and GetAttributes.
+- Editable Lua PlayerController2D (TopDown/Platformer) and PlayerController3D
+  (Platformer/FreeCamera), including grounded jumping and configurable keys/speeds.
+- Keyboard/mouse input, camera following and mouse look, HTML UI widgets, synthesized
+  sounds, local/embedded audio, vector and math helpers.
+- Automatic 3D object cleanup below Workspace.FallenHeight, with OnFallen recovery hooks.
+
+Existing version 1 **PhysicsObject** documents and Lua constructors migrate to Object2D.
+2D uses pixels with Y pointing down; 3D uses meters with Y pointing up. Parenting organizes
+objects and scripts; it does not imply inherited transforms.
+
+This is a local single-player engine, not a Roblox implementation. Lua is **Lua 5.3**
+through Fengari, not Luau. There is no networking, skeletal animation system, polygon
+collider editor or touch/gamepad controller. Scripts are trusted code, not a security sandbox.
+3D needs a WebGL-capable machine. Native packages include Chromium and are unsigned.
+
+## Example projects
+
+**Dead Signal (2D):** WASD/arrows move, mouse aims, left click/Space fires. Survive waves
+of increasingly fast zombies. Kills award points; between waves upgrade health, damage,
+fire rate or speed. Death offers a fresh run. Gameplay is ordinary Lua under
+`examples/zombie/` and uses the same public API as your projects.
+
+**Parcel Panic (3D):** a floating-island workplace comedy. Collect three lost parcels,
+deliver them to a post box, score a football goal, and ring the bell to clock out.
+WASD moves, Space jumps, right-drag looks, E interacts/kicks, and R returns to spawn.
+Fallen players respawn and lost balls are replaced. See `examples/parcel-panic/`.
+
+Each folder in **Example Projects.zip** includes a named, self-contained Studio document
+and editable Lua/asset source. `project.openengine` in a source folder references those
+external files and is intended for the CLI. Open the named portable document in Studio.
+
+## Develop from source
+
+Install [Node.js 24+](https://nodejs.org), then run from the repository root:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the address printed by Vite. No Lua installation, API keys, or external services
-are needed. For desktop Studio from source:
+Open the address Vite prints. There are no required credentials, databases or game services.
+For desktop Studio on a graphical machine:
 
 ```sh
 npm run studio
 ```
 
-The first desktop launch downloads the matching Electron runtime from its official
-GitHub release and verifies its checksum. Downloads also respect standard HTTP(S)
-proxy settings. If your network blocks GitHub release assets, browser Studio still works.
-
-## What you can build
-
-- Top-down games, arena shooters, simple platformers, puzzles, and physics prototypes.
-- Scenes assembled from colored boxes, circles, and embedded sprite images.
-- Lua gameplay organized into ordinary Scripts and reusable ModuleScripts.
-- Keyboard/mouse controls, camera following, collision and raycast mechanics.
-- Custom text, buttons, and health/progress bars; synthesized or file-based audio.
-- Offline web games and portable desktop games containing their runtime and game data.
-
-This release is **2D**, local/single-player, and shape/sprite based. It does not include
-3D rendering, multiplayer replication, skeletal animation, a visual UI designer, or a
-Roblox compatibility layer. The service/instance scripting model is inspired by Roblox;
-Lua here is standard Lua 5.3 through Fengari, not Luau.
-
-## Studio workflow
-
-Click the project title to set your game name, description, and control hint.
-
-1. Select a node in **Explorer**. Edit its name, position, size, rotation, appearance,
-   sprite, and physics properties in **Properties**.
-2. Drag objects in the scene. Scroll to zoom, middle-drag or Alt-drag to pan, and
-   press **F** to frame the selection. **Snap** aligns movement to 25 world units.
-3. Use **Insert** to create PhysicsObjects, folders, Scripts, or ModuleScripts.
-   New nodes appear under the selected node; drag hierarchy rows to change parents.
-4. Select a Script or ModuleScript to edit Lua. Switch back with the **Scene** tab.
-5. Press **F5** or **Play**. Each play session gets its own scene, physics world,
-   Lua state, and module cache. Stop returns to the untouched edit document.
-6. **Save** writes a portable `.openengine` JSON document, including scripts and
-   sprite data. **Open** restores one. Edits also autosave locally in the browser.
-7. **Build game** exports an offline web ZIP. Packaged desktop Studio can also
-   export a native game for its operating system without Node or a compiler.
-
-Ctrl/Cmd+S saves; Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo/redo scene changes;
-Ctrl/Cmd+D duplicates; Delete removes the selection. Inside the script textarea,
-standard text undo remains available. Loading a project or making a new one is undoable.
-The Guide button can reload the original example.
-
-Autosave is convenience storage, not a backup. Download project files regularly.
-Projects execute code when you press Play; open and run projects from people you trust.
-
-## Dead Signal
-
-WASD or arrow keys move, the mouse aims, and holding left click or Space fires.
-Zombies move toward you and deal contact damage. Each kill awards 25 points.
-
-Each cleared wave opens a supply screen. Spend points on maximum health with a
-full heal, damage, fire rate, or movement speed, then start the next wave. Prices
-increase for repeated purchases. Points carry across waves. Waves contain more
-zombies, with increasing health and speed. The game ends at zero health and offers
-**Try again**, which resets the run. Counts and speed eventually cap to keep the
-simulation manageable; waves themselves continue indefinitely.
-
-Source files live in `examples/zombie/`. Gameplay is in `scripts/Survival.lua`,
-projectiles in `scripts/Weapons.lua`, tuning in `scripts/Config.lua`. The optional,
-disabled `CollisionDemo` Script demonstrates `script.Parent.OnCollision`.
-The example's two embedded SVG sprites are included as editable source assets.
-
-## Build and distribute
+Electron downloads come from official GitHub releases with TLS and checksum verification.
+The installer/packager honors standard HTTP(S) proxy settings. Browser Studio works without
+an Electron download. All dependencies are version-pinned and locked.
 
 ```sh
-# Production browser Studio and game runtime
-npm run build
-npm run preview
-
-# Self-contained, offline game ZIP (open index.html after unzipping)
-npm run package:game -- --platform web
-
-# Portable Windows game with .exe, Electron runtime, and bundled project
-npm run package:game -- --platform win32
-
-# Package a project saved from Studio
-npm run package:game -- --project "My Game.openengine" --platform win32
-
-# Portable Windows Studio with in-app native export
-npm run package:studio -- --platform win32
-
-# Linux builds; macOS packaging should be performed on macOS
-npm run package:game -- --platform linux
-```
-
-Outputs go to `release/`. Windows and Linux native exports are folders; zip and
-ship the **entire folder**, including the license files. An `.exe` alone is not
-a complete Electron application. No Node.js or Lua installation is needed by players.
-Use `--arch arm64` for supported ARM targets; x64 is the default.
-Native exports are portable distributions, not installers, and are not code-signed.
-The in-app exporter supports Windows and Linux; macOS uses the CLI.
-
-The checked-in example project resolves its `SourceFile` references during build.
-Studio saves embed all code directly. Sprite uploads and named SourceFile assets are embedded as data URLs.
-For portable audio, use the built-in effects or embedded data URLs with `PlayFile`;
-arbitrary external audio/image URLs are not downloaded and bundled automatically.
-Native project open/save is limited to 16 MB.
-
-## Documentation and development
-
-- [Lua and engine API](docs/API.md)
-- [Make your own game](docs/TUTORIAL.md)
-- [Architecture and extension points](docs/ARCHITECTURE.md)
-- [Validation and platform coverage](docs/VALIDATION.md)
-- [Third-party licenses](THIRD_PARTY_NOTICES.md)
-
-```sh
-npm test                    # Headless engine/gameplay and packaging tests
-npx playwright install chromium  # Once, unless Chromium is already installed
-npm run test:browser         # Studio, input/editing, save and actual offline export
+npm test                         # Engine, gameplay, document and native-file tests
+npx playwright install chromium  # Once, unless system Chromium is available
+npm run test:browser              # Real editor and offline-game integration checks
+npm run test:production           # Production bundles under desktop CSP
 npm run format:check
 ```
 
-Set `CHROMIUM_PATH` to use a system Chromium executable. Node 24 is pinned in
-`.node-version`; npm dependencies are pinned and locked. MIT licensed.
+Set CHROMIUM_PATH to choose a system Chromium executable. Headless Linux desktop export
+validation is available after packaging Linux Studio:
+
+```sh
+npm run package:studio -- --platform linux
+npm run test:desktop -- --executable release/OpenEngineStudio-linux-x64/OpenEngineStudio
+```
+
+## Package games and releases
+
+```sh
+npm run build
+npm run preview
+npm run package:examples
+npm run package:game -- --platform web
+npm run package:game -- --project "My Game.openengine" --platform win32
+npm run package:studio -- --platform win32
+```
+
+Outputs go to `release/`. Native outputs are folders; distribute the **entire folder**,
+including Electron license files. The .exe alone is not a complete application.
+Use `--platform linux` or package on macOS for those systems; `--arch arm64` selects ARM.
+In-app native export supports Windows/Linux. macOS CLI packaging/signing is not validated.
+
+Uploading an image embeds its data in the saved project. SourceFile assets are resolved
+by the CLI. Use named/embedded assets and built-in sounds for portable exports; external
+URLs are not downloaded automatically. Desktop project open/save supports up to 64 MB.
+The release workflow builds both requested ZIPs and publishes them when a version tag
+matching package.json is pushed. New releases remain drafts until asset uploads finish.
+
+## Documentation
+
+- [Lua and engine API](docs/API.md)
+- [Make your own game](docs/TUTORIAL.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Validation and platform coverage](docs/VALIDATION.md)
+- [Third-party licenses](THIRD_PARTY_NOTICES.md)
+
+MIT licensed. Art and texture patterns shipped with the examples were created for this project.

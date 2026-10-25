@@ -1,7 +1,7 @@
 {
   "name": "openengine",
-  "version": "0.1.0",
-  "description": "A 2D game engine and scene studio with Lua scripting, Box2D physics, and desktop export.",
+  "version": "0.2.0",
+  "description": "A Lua game engine and dockable Studio for 2D and 3D projects.",
   "main": "desktop/main.cjs",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,8 @@
     "format:check": "prettier --check .",
     "test:production": "npm run build && node tools/smoke-production.mjs",
     "test:desktop": "node tools/smoke-desktop.mjs",
-    "package:source": "node tools/package-source.mjs"
+    "package:source": "node tools/package-source.mjs",
+    "package:examples": "node tools/package-examples.mjs"
   },
   "repository": {
     "type": "git",

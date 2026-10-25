@@ -2,7 +2,7 @@
 
 ## Execution model
 
-Each Play/game session owns one Lua 5.3 VM. Enabled `Script` instances execute
+Each Play/game session owns one Lua 5.3 VM. Player controllers are ordinary editable Lua templates with exposed properties and the same lifecycle as Scripts. Enabled `Script` instances execute
 once at startup, in scene order; newly parented Scripts execute immediately.
 `ModuleScript` instances execute on their first `require(instance)` and must
 return a non-nil value. Results are cached by module instance until Stop/restart.
@@ -43,15 +43,16 @@ local Assets = game:GetService("AssetService")
 `workspace` is also a global alias for Workspace. Unknown service names raise errors.
 Workspace contains scene nodes; ScriptService is a convenient place for game controllers
 and modules. Folders are organizational: transforms use world coordinates and are
-not inherited from parents. PhysicsObjects must be descendants of Workspace to be
+not inherited from parents. Object2Ds must be descendants of Workspace to be
 visible in the editor; only Workspace descendants create physics bodies. ScriptService is for scripts/modules.
 
 ## Instances and hierarchy
 
-Supported classes: `Folder`, `PhysicsObject`, `Script`, `ModuleScript`.
+Supported classes: `Folder`, `Object2D`, `Object3D`, `Script`, `ModuleScript`,
+`PlayerController2D`, and `PlayerController3D`. Legacy PhysicsObject names are accepted as Object2D aliases.
 
 ```lua
-local object = Instance.new("PhysicsObject")
+local object = Instance.new("Object2D")
 object.Name = "Crate"
 object.Position = Vector2.new(150, 100)
 object.Size = Vector2.new(64, 48)
@@ -65,19 +66,19 @@ local crate = Workspace:FindFirstChild("Crate", true)
 for _, child in ipairs(Workspace:GetChildren()) do print(child.Name) end
 ```
 
-| Member                                             | Meaning                                                                              |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `Name`                                             | Display/hierarchy name; sibling names may repeat, so lookup returns the first match. |
-| `Id`, `ClassName`, `Destroyed`                     | Read-only identity, type and lifecycle state.                                        |
-| `Parent`                                           | Parent instance; assigning nil detaches a node and its subtree. Cycles are rejected. |
-| `GetChildren()` / `GetDescendants()`               | Snapshot collections, **1-indexed** for Lua `ipairs` and `#`.                        |
-| `FindFirstChild(name, recursive=false)`            | First matching child, or nil.                                                        |
-| `FindFirstChildOfClass(className)`                 | First immediate child of that class, or nil.                                         |
-| `IsA(className)`                                   | Exact class check; every node is also an `Instance`.                                 |
-| `GetFullName()`                                    | Dot-separated path starting with `game`.                                             |
-| `Clone()`                                          | Detached deep copy, including attributes, child scripts and fresh IDs.               |
-| `Destroy()`                                        | Removes the node and descendants, physics bodies and events. Idempotent.             |
-| `SetAttribute(name, value)` / `GetAttribute(name)` | Per-instance data: finite numbers, strings, booleans; nil removes an attribute.      |
+| Member                                             | Meaning                                                                                   |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `Name`                                             | Display/hierarchy name; sibling names may repeat, so lookup returns the first match.      |
+| `Id`, `ClassName`, `Destroyed`                     | Read-only identity, type and lifecycle state.                                             |
+| `Parent`                                           | Parent instance; assigning nil detaches a node and its subtree. Cycles are rejected.      |
+| `GetChildren()` / `GetDescendants()`               | Snapshot collections, **1-indexed** for Lua `ipairs` and `#`.                             |
+| `FindFirstChild(name, recursive=false)`            | First matching child, or nil.                                                             |
+| `FindFirstChildOfClass(className)`                 | First immediate child of that class, or nil.                                              |
+| `IsA(className)`                                   | Exact class check; every node is also an `Instance`.                                      |
+| `GetFullName()`                                    | Dot-separated path starting with `game`.                                                  |
+| `Clone()`                                          | Detached deep copy, including attributes, child scripts and fresh IDs.                    |
+| `Destroy()`                                        | Removes the node and descendants, physics bodies and events. Idempotent.                  |
+| `SetAttribute(name, value)` / `GetAttribute(name)` | Per-instance values. nil removes an attribute. Add/edit/remove data attributes in Studio. |
 
 A property/method takes precedence over a child with the same name. Use
 `FindFirstChild` when a child's name collides with an API member. Cloning copies
@@ -90,7 +91,7 @@ object.OnCollision:Connect(function(with)
 end)
 ```
 
-## PhysicsObject
+## Object2D
 
 | Property                  | Default / units                                                               |
 | ------------------------- | ----------------------------------------------------------------------------- |
@@ -110,7 +111,7 @@ end)
 
 Assigning Size, Shape, Anchored, Sensor, CollisionGroup, Friction or Restitution
 from Lua rebuilds the fixture. Assign a complete Size value rather than changing
-`Size.X` in place. Position/Velocity vectors are immutable values. All bodies have
+`Size.X` in place. Position/Velocity vectors are immutable values. 2D bodies have
 fixed angular rotation; scripts can set Rotation directly. No joints, torque API,
 or polygon collider editor are provided in this release.
 
@@ -291,3 +292,99 @@ end
 
 Use audio/wav or another browser-supported MIME type for named audio and pass
 the result of Get to AudioService:PlayFile. Missing named assets raise an error.
+
+## Attributes and persistence
+
+`SetAttribute(name, value)` and `GetAttribute(name)` accept/return runtime values.
+`GetAttributes()` returns a separate dictionary of all current attributes. Nil removes
+an attribute. Plain Lua tables are converted into data records/arrays at the bridge.
+
+```lua
+object:SetAttribute("Inventory", { coins = 12, items = {"key", "map"} })
+object:SetAttribute("Spawn", Vector3.new(0, 5, 0))
+for name, value in pairs(object:GetAttributes()) do print(name, value) end
+```
+
+Numbers, strings, booleans, nested acyclic records/arrays, and Vector2/Vector3 values
+round-trip through saving/cloning. Runtime-only functions or instance references may
+be stored while running, but cannot be serialized into a project document.
+
+## Player controllers
+
+Insert a PlayerController2D/3D under an object of the corresponding dimension.
+Inserting one without a suitable selection creates an owner object. Controllers have
+Source/Enabled and are edited like Scripts. Their exposed values are stored with
+the project; edits apply when Play starts. Avoid attaching multiple movement scripts
+to one actor, since they would compete for the same velocity.
+
+| Controller         | Settings                                                                                                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PlayerController2D | Mode: TopDown or Platformer; Speed, JumpSpeed, Gravity, FollowCamera, LeftKey, RightKey, UpKey, DownKey, JumpKey.                                    |
+| PlayerController3D | Mode: Platformer or FreeCamera; Speed, JumpSpeed, FlySpeed, LookSensitivity, FollowCamera, LeftKey, RightKey, ForwardKey, BackKey, JumpKey, DownKey. |
+
+2D Platformer sets world gravity to (0, Gravity). Platformers use a downward ray and
+a new jump-key press to prevent air jumping. The 3D platformer keeps its actor upright
+and removes actor friction so movement does not fight ground contact. FreeCamera
+anchors its actor and moves it directly, passing through geometry. Hold right mouse
+to look; Space and DownKey (Control by default) move vertically in FreeCamera.
+
+## Object3D, world settings and coordinates
+
+Choose a 3D project when creating it. 3D scenes use **meters, Y up**, with forward
+being negative Z at camera yaw zero. Rotation is a Vector3 of radians in YZX order.
+
+```lua
+local ball = Instance.new("Object3D")
+ball.Shape = "Sphere" -- Box, Sphere or Cylinder
+ball.Size = Vector3.new(1, 1, 1)
+ball.Position = Vector3.new(0, 5, 0)
+ball.Rotation = Vector3.new(0, math.pi / 4, 0)
+ball.Anchored = false
+ball.Mass = 1
+ball.Restitution = 0.5
+ball.Material = "Rock"
+ball.TextureScale = 2
+ball.Parent = workspace
+ball.Velocity = Vector3.new(4, 8, 0)
+
+local hit = workspace:Raycast(Vector3.new(0, 10, 0), Vector3.new(0, -20, 0), ball)
+if hit then print(hit.Instance.Name, hit.Distance, hit.Normal.Y) end
+```
+
+Common properties mirror Object2D: Position, Rotation, Velocity, Size, Shape, Color,
+Texture, Anchored, Sensor, Visible, CollisionGroup, Friction, Restitution. 3D adds
+Mass (positive), FixedRotation (false by default), Material, and TextureScale (positive
+world units per repeat). Shapes are physical primitives, not arbitrary imported meshes.
+Sphere diameter and cylinder radius use Size.X; use matching circular dimensions.
+
+Materials: Default, Grass, Rock, Brick, Wood, Metal. Built-in textures are original
+embedded SVG patterns. Texture overrides a material's pattern and can be an embedded
+image, a local URL, or asset:name. Color tints the surface.
+
+Select Workspace to edit Skybox, BackgroundColor and FallenHeight:
+
+```lua
+workspace.Skybox = "builtin:sky" -- Or an embedded equirectangular image URL.
+workspace.Skybox = "" -- Empty background, using BackgroundColor.
+workspace.BackgroundColor = "#000000"
+workspace.FallenHeight = -100
+ball.OnFallen:Connect(function()
+    ball.Position = Vector3.new(0, 5, 0) -- Move above the barrier to cancel removal.
+    ball.Velocity = Vector3.new()
+end)
+```
+
+After physics, every Object3D below FallenHeight fires OnFallen, then is destroyed
+with its descendants if it is still below the barrier. The story example recovers
+its player and ball before they reach the barrier. Raise/lower the barrier in Properties.
+Sky images are interpreted as equirectangular panoramas; there is no six-face cubemap
+editor. Built-in hemispheric/directional lighting and shadows are supplied by the renderer.
+
+Camera in 3D exposes Position, Follow, Yaw, Pitch, Distance and FirstPerson. Following
+a character targets a point one meter above its center. Distance controls third-person
+separation; FirstPerson uses zero separation. Set Follow=nil to control Position directly.
+The view direction at yaw/pitch zero is (0,0,-1); a positive yaw turns toward negative X.
+
+Vector3 supports X/Y/Z, Magnitude, Unit, Add/Sub/Mul/Div/Dot/Cross/Distance/Lerp with
+the same immutable-value conventions as Vector2. Assign whole vectors to transforms.
+No parent transform inheritance, joints, skeletons or multiplayer replication are provided.

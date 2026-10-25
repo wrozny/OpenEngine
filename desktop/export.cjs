@@ -39,7 +39,7 @@ async function buildNativeGame({ appRoot, executable, destination, project, plat
       path.join(gameRoot, 'package.json'),
       JSON.stringify({
         name: 'openengine-game',
-        version: '1.0.0',
+        version: '0.2.0',
         main: 'desktop/main.cjs',
         openengineMode: 'game',
       }),

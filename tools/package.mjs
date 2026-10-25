@@ -25,6 +25,7 @@ const { values, positionals } = parseArgs({
     arch: { type: 'string', default: 'x64' },
   },
 });
+const packageInfo = JSON.parse(await readFile('package.json', 'utf8'));
 const kind = positionals[0];
 if (!['game', 'studio'].includes(kind)) throw new Error('Choose game or studio');
 if (!['win32', 'linux', 'darwin', 'web'].includes(values.platform))
@@ -62,7 +63,7 @@ if (values.platform === 'web') {
       JSON.stringify({
         name: name.toLowerCase(),
         productName: name,
-        version: '0.1.0',
+        version: packageInfo.version,
         description: project?.description || 'OpenEngine Studio',
         author: 'OpenEngine contributors',
         main: 'desktop/main.cjs',
@@ -86,7 +87,7 @@ if (values.platform === 'web') {
     for (const output of outputs) {
       await writeFile(
         join(output, 'START-HERE.txt'),
-        `Run ${name}${values.platform === 'win32' ? '.exe' : ''}.\nKeep this entire folder together. No Node.js or Lua installation required.\n\nOpenEngine is a 2D Lua game engine. See https://github.com/wrozny/OpenEngine for documentation.\n`,
+        `Run ${name}${values.platform === 'win32' ? '.exe' : ''}.\nKeep this entire folder together. No Node.js or Lua installation required.\n\nOpenEngine is a 2D and 3D Lua game engine. See https://github.com/wrozny/OpenEngine for documentation.\n`,
       );
       console.log(`Packaged ${kind}: ${output}`);
     }

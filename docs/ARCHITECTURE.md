@@ -1,75 +1,118 @@
 # Architecture
 
-OpenEngine separates authoring, simulation, presentation, and distribution. The editor
-never simulates its own document. Play serializes the document into a new Engine; Stop
-disposes that Engine and leaves the authoring document alone.
+OpenEngine separates scene data, simulation, rendering, authoring tools and distribution.
+Every Play session receives a serialized copy of the document, so its bodies, Lua modules,
+attributes and event subscriptions cannot mutate the editor's scene.
 
-| Area                              | Responsibility                                                                           |
-| --------------------------------- | ---------------------------------------------------------------------------------------- |
-| `src/engine/scene.js`             | Instance hierarchy, serialization, cloning and project validation.                       |
-| `src/engine/signal.js`            | Snapshot-based event dispatch with explicit disconnection.                               |
-| `src/engine/math.js`              | Immutable 2D vector values and numeric helpers.                                          |
-| `src/engine/engine.js`            | Service container, 60 Hz simulation, Planck ownership and post-step contacts.            |
-| `src/engine/lua.js`               | Lua VM lifetime, host proxies, script environments, module cache and callback ownership. |
-| `src/engine/input.js`, `audio.js` | Scoped DOM input and WebAudio/file playback lifecycle.                                   |
-| `src/engine/renderer.js`          | Canvas rendering, sprite caching, hit testing and selection outlines.                    |
-| `src/game-view.js`                | Shared play surface, DOM UI, input wiring and animation lifetime.                        |
-| `src/studio/`                     | Editor document/history, hierarchy, inspector, source editing and file/export UI.        |
-| `src/runtime/`                    | Game-only entry points for desktop/web and fully offline HTML export.                    |
-| `desktop/`                        | Isolated Electron shell, narrow file/build IPC and native distribution copying.          |
-| `tools/`                          | Project source hydration, reproducible builds and Electron packaging.                    |
-| `examples/zombie/`                | Game data, embedded sprite sources and ordinary Lua gameplay.                            |
+## Modules
 
-## Deliberate choices
+| Area                                                                | Responsibility                                                                       |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/engine/scene.js`                                               | Hierarchy, class defaults, compatibility, transforms, validation and serialization.  |
+| `src/engine/attributes.js`, `math.js`                               | Serializable attribute values and immutable 2D/3D vectors.                           |
+| `src/engine/engine.js`                                              | Services, Lua lifecycle, fixed-step simulation, queued contacts and world cleanup.   |
+| `src/engine/physics/`                                               | Planck pixel/meter conversion and Cannon's meter-based Y-up world.                   |
+| `src/engine/renderer.js`, `renderer3d.js`                           | Canvas 2D and Three.js projection, materials, resource lifetime and picking.         |
+| `src/engine/materials.js`, `texture-uv.js`                          | Original embedded patterns and world-sized primitive UV mapping.                     |
+| `src/engine/controllers.js`                                         | Editable Lua templates and exposed controller defaults.                              |
+| `src/engine/lua.js`, `lua-syntax.js`                                | VM bridge, module environments, owned callbacks and compile-only editor diagnostics. |
+| `src/game-view.js`                                                  | Shared play surface, input wiring, DOM widgets, frame loop and teardown.             |
+| `src/studio/store.js`                                               | Authoring document, selection, transactional edits and undo/redo.                    |
+| `src/studio/dock.js`, `viewport.js`                                 | Dockable layout and dimensional scene interactions/gizmos.                           |
+| `src/studio/code-editor.js`, `lua-api.js`                           | Monaco models, project-aware completions, help and diagnostics.                      |
+| `src/studio/launcher.js`, `projects.js`                             | Explicit project startup, dimension selection, files and browser recent copies.      |
+| `src/studio/hierarchy.js`, `inspector.js`, `attribute-inspector.js` | Reusable authoring panels.                                                           |
+| `src/studio/context-menu.js`, `dialogs.js`                          | Context operations and focused dialogs.                                              |
+| `desktop/projects.cjs`                                              | Persistent recent paths, existence checks and authorized atomic project writes.      |
+| `desktop/main.cjs`, `preload.cjs`, `export.cjs`                     | Sandboxed Electron shell, narrow IPC and native game export.                         |
+| `tools/`                                                            | Source-file hydration, runtime builds, example ZIPs and platform packaging.          |
 
-- **2D and Canvas** keep the runtime small, easy to inspect, and independent of a GPU driver.
-- **Planck** provides existing Box2D collision resolution, sensors, filtering and raycasts.
-  Engine units convert at the boundary: 50 pixels to one physics meter.
-- **Fengari** runs Lua 5.3 consistently in a browser and desktop runtime. Per-session
-  states prevent old module caches and callbacks from leaking into new play sessions.
-- **Explicit services and scene instances** provide a familiar hierarchy without attempting
-  to reproduce Roblox's networking, APIs or proprietary scripting dialect.
-- **JSON documents** embed script source and sprites. Editor saves and packaged projects
-  use the same format. A source project may use relative SourceFile references, which
-  the build pipeline resolves before distribution.
-- **No server** is required. Web builds embed runtime and project in one HTML document.
-  Desktop builds embed the compiled runtime and project in Electron's app resources.
-- **No renderer Node integration**: Electron uses a sandboxed preload, context isolation,
-  disabled navigation/popups, denied permission requests, and a restrictive CSP. Native
-  file paths are chosen through system dialogs. Lua projects remain trusted code.
+## Established dependencies
 
-## Lifecycle
+Three.js supplies the 3D renderer and transform/orbit controls. Cannon (cannon-es)
+provides 3D rigid bodies, while Planck provides Box2D-based 2D physics. Fengari executes
+Lua 5.3 in browsers and desktop. Microsoft's Monaco supplies text editing; Golden Layout
+supplies docking; Lucide supplies icons. fflate creates portable ZIPs. No project code,
+textures or editor components are downloaded from unreviewed runtime/CDN sources.
+Dependencies are pinned in package.json and package-lock.json; full notices accompany
+exported games and Studio.
 
-The engine starts enabled Scripts after attaching the scene. Newly attached Scripts
-start immediately. Lua event subscriptions record the owning Script, including
-subscriptions added from its event callbacks. Removing/disabling that Script disconnects
-its subscriptions. A callback error disconnects that handler and reports its owner.
-Stopping a game disposes Lua, input listeners, audio, UI subscriptions and scene bodies.
+## Scene and scripting model
 
-Heartbeat precedes the physics step. Contacts are queued during world stepping and
-dispatched afterwards so gameplay may destroy/create objects without mutating a locked
-Box2D world. Scene rendering sorts visible objects by Layer. Input transforms pointer
-coordinates into world space using the same camera as rendering.
+Project version 1 remains supported. Missing dimension means 2D. PhysicsObject input
+names normalize to Object2D; new documents use Object2D/Object3D. A project contains
+Workspace and ScriptService, embedded assets, object data and source strings. Source
+projects may reference relative Lua/asset files; the build loader embeds them.
 
-## Extending the engine
+Object transforms are world space. Parenting controls organization and script ownership,
+not inherited transform multiplication. 2D is pixels/Y-down; 3D is meters/Y-up. The physics
+adapter owns unit conversion, body construction, transform synchronization and raycasts.
 
-- Add a service to the Engine service map; public properties/methods are bridged into Lua.
-  Keep Lua-callable methods in colon style and return engine values or primitives.
-- Add a class by extending CLASSES, constructor defaults, validation, serialization,
-  inspector UI, and any runtime attachment behavior it needs. Add behavioral tests.
-- Add collision groups in GROUPS/MASKS; document both sides of the filter relationship.
-- New UI primitives belong in UIService data and GameView's DOM rendering, not in game Lua
-  internals. New game rules belong in example/project scripts, not renderer conditionals.
-- For transform inheritance, animation, joints, or external asset pipelines, introduce
-  explicit components rather than adding game-name checks to the runtime.
+One Lua state belongs to each session. Enabled Scripts/controllers start after scene
+attachment; newly attached scripts start immediately. Modules run once per require and
+cache results in that VM. Each script has a separate script binding. Controller nodes
+store editable Lua Source plus explicit control/speed properties; there is no hidden
+native movement system competing with their scripts.
 
-## Scope and tradeoffs
+Event connections remember their owning script, including connections created from its
+callbacks. Destroying/unparenting/disabling an owner disconnects them. Destroying a signal
+also releases its Lua connections, preventing projectiles from retaining every shot's
+callback. Callback errors stop that handler and identify its owner in Output.
 
-This is a compact 0.1 engine, not a replacement for a mature 3D editor. The source editor
-is a plain accessible textarea with line numbers and indentation; there is no language
-server or autocomplete. History stores up to 80 complete project snapshots, so large
-embedded assets increase memory usage. Sprite images are cached per renderer; changing
-many unique textures in one session increases memory usage until that view is closed.
-Native packages are comparatively large because they include Chromium. Game data and
-Lua source remain inspectable in exports; there is no encryption or anti-cheat promise.
-The zombie AI intentionally steers directly toward the player and can be blocked by cover.
+Heartbeat runs before each 60 Hz physics step. Contacts are queued during stepping and
+dispatched afterwards, allowing safe body destruction inside handlers. The 3D world then
+checks FallenHeight, fires OnFallen, and removes objects still below it. A recovery handler
+can move an object above the barrier to retain it.
+
+## Authoring model
+
+Studio starts with a launcher and never executes a project on import. The document store
+owns transactions and up to 80 history snapshots; grouped edits are one undo step.
+Multi-selection actions exclude descendants of already-selected ancestors to avoid
+repeating subtree operations. A new/opened project starts its own history.
+
+Golden Layout owns tab movement, split sizing and persistence. Panels retain their own
+DOM and can be moved without creating a second editor/store. The viewport recreates its
+projection when the project dimension changes. Three's controls operate on rendered
+objects; completed drags become document transactions. GPU meshes, geometry, textures,
+controls and animation callbacks are disposed when their view ends.
+
+Monaco owns one model per edited script and disposes them when changing projects.
+Completion providers describe engine services, objects, vectors and scene children,
+with basic service-alias inference. They are intentionally not a complete Lua language
+server. Diagnostics compile source in a temporary VM without executing it. Play uses a
+separate runtime VM with callback instruction budgets.
+
+## Files, security and distribution
+
+Electron has no renderer Node integration: context isolation and sandboxing are enabled,
+permissions/popups/navigation are denied, and CSP restricts code/assets to packaged
+resources and embedded media. Monaco workers are local packaged resources, not remote
+scripts. Project paths enter through native dialogs or known recent records. Removing
+an entry from recents does not delete the file or revoke the active document's save grant.
+Writes use a temporary sibling followed by rename.
+
+These boundaries do not turn Lua into an untrusted-code sandbox. Projects are trusted
+code. Runtime attributes can hold values that cannot be saved; serialization explicitly
+rejects executable references or cyclic data rather than silently corrupting a project.
+Keep project backups, especially when relying on browser storage quotas.
+
+Web exports embed their runtime, project and license notices in one offline HTML file.
+Desktop exports bundle the same compiled runtime with Electron and project.json. Native
+Studio exports copy its installed runtime into a separate folder and replace the app
+payload with the game. Release automation builds Windows Studio and Example Projects.zip
+before publishing the versioned release. Credentials are supplied by the GitHub runner;
+none are stored in source or archives.
+
+## Extension points and limits
+
+Add services through the Engine service map; add classes through defaults, validation,
+serialization, attachment, inspector controls and behavioral tests. Add game rules in
+Lua, not renderer-specific conditionals. A future transform-inheritance or animation
+system should be an explicit component rather than an implicit parenting side effect.
+
+There is no skeletal animation, networking, arbitrary mesh collider import, joint editor,
+or formal large-world performance target. Shape colliders are primitives. The zombie AI
+intentionally chases directly and can be blocked by cover. History snapshots and embedded
+images trade memory for simple portable documents. Native packages are comparatively
+large because they include Chromium; exported code/data remain inspectable.

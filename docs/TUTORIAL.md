@@ -2,10 +2,11 @@
 
 This small collectible demo shows how to build something independent of Dead Signal.
 
-1. In Studio click **New**, then insert a PhysicsObject under Workspace.
+1. In Studio create a **2D** project with the **Empty scene** template, then right-click
+   Workspace and insert an Object2D.
 2. Name it **Player**, set Shape to Circle, dimensions to 36 × 36, uncheck Anchored,
    and set Collision group to **player**. Give it a color or upload a sprite.
-3. Select Workspace and insert another PhysicsObject named **Coin**. Set Position X
+3. Select Workspace and insert another Object2D named **Coin**. Set Position X
    to 180, Shape to Circle, dimensions to 24 × 24, Color to yellow, Sensor checked,
    and leave it Anchored. Keep its Collision group **world** so it detects the player.
 4. Select Player and insert a Script named **Movement**. Paste:
@@ -62,7 +63,7 @@ session. Restart Play to reload edited module source.
 
 ## A few extension ideas
 
-- Add static PhysicsObjects for walls; the player collides with them automatically.
+- Add static Object2Ds for walls; the player collides with them automatically.
 - Use `Workspace:Raycast` for a hitscan weapon or interaction check.
 - Use an anchored sensor for a checkpoint or exit zone.
 - Read elapsed time from Heartbeat to implement cooldowns, timers, and moving hazards.
@@ -70,5 +71,17 @@ session. Restart Play to reload edited module source.
 - Build menus with UI labels/buttons/bars and OnAction callbacks.
 
 Keep global controllers in ScriptService, object-specific scripts under their objects,
-and reusable functions in modules. PhysicsObject transforms are world space, so parenting
+and reusable functions in modules. Object2D transforms are world space, so parenting
 is for organization and script ownership rather than automatic transform inheritance.
+
+## Try a 3D project
+
+Use Home → New project, choose 3D and the starter template, then Create project.
+The Player has a PlayerController3D with editable speed, jumping and key properties.
+Select Ground to try the Grass, Rock or Brick materials and change TextureScale.
+Select Workspace to change the sky or FallenHeight. Play with WASD and Space; hold
+right mouse to look around. Change the controller Mode to FreeCamera to fly through
+objects with Space/Control controlling height.
+
+For a larger example, explicitly open Parcel Panic from Home or from Example Projects.zip.
+Its Story Script handles goals and recovery using the public Lua API.

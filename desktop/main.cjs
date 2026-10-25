@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell, session } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { ProjectRegistry, MAX_PROJECT_BYTES } = require('./projects.cjs');
 const { buildNativeGame } = require('./export.cjs');
 let window;
 const mode = require('../package.json').openengineMode || 'studio';
@@ -15,8 +16,8 @@ function trusted(event) {
     throw new Error('Unauthorized window');
 }
 function projectText(text) {
-  if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > 16 * 1024 * 1024)
-    throw new Error('Project is too large (16 MB maximum)');
+  if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > MAX_PROJECT_BYTES)
+    throw new Error('Project is too large (64 MB maximum)');
   const project = JSON.parse(text);
   if (
     project.format !== 'openengine' ||
@@ -65,6 +66,40 @@ app.whenReady().then(() => {
     return JSON.parse(await fs.readFile(path.join(appRoot, 'project.json'), 'utf8'));
   });
   if (mode !== 'studio') return;
+  const registry = new ProjectRegistry(path.join(app.getPath('userData'), 'recent-projects.json'));
+  ipcMain.handle('project:recents', async (event) => {
+    trusted(event);
+    return registry.list();
+  });
+  ipcMain.handle('project:forget', async (event, file) => {
+    trusted(event);
+    await registry.forget(file);
+  });
+  ipcMain.handle('project:reopen', async (event, file) => {
+    trusted(event);
+    return registry.read(file);
+  });
+  ipcMain.handle('project:open-record', async (event) => {
+    trusted(event);
+    const result = await dialog.showOpenDialog(window, {
+      properties: ['openFile'],
+      filters: [{ name: 'OpenEngine project', extensions: ['openengine', 'json'] }],
+    });
+    if (result.canceled) return null;
+    return registry.read(result.filePaths[0], true);
+  });
+  ipcMain.handle('project:save-record', async (event, text, name, currentPath) => {
+    trusted(event);
+    projectText(text);
+    if (currentPath) return registry.save(currentPath, text);
+    const result = await dialog.showSaveDialog(window, {
+      defaultPath: path.basename(String(name)),
+      filters: [{ name: 'OpenEngine project', extensions: ['openengine'] }],
+    });
+    if (result.canceled) return null;
+    return registry.save(result.filePath, text, true);
+  });
+
   ipcMain.handle('project:open', async (event) => {
     trusted(event);
     const result = await dialog.showOpenDialog(window, {

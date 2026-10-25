@@ -47,3 +47,23 @@ test('native Studio export assembles a standalone runtime without editing Studio
     await rm(temp, { recursive: true, force: true });
   }
 });
+
+test('recent projects track real files, missing paths and explicit removal', async () => {
+  const { ProjectRegistry } = await import('../desktop/projects.cjs');
+  const temp = await mkdtemp(join(tmpdir(), 'openengine-recents-'));
+  try {
+    const registry = new ProjectRegistry(join(temp, 'state', 'recent.json')),
+      file = join(temp, 'Game.openengine');
+    const project = await loadProject('examples/zombie/project.openengine');
+    await registry.save(file, JSON.stringify(project), true);
+    assert.equal((await registry.list())[0].exists, true);
+    assert.equal((await registry.read(file)).name, 'Dead Signal');
+    await assert.rejects(registry.read(join(temp, 'not-authorized')), /Choose this project/);
+    await rm(file);
+    assert.equal((await registry.list())[0].exists, false);
+    await registry.forget(file);
+    assert.deepEqual(await registry.list(), []);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});

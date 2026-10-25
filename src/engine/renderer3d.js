@@ -47,6 +47,7 @@ export class Renderer3D {
     this.selection = new THREE.Group();
     this.scene.add(this.selection);
     this.skyKey = null;
+    this.textureVersion = 0;
   }
   resolve(url) {
     return url?.startsWith('asset:') ? this.assets[url.slice(6)]?.data : url;
@@ -54,7 +55,9 @@ export class Renderer3D {
   texture(url) {
     if (!url) return null;
     if (!this.textures.has(url)) {
-      const texture = this.textureLoader.load(url);
+      const texture = this.textureLoader.load(url, () => {
+        this.textureVersion++;
+      });
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       this.textures.set(url, texture);
@@ -154,6 +157,27 @@ export class Renderer3D {
         this.viewCamera.lookAt(new THREE.Vector3(p.X, p.Y, p.Z).add(direction));
       }
     }
+    // Render idle editors once; texture arrival, transforms and camera movement invalidate the frame.
+    const signature = JSON.stringify([
+      this.width,
+      this.height,
+      this.skyKey,
+      this.textureVersion,
+      this.overlayRevision,
+      grid,
+      this.viewCamera.position.toArray(),
+      this.viewCamera.quaternion.toArray(),
+      [...this.meshes.values()].map(({ mesh, key }) => [
+        key,
+        mesh.visible,
+        mesh.position.toArray().map((n) => Number(n.toFixed(5))),
+        mesh.rotation.toArray(),
+        mesh.scale.toArray(),
+      ]),
+      (Array.isArray(selected) ? selected : [selected]).map((node) => node?.Id),
+    ]);
+    if (signature === this.lastSignature) return;
+    this.lastSignature = signature;
     while (this.selection.children.length) {
       const box = this.selection.children[0];
       this.selection.remove(box);

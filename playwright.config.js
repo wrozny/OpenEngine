@@ -11,7 +11,7 @@ export default defineConfig({
       executablePath:
         process.env.CHROMIUM_PATH ||
         (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined),
-      args: ['--no-sandbox'],
+      args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
     },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',

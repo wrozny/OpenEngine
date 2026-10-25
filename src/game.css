@@ -281,3 +281,12 @@ button.primary:hover {
 .game-widget.label {
   pointer-events: none;
 }
+
+.game-widget.label {
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: #17212bd9;
+  color: #e4edf7;
+  font-size: 13px;
+  box-shadow: 0 2px 12px #0002;
+}

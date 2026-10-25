@@ -1,7 +1,7 @@
 import fengari from 'fengari';
 import interop from 'fengari-interop';
 import { SceneNode, isRunnableScript } from './scene.js';
-import { Vector2 } from './math.js';
+import { Vector2, Vector3 } from './math.js';
 import { Signal } from './signal.js';
 
 const { lua, lauxlib, lualib, to_luastring, to_jsstring } = fengari;
@@ -9,6 +9,7 @@ const BOOTSTRAP = `
 local host = __host
 __host = nil
 Vector2 = { new = function(x, y) return host:Vector(x or 0, y or 0) end }
+Vector3 = { new = function(x, y, z) return host:Vector3(x or 0, y or 0, z or 0) end }
 Instance = { new = function(className, parent) return host:Create(className, parent) end }
 print = function(...)
   local parts = {}
@@ -56,6 +57,7 @@ export class LuaRuntime {
     lua.lua_pop(this.state, 1);
     this.setGlobal('__host', {
       Vector: (x, y) => new Vector2(x, y),
+      Vector3: (x, y, z) => new Vector3(x, y, z),
       Create: (className, parent) => {
         const node = new SceneNode(className);
         if (parent) node.Parent = parent;
@@ -187,10 +189,12 @@ export class LuaRuntime {
             'CollisionGroup',
             'Restitution',
             'Friction',
+            'Mass',
+            'FixedRotation',
           ].includes(key)
         )
           runtime.engine.rebuildBody(target);
-        if (target._body && key === 'Rotation') target._body.setAngle(target.Rotation);
+
         return true;
       },
     });

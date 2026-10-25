@@ -1,4 +1,5 @@
 import { Engine } from './engine/engine.js';
+import { Renderer3D } from './engine/renderer3d.js';
 import { Renderer } from './engine/renderer.js';
 
 function element(tag, className, text) {
@@ -38,7 +39,10 @@ export class GameView {
       this.root.append(stop);
     }
     container.append(this.root);
-    this.renderer = new Renderer(this.canvas, project.assets);
+    this.renderer = new (project.dimension === '3D' ? Renderer3D : Renderer)(
+      this.canvas,
+      project.assets,
+    );
     this.renderer.camera = this.engine.camera;
     this.renderer.resize();
     this.engine.input.attach(
@@ -57,7 +61,9 @@ export class GameView {
       this.engine.input.updatePointer();
       this.engine.update(document.hidden ? 0 : (now - this.lastTime) / 1000);
       this.lastTime = now;
-      this.renderer.draw(this.engine.workspace.GetDescendants());
+      this.renderer.draw(this.engine.workspace.GetDescendants(), {
+        workspace: this.engine.workspace,
+      });
       if (this.dirtyUI) {
         this.renderUI();
         this.dirtyUI = false;
@@ -159,9 +165,9 @@ export class GameView {
     const button = element(
       'button',
       'primary game-continue',
-      ui.State === 'dead' ? 'Try again  ↻' : 'Start next wave  →',
+      ui.State === 'dead' || ui.State === 'complete' ? 'Play again  ↻' : 'Start next wave  →',
     );
-    button.dataset.action = ui.State === 'dead' ? 'restart' : 'next';
+    button.dataset.action = ui.State === 'dead' || ui.State === 'complete' ? 'restart' : 'next';
     button.onclick = () => {
       this.engine.audio.unlock();
       ui.OnAction.Fire(button.dataset.action);
@@ -174,6 +180,7 @@ export class GameView {
     this.disposed = true;
     cancelAnimationFrame(this.frameId);
     this.engine.dispose();
+    this.renderer.dispose?.();
     this.root.remove();
   }
 }

@@ -1,14 +1,11 @@
-import * as planck from 'planck';
+import { PlanckWorld } from './physics/planck-world.js';
+import { CannonWorld } from './physics/cannon-world.js';
 import { Signal } from './signal.js';
 import { SceneNode, deserializeNode, validateProject, isRunnableScript } from './scene.js';
-import { Vector2, math } from './math.js';
+import { Vector2, Vector3, math } from './math.js';
 import { LuaRuntime } from './lua.js';
 import { InputService } from './input.js';
 import { AudioService } from './audio.js';
-
-const SCALE = 50;
-const GROUPS = { world: 1, player: 2, zombie: 4, projectile: 8, decoration: 16 };
-const MASKS = { world: 15, player: 5, zombie: 15, projectile: 5, decoration: 0 };
 
 export class UIService {
   constructor() {
@@ -107,9 +104,13 @@ export class Engine {
     this.project = structuredClone(project);
     this.logs = [];
     this.onLog = options.onLog || (() => {});
-    this.world = new planck.World(planck.Vec2(0, 0));
-    this.nodes = new Set();
+    this.dimension = project.dimension || '2D';
     this.contacts = [];
+    this.physicsWorld = new (this.dimension === '3D' ? CannonWorld : PlanckWorld)((contact) =>
+      this.contacts.push(contact),
+    );
+    this.world = this.physicsWorld.world;
+    this.nodes = new Set();
     this.running = false;
     this.accumulator = 0;
     this.stepSize = 1 / 60;
@@ -120,13 +121,18 @@ export class Engine {
     this.input = new InputService();
     this.audio = new AudioService();
     this.ui = new UIService();
-    this.camera = { Position: new Vector2(), Zoom: 1, Follow: null };
+    this.camera = {
+      Position: this.dimension === '3D' ? new Vector3(0, 4, 10) : new Vector2(),
+      Zoom: 1,
+      Follow: null,
+      Yaw: 0,
+      Pitch: -0.2,
+      Distance: 7,
+      FirstPerson: false,
+    };
     this.physics = {
-      SetGravity: (vector) => this.world.setGravity(this.toPhysics(vector)),
-      GetGravity: () => {
-        const g = this.world.getGravity();
-        return new Vector2(g.x * SCALE, g.y * SCALE);
-      },
+      SetGravity: (vector) => this.physicsWorld.setGravity(vector),
+      GetGravity: () => this.physicsWorld.getGravity(),
     };
     this.runService = {
       Heartbeat: new Signal((error) => this.log('error', error.message)),
@@ -162,25 +168,19 @@ export class Engine {
     this.workspace.Raycast = (origin, direction, ignore) => this.raycast(origin, direction, ignore);
     this.workspace.GetObjectsInRadius = (center, radius) =>
       [...this.nodes].filter(
-        (node) =>
-          node.ClassName === 'Object2D' && node._body && node.Position.Distance(center) <= radius,
+        (node) => this.isPhysical(node) && node._body && node.Position.Distance(center) <= radius,
       );
     this.attach(this.root);
-    for (const event of ['begin-contact', 'end-contact'])
-      this.world.on(event, (contact) => {
-        const a = contact.getFixtureA().getBody().getUserData();
-        const b = contact.getFixtureB().getBody().getUserData();
-        this.contacts.push({ a, b, event });
-      });
   }
+
   log(level, message) {
     const entry = { level, message: String(message), time: this.runService?.Time || 0 };
     this.logs.push(entry);
     if (this.logs.length > 250) this.logs.shift();
     this.onLog(entry);
   }
-  toPhysics(v) {
-    return planck.Vec2(v.X / SCALE, v.Y / SCALE);
+  isPhysical(node) {
+    return node.ClassName === (this.dimension === '3D' ? 'Object3D' : 'Object2D');
   }
   isInWorkspace(node) {
     for (let parent = node; parent; parent = parent.Parent)
@@ -196,10 +196,10 @@ export class Engine {
 
       if (this.running && isRunnableScript(node) && node.Enabled) this.lua.run(node);
     }
-    if (node.ClassName === 'Object2D') {
+    if (this.isPhysical(node)) {
       if (this.isInWorkspace(node) && !node._body) this.createBody(node);
       else if (!this.isInWorkspace(node) && node._body) {
-        this.world.destroyBody(node._body);
+        this.physicsWorld.remove(node);
         node._body = null;
       }
     }
@@ -208,60 +208,20 @@ export class Engine {
   detach(node) {
     if (isRunnableScript(node)) this.lua?.stopScript(node);
     for (const child of node.GetChildren()) this.detach(child);
-    if (node._body) this.world.destroyBody(node._body);
+    if (node._body) this.physicsWorld.remove(node);
     node._body = null;
     node._engine = null;
     this.nodes.delete(node);
   }
   createBody(node) {
-    if (!(node.Size.X > 0 && node.Size.Y > 0)) throw new Error(`Invalid body size: ${node.Name}`);
-    const body = this.world.createBody({
-      type: node.Anchored ? 'static' : 'dynamic',
-      position: this.toPhysics(node.Position),
-      angle: node.Rotation || 0,
-      fixedRotation: true,
-      bullet: node.CollisionGroup === 'projectile',
-      userData: node,
-    });
-    const shape =
-      node.Shape === 'Circle'
-        ? planck.Circle(node.Size.X / (2 * SCALE))
-        : planck.Box(node.Size.X / (2 * SCALE), node.Size.Y / (2 * SCALE));
-    body.createFixture(shape, {
-      density: 1,
-      friction: node.Friction,
-      restitution: node.Restitution,
-      isSensor: node.Sensor,
-      filterCategoryBits: GROUPS[node.CollisionGroup] || 1,
-      filterMaskBits: MASKS[node.CollisionGroup] ?? 0xffff,
-    });
-    body.setLinearVelocity(this.toPhysics(node.Velocity));
-    node._body = body;
+    this.physicsWorld.create(node);
   }
   rebuildBody(node) {
-    if (this.world.isLocked()) throw new Error('Cannot rebuild physics during a physics step');
-    if (node._body) this.world.destroyBody(node._body);
+    this.physicsWorld.remove(node);
     this.createBody(node);
   }
   raycast(origin, direction, ignore) {
-    let result;
-    if (direction.Magnitude === 0) return undefined;
-    this.world.rayCast(
-      this.toPhysics(origin),
-      this.toPhysics(origin.Add(direction)),
-      (fixture, point, normal, fraction) => {
-        const node = fixture.getBody().getUserData();
-        if (node === ignore || node.Sensor || node.Destroyed) return -1;
-        result = {
-          Instance: node,
-          Position: new Vector2(point.x * SCALE, point.y * SCALE),
-          Normal: new Vector2(normal.x, normal.y),
-          Distance: direction.Magnitude * fraction,
-        };
-        return fraction;
-      },
-    );
-    return result;
+    return this.physicsWorld.raycast(origin, direction, ignore);
   }
   start() {
     if (this.running) return;
@@ -277,14 +237,14 @@ export class Engine {
     while (this.accumulator >= this.stepSize) {
       this.runService.Time += this.stepSize;
       this.runService.Heartbeat.Fire(this.stepSize);
-      this.world.step(this.stepSize, 8, 3);
-      for (const node of this.nodes)
-        if (node._body) {
-          const p = node._body.getPosition(),
-            v = node._body.getLinearVelocity();
-          node._position = new Vector2(p.x * SCALE, p.y * SCALE);
-          node._velocity = new Vector2(v.x * SCALE, v.y * SCALE);
-          node.Rotation = node._body.getAngle();
+      this.physicsWorld.step(this.stepSize);
+      for (const node of this.nodes) if (node._body) this.physicsWorld.sync(node);
+      if (this.dimension === '3D')
+        for (const node of [...this.nodes]) {
+          if (node.ClassName === 'Object3D' && node.Position.Y < this.workspace.FallenHeight) {
+            node.OnFallen.Fire();
+            if (!node.Destroyed && node.Position.Y < this.workspace.FallenHeight) node.Destroy();
+          }
         }
       const contacts = this.contacts;
       this.contacts = [];
@@ -297,7 +257,10 @@ export class Engine {
       this.accumulator -= this.stepSize;
     }
     if (this.camera.Follow && !this.camera.Follow.Destroyed)
-      this.camera.Position = this.camera.Follow.Position;
+      this.camera.Position =
+        this.dimension === '3D'
+          ? this.camera.Follow.Position.Add(new Vector3(0, 1, 0))
+          : this.camera.Follow.Position;
   }
   dispose() {
     this.running = false;

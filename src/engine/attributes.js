@@ -1,4 +1,4 @@
-import { Vector2 } from './math.js';
+import { Vector2, Vector3 } from './math.js';
 
 /** Attribute documents contain data, never executable values or engine references. */
 export function encodeAttribute(value, seen = new Set()) {
@@ -8,7 +8,8 @@ export function encodeAttribute(value, seen = new Set()) {
     throw new Error('Saved attributes must be finite, acyclic data values');
   seen.add(value);
   let result;
-  if (value instanceof Vector2) result = { $type: 'Vector2', X: value.X, Y: value.Y };
+  if (value instanceof Vector3) result = { $type: 'Vector3', X: value.X, Y: value.Y, Z: value.Z };
+  else if (value instanceof Vector2) result = { $type: 'Vector2', X: value.X, Y: value.Y };
   else if (Array.isArray(value)) result = value.map((item) => encodeAttribute(item, seen));
   else if (
     Object.getPrototypeOf(value) === Object.prototype ||
@@ -22,6 +23,7 @@ export function encodeAttribute(value, seen = new Set()) {
   return result;
 }
 export function decodeAttribute(value) {
+  if (value?.$type === 'Vector3') return new Vector3(value.X, value.Y, value.Z);
   if (value?.$type === 'Vector2') return new Vector2(value.X, value.Y);
   if (Array.isArray(value)) return value.map(decodeAttribute);
   if (value && typeof value === 'object')

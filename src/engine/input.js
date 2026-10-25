@@ -8,6 +8,7 @@ export class InputService {
     this.buttons = new Set();
     this.MousePosition = new Vector2();
     this.screenPosition = null;
+    this.mouseDelta = new Vector2();
     this.updatePointer = () => {};
     this.Began = new Signal();
     this.Ended = new Signal();
@@ -18,6 +19,11 @@ export class InputService {
   }
   IsMouseDown(button = 0) {
     return this.buttons.has(button);
+  }
+  ConsumeMouseDelta() {
+    const delta = this.mouseDelta;
+    this.mouseDelta = new Vector2();
+    return delta;
   }
   GetAxis(negative, positive) {
     return Number(this.IsKeyDown(positive)) - Number(this.IsKeyDown(negative));
@@ -44,6 +50,9 @@ export class InputService {
         this.MousePosition = screenToWorld(this.screenPosition.X, this.screenPosition.Y);
     };
     const updatePointer = (event) => {
+      this.mouseDelta = this.mouseDelta.Add(
+        new Vector2(event.movementX || 0, event.movementY || 0),
+      );
       const rect = canvas.getBoundingClientRect();
       this.screenPosition = new Vector2(event.clientX - rect.left, event.clientY - rect.top);
       this.updatePointer();

@@ -28,3 +28,20 @@ test('controller insertion creates an appropriate owner and 3D project data is i
   assert.equal(store.selected.Speed, 7);
   assert.throws(() => store.add('Object2D'), /dimension/);
 });
+
+test('Lua diagnostics compile without executing and completion context includes engine methods', async () => {
+  const { luaSyntaxError } = await import('../src/engine/lua-syntax.js');
+  const { completionContext } = await import('../src/studio/lua-api.js');
+  assert.equal(luaSyntaxError('while true do end'), null);
+  assert.equal(luaSyntaxError('local x = 1\nlocal =').line, 2);
+  const store = new StudioStore(createProject('Test'));
+  const script = store.add('Script');
+  const context = completionContext(
+    'Input',
+    'local Input = game:GetService("InputService")',
+    script,
+    store.workspace,
+  );
+  assert.ok(context.methods.IsKeyDown);
+  assert.ok(completionContext('workspace', '', script, store.workspace).methods.Raycast);
+});

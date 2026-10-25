@@ -26,7 +26,7 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(200, {
       'Content-Type': types[extname(file)] || 'application/octet-stream',
       'Content-Security-Policy':
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'",
     });
     response.end(await readFile(file));
   } catch {

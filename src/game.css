@@ -1,0 +1,283 @@
+:root {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  color: #e1e9e8;
+  color-scheme: dark;
+  background: #101719;
+}
+* {
+  box-sizing: border-box;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #9bdccd;
+  outline-offset: 2px;
+}
+button {
+  color: inherit;
+}
+button.primary,
+.primary {
+  background: #a0dfce;
+  color: #102a25;
+  border: 1px solid #a0dfce;
+  border-radius: 6px;
+  font-weight: 650;
+}
+button.primary:hover {
+  background: #b9eedf;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 2px;
+  color: #8aa6a2;
+}
+.game-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #101b1b;
+}
+.game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  cursor: crosshair;
+}
+.game-hud {
+  position: absolute;
+  top: 24px;
+  left: 26px;
+  right: 26px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  pointer-events: none;
+}
+.hud-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hud-identity strong {
+  font-size: 24px;
+  font-weight: 600;
+}
+.hud-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 13px 18px;
+  background: #101d20e8;
+  border: 1px solid #7d99932b;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 8px 30px #0002;
+}
+.hud-health {
+  width: 140px;
+  font-size: 11px;
+}
+.health-track {
+  height: 4px;
+  background: #354644;
+  margin-top: 7px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.health-fill {
+  height: 100%;
+  background: #9bdccd;
+  transition: width 0.15s;
+}
+.hud-points {
+  color: #e4cb97;
+  font-variant-numeric: tabular-nums;
+}
+.game-help {
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #b0c0b9;
+  font:
+    10px/1.5 ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+.game-exit {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  padding: 8px 12px;
+  border: 1px solid #50615d;
+  background: #172724;
+  color: #cbded6;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #091514b8;
+  backdrop-filter: blur(7px);
+}
+.game-overlay[hidden] {
+  display: none;
+}
+.game-panel {
+  width: min(580px, 100%);
+  padding: 35px;
+  background: #152320;
+  border: 1px solid #41524a;
+  border-radius: 14px;
+  box-shadow: 0 40px 100px #0006;
+}
+.game-panel h1 {
+  font-size: 32px;
+  font-weight: 550;
+  letter-spacing: -1px;
+  margin: 13px 0;
+}
+.game-panel p {
+  color: #a0b2a9;
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+.shop-balance {
+  font-size: 12px;
+  color: #e6ca90;
+  margin-bottom: 12px;
+}
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+.upgrade-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  padding: 16px;
+  background: #1c2d27;
+  border: 1px solid #40564a;
+  border-radius: 7px;
+}
+.upgrade-card:hover:enabled {
+  border-color: #9bdccd;
+  background: #253e33;
+}
+.upgrade-card strong {
+  font-size: 13px;
+}
+.upgrade-card span {
+  font-size: 10px;
+  color: #9ab09e;
+}
+.upgrade-card b {
+  font-size: 11px;
+  font-weight: 500;
+  color: #e4cb97;
+}
+.game-continue {
+  width: 100%;
+  padding: 13px;
+}
+.runtime-shell {
+  position: fixed;
+  inset: 0;
+}
+.runtime-error {
+  padding: 40px;
+  white-space: pre-wrap;
+  color: #edbba8;
+}
+@media (max-width: 700px) {
+  .game-hud {
+    left: 14px;
+    right: 14px;
+    top: 14px;
+  }
+  .hud-stats {
+    gap: 10px;
+    padding: 10px;
+  }
+  .hud-health {
+    width: 90px;
+  }
+  .hud-identity strong {
+    font-size: 18px;
+  }
+  .game-help {
+    font-size: 8px;
+  }
+  .game-panel {
+    padding: 24px;
+  }
+  .game-panel h1 {
+    font-size: 25px;
+  }
+}
+.game-widgets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.game-widget {
+  position: absolute;
+  pointer-events: auto;
+  font-size: 14px;
+}
+.game-widget.button {
+  border: 1px solid #6e9b87;
+  background: #203d31;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+.game-widget.button:hover {
+  background: #31533f;
+}
+.game-widget.bar {
+  background: #294034;
+  border-radius: 10px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.game-widget.bar > div {
+  height: 100%;
+  transition: width 0.1s;
+}
+.game-widget.label {
+  pointer-events: none;
+}

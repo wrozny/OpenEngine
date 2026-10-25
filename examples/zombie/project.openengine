@@ -1,0 +1,306 @@
+{
+  "format": "openengine",
+  "version": 1,
+  "name": "Dead Signal",
+  "description": "A Lua-driven survival game built with OpenEngine.",
+  "controls": "WASD  move   /   MOUSE  aim   /   HOLD CLICK  fire",
+  "assets": {
+    "player": {
+      "SourceFile": "assets/player.svg",
+      "mimeType": "image/svg+xml"
+    },
+    "zombie": {
+      "SourceFile": "assets/zombie.svg",
+      "mimeType": "image/svg+xml"
+    }
+  },
+  "services": [
+    {
+      "id": "workspace",
+      "className": "Folder",
+      "name": "Workspace",
+      "attributes": {},
+      "children": [
+        {
+          "id": "player",
+          "className": "PhysicsObject",
+          "name": "Player",
+          "attributes": {},
+          "children": [],
+          "Texture": "asset:player",
+          "ShowHealthBar": false,
+          "Shape": "Circle",
+          "Color": "#9bdccd",
+          "Size": {
+            "X": 38,
+            "Y": 38
+          },
+          "Rotation": 0,
+          "Anchored": false,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 3,
+          "CollisionGroup": "player",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 0,
+            "Y": 0
+          }
+        },
+        {
+          "id": "north-wall",
+          "className": "PhysicsObject",
+          "name": "North wall",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#3b5050",
+          "Size": {
+            "X": 1880,
+            "Y": 40
+          },
+          "Rotation": 0,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 0,
+            "Y": -640
+          }
+        },
+        {
+          "id": "south-wall",
+          "className": "PhysicsObject",
+          "name": "South wall",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#3b5050",
+          "Size": {
+            "X": 1880,
+            "Y": 40
+          },
+          "Rotation": 0,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 0,
+            "Y": 640
+          }
+        },
+        {
+          "id": "west-wall",
+          "className": "PhysicsObject",
+          "name": "West wall",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#3b5050",
+          "Size": {
+            "X": 40,
+            "Y": 1240
+          },
+          "Rotation": 0,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": -920,
+            "Y": 0
+          }
+        },
+        {
+          "id": "east-wall",
+          "className": "PhysicsObject",
+          "name": "East wall",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#3b5050",
+          "Size": {
+            "X": 40,
+            "Y": 1240
+          },
+          "Rotation": 0,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 920,
+            "Y": 0
+          }
+        },
+        {
+          "id": "supply-crate",
+          "className": "PhysicsObject",
+          "name": "Supply crate",
+          "attributes": {},
+          "children": [
+            {
+              "id": "collision-demo",
+              "className": "Script",
+              "name": "CollisionDemo",
+              "attributes": {},
+              "children": [],
+              "Source": "",
+              "Enabled": false,
+              "SourceFile": "scripts/CollisionDemo.lua"
+            }
+          ],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#7c7253",
+          "Size": {
+            "X": 85,
+            "Y": 60
+          },
+          "Rotation": 0.12,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": -260,
+            "Y": -170
+          }
+        },
+        {
+          "id": "abandoned-vehicle",
+          "className": "PhysicsObject",
+          "name": "Abandoned vehicle",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#486260",
+          "Size": {
+            "X": 135,
+            "Y": 65
+          },
+          "Rotation": -0.3,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 300,
+            "Y": 200
+          }
+        },
+        {
+          "id": "concrete-block",
+          "className": "PhysicsObject",
+          "name": "Concrete block",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#5c6c68",
+          "Size": {
+            "X": 110,
+            "Y": 45
+          },
+          "Rotation": 0,
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "Layer": 0,
+          "CollisionGroup": "world",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": -380,
+            "Y": 280
+          }
+        },
+        {
+          "id": "zombies",
+          "className": "Folder",
+          "name": "Zombies",
+          "attributes": {},
+          "children": []
+        },
+        {
+          "id": "projectiles",
+          "className": "Folder",
+          "name": "Projectiles",
+          "attributes": {},
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "scripts",
+      "className": "Folder",
+      "name": "ScriptService",
+      "attributes": {},
+      "children": [
+        {
+          "id": "config",
+          "className": "ModuleScript",
+          "name": "Config",
+          "attributes": {},
+          "children": [],
+          "Source": "",
+          "Enabled": true,
+          "SourceFile": "scripts/Config.lua"
+        },
+        {
+          "id": "weapons",
+          "className": "ModuleScript",
+          "name": "Weapons",
+          "attributes": {},
+          "children": [],
+          "Source": "",
+          "Enabled": true,
+          "SourceFile": "scripts/Weapons.lua"
+        },
+        {
+          "id": "survival",
+          "className": "Script",
+          "name": "Survival",
+          "attributes": {},
+          "children": [],
+          "Source": "",
+          "Enabled": true,
+          "SourceFile": "scripts/Survival.lua"
+        }
+      ]
+    }
+  ]
+}

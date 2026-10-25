@@ -1,0 +1,116 @@
+const { app, BrowserWindow, ipcMain, dialog, shell, session } = require('electron');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { buildNativeGame } = require('./export.cjs');
+let window;
+const mode = require('../package.json').openengineMode || 'studio';
+const appRoot = path.resolve(__dirname, '..');
+
+function trusted(event) {
+  if (
+    !window ||
+    event.sender !== window.webContents ||
+    event.senderFrame !== window.webContents.mainFrame
+  )
+    throw new Error('Unauthorized window');
+}
+function projectText(text) {
+  if (typeof text !== 'string' || Buffer.byteLength(text, 'utf8') > 16 * 1024 * 1024)
+    throw new Error('Project is too large (16 MB maximum)');
+  const project = JSON.parse(text);
+  if (
+    project.format !== 'openengine' ||
+    project.version !== 1 ||
+    typeof project.name !== 'string' ||
+    !Array.isArray(project.services)
+  )
+    throw new Error('Invalid project');
+  return project;
+}
+app.whenReady().then(() => {
+  session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) =>
+    callback(false),
+  );
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) =>
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'",
+        ],
+      },
+    }),
+  );
+  window = new BrowserWindow({
+    title: mode === 'game' ? 'OpenEngine Game' : 'OpenEngine Studio',
+    width: 1440,
+    height: 930,
+    minWidth: mode === 'game' ? 720 : 900,
+    minHeight: 600,
+    backgroundColor: '#14211d',
+    autoHideMenuBar: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+    },
+  });
+  window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  window.webContents.on('will-navigate', (event) => event.preventDefault());
+  window.loadFile(path.join(appRoot, 'dist', mode === 'game' ? 'runtime.html' : 'index.html'));
+  ipcMain.handle('project:bundled', async (event) => {
+    trusted(event);
+    if (mode !== 'game') return null;
+    return JSON.parse(await fs.readFile(path.join(appRoot, 'project.json'), 'utf8'));
+  });
+  if (mode !== 'studio') return;
+  ipcMain.handle('project:open', async (event) => {
+    trusted(event);
+    const result = await dialog.showOpenDialog(window, {
+      properties: ['openFile'],
+      filters: [{ name: 'OpenEngine project', extensions: ['openengine', 'json'] }],
+    });
+    if (result.canceled) return null;
+    const stat = await fs.stat(result.filePaths[0]);
+    if (stat.size > 16 * 1024 * 1024) throw new Error('Project is too large');
+    return fs.readFile(result.filePaths[0], 'utf8');
+  });
+  ipcMain.handle('project:save', async (event, text, name) => {
+    trusted(event);
+    projectText(text);
+    const result = await dialog.showSaveDialog(window, {
+      defaultPath: path.basename(String(name)),
+      filters: [{ name: 'OpenEngine project', extensions: ['openengine'] }],
+    });
+    if (result.canceled) return false;
+    // A temporary sibling avoids leaving a half-written save if writing is interrupted.
+    const temporary = result.filePath + '.tmp';
+    await fs.writeFile(temporary, text, 'utf8');
+    await fs.rename(temporary, result.filePath);
+    return true;
+  });
+  ipcMain.handle('project:build', async (event, text) => {
+    trusted(event);
+    const project = projectText(text);
+    if (!app.isPackaged)
+      throw new Error(
+        'Native export runs from packaged Studio. In a source checkout use npm run package:game.',
+      );
+    const result = await dialog.showOpenDialog(window, {
+      title: 'Choose an export folder',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled) return null;
+    const output = await buildNativeGame({
+      appRoot,
+      executable: process.execPath,
+      destination: result.filePaths[0],
+      project,
+      platform: process.platform,
+    });
+    await shell.openPath(output);
+    return output;
+  });
+});
+app.on('window-all-closed', () => app.quit());

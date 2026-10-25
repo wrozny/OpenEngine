@@ -1,0 +1,51 @@
+{
+  "name": "openengine",
+  "version": "0.1.0",
+  "description": "A 2D game engine and scene studio with Lua scripting, Box2D physics, and desktop export.",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "node tools/build-runtime.mjs && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "studio": "node tools/install-electron.mjs && npm run build && electron .",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "playwright test",
+    "package:game": "node tools/package.mjs game",
+    "package:studio": "node tools/package.mjs studio",
+    "predev": "node tools/build-runtime.mjs",
+    "desktop:prepare": "node tools/install-electron.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:production": "npm run build && node tools/smoke-production.mjs",
+    "test:desktop": "node tools/smoke-desktop.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wrozny/OpenEngine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/wrozny/OpenEngine/issues"
+  },
+  "homepage": "https://github.com/wrozny/OpenEngine#readme",
+  "dependencies": {
+    "fengari": "0.1.5",
+    "fengari-interop": "0.1.4",
+    "fflate": "0.8.3",
+    "planck": "1.5.1"
+  },
+  "devDependencies": {
+    "@electron/get": "5.1.0",
+    "@electron/packager": "20.3.0",
+    "@playwright/test": "1.64.1",
+    "electron": "45.0.0",
+    "prettier": "3.9.10",
+    "vite": "8.3.5"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

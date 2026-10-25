@@ -6,21 +6,24 @@ The included game, **Dead Signal**, is built with the same Lua API available to 
 
 ## Downloads
 
-Open the [downloads workflow](https://github.com/wrozny/OpenEngine/actions/workflows/downloads.yml),
-choose the latest successful run, and scroll to **Artifacts**. Download
-**OpenEngineStudio-Windows** for the ready-to-run Studio ZIP and **DeadSignal-source**
-for the Lua scripts, scene, sprites, and a self-contained project you can open in Studio.
-Sign in to GitHub to download artifacts. Builds run automatically on main pushes; you
-can also use **Run workflow**. Downloads are retained for 90 days.
+Open the [latest release](https://github.com/wrozny/OpenEngine/releases/latest) and
+expand **Assets**. Download **OpenEngineStudio-Windows.zip** for the ready-to-run
+Windows Studio and **DeadSignal-source.zip** for the Lua scripts, scene, sprites,
+and a self-contained project you can open in Studio. These are release assets,
+with no Actions artifact expiration. Each release also includes checksums and
+GitHub's complete source-code archives.
 
-For the entire repository source, use **Code → Download ZIP** on the repository page.
+Releases publish automatically when a version tag matching package.json is pushed
+(for example, v0.1.0). The release workflow can also be run manually for an existing
+tag. It uploads both ZIPs before publishing a new release.
+
+For the current repository source, use **Code → Download ZIP** on the repository page.
 
 ## Start here
 
-**Windows, no development tools:** unzip `OpenEngineStudio-win32-x64.zip` from the
-`release` folder and run `OpenEngineStudio.exe`. The example opens automatically.
-Press **Play**. To play the game directly, unzip `DeadSignal-win32-x64.zip` and run
-`DeadSignal.exe`. Keep the executable with the other files in its folder.
+**Windows, no development tools:** unzip `OpenEngineStudio-Windows.zip` from GitHub Releases and run `OpenEngineStudio.exe`. The example opens automatically.
+Press **Play** to run Dead Signal. Keep the executable with all the other files
+in its extracted folder. Standalone game packaging instructions are below.
 These unsigned portable packages may trigger Windows reputation prompts.
 
 **From source:** install [Node.js 24 or newer](https://nodejs.org), then:

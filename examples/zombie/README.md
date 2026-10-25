@@ -5,17 +5,16 @@ Dead Signal. It is a project for OpenEngine, not an independent engine/runtime.
 
 ## Open in Windows Studio
 
-Download the `OpenEngineStudio-Windows` and `DeadSignal-source` artifacts from the
-[downloads workflow](https://github.com/wrozny/OpenEngine/actions/workflows/downloads.yml).
-Choose the latest successful run and find **Artifacts** near the bottom of its page.
-GitHub requires you to be signed in to download artifacts.
+Download **OpenEngineStudio-Windows.zip** and **DeadSignal-source.zip** from
+the [latest GitHub release](https://github.com/wrozny/OpenEngine/releases/latest),
+under **Assets**.
 
 1. Extract both ZIPs to separate folders. Keep all Studio runtime files together.
 2. Run `OpenEngineStudio.exe` from the Studio folder.
 3. Click **Open** and select `DeadSignal.openengine` from the game source download.
 4. Press **Play**. Edit scripts through Explorer, then save your own project.
 
-`DeadSignal.openengine` is generated for the downloadable source artifact and embeds
+`DeadSignal.openengine` is generated for the downloadable source ZIP and embeds
 all Lua and sprite data, so it opens directly in Studio. Changes saved from Studio
 stay in that self-contained document; they do not rewrite the separate Lua files.
 
@@ -49,5 +48,5 @@ To package the game as a Windows runtime:
 npm run package:game -- --project examples/zombie/project.openengine --platform win32
 ```
 
-GitHub artifacts are retained for 90 days. Use **Run workflow** on the downloads
-workflow page to create fresh downloads later.
+Release downloads do not have an Actions artifact expiration. The release also
+includes SHA256SUMS.txt and complete engine source archives.

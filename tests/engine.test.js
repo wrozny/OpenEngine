@@ -26,7 +26,7 @@ function scripted(source) {
 
 test('hierarchy rejects cycles, clones independently and destroys descendants', () => {
   const a = new SceneNode('Folder', 'a'),
-    b = new SceneNode('PhysicsObject', 'b');
+    b = new SceneNode('Object2D', 'b');
   b.Parent = a;
   assert.throws(() => {
     a.Parent = b;
@@ -61,7 +61,7 @@ test('Lua hierarchy, script.Parent, modules, nil parenting and callbacks', () =>
     module.Source = 'return { value = 3 }'
     local a, b = require(module), require(module)
     assert(a == b and a.value == 3)
-    local obj = Instance.new('PhysicsObject')
+    local obj = Instance.new('Object2D')
     obj.Name = 'Box'
     obj.Position = Vector2.new(10,20)
     obj.Parent = workspace
@@ -95,11 +95,11 @@ test('Lua infinite loops fail within the instruction budget', () => {
 
 test('physics dispatches collision to Lua and supports raycast', () => {
   const engine = scripted(`
-    local a = Instance.new('PhysicsObject')
+    local a = Instance.new('Object2D')
     a.Name = 'A'; a.Shape = 'Circle'; a.Size = Vector2.new(30,30)
     a.Position = Vector2.new(-50,0); a.Anchored = false
     a.Velocity = Vector2.new(100,0); a.Parent = workspace
-    local b = Instance.new('PhysicsObject')
+    local b = Instance.new('Object2D')
     b.Name = 'B'; b.Position = Vector2.new(30,0); b.Size = Vector2.new(30,30); b.Parent = workspace
     a.OnCollision:Connect(function(with) print('Collision!', with.Name) end)
   `);
@@ -242,7 +242,7 @@ test('player input moves at configured speed and Workspace owns physics', async 
   for (let i = 0; i < 15; i++) engine.update(1 / 60);
   assert.ok(Math.abs(player.Position.X - 60) < 0.01);
   assert.ok(Math.abs(player.Position.Y) < 0.01);
-  const stored = new SceneNode('PhysicsObject', 'Stored');
+  const stored = new SceneNode('Object2D', 'Stored');
   stored.Parent = engine.scriptService;
   assert.equal(stored._body, null);
   stored.Parent = engine.workspace;
@@ -255,7 +255,7 @@ test('player input moves at configured speed and Workspace owns physics', async 
 test('destroyed projectile signals release Lua callbacks instead of retaining each shot', () => {
   const engine = scripted(`
     for i = 1, 100 do
-      local bullet = Instance.new('PhysicsObject', workspace)
+      local bullet = Instance.new('Object2D', workspace)
       bullet.OnCollision:Connect(function() print('hit') end)
       bullet:Destroy()
     end
@@ -279,6 +279,40 @@ test('module cycles report an error without corrupting the next script', () => {
   `);
   engine.start();
   assert.ok(engine.logs.some((l) => l.message === 'cycle diagnosed'));
+  assert.deepEqual(
+    engine.logs.filter((l) => l.level === 'error'),
+    [],
+  );
+  engine.dispose();
+});
+
+test('legacy PhysicsObject documents and Lua constructors migrate to Object2D', () => {
+  const legacy = new SceneNode('PhysicsObject', 'Legacy');
+  assert.equal(legacy.ClassName, 'Object2D');
+  assert.equal(legacy.IsA('PhysicsObject'), true);
+  const data = serializeNode(legacy);
+  data.className = 'PhysicsObject';
+  assert.equal(deserializeNode(data).ClassName, 'Object2D');
+});
+
+test('attribute collections retain nested data and vector values through saves and Lua', () => {
+  const node = new SceneNode('Object2D');
+  node.SetAttribute('config', { items: [1, true, 'hello'] });
+  node.SetAttribute('direction', new Vector2(2, 3));
+  const snapshot = serializeNode(node);
+  node.SetAttribute('later', 1);
+  assert.equal(snapshot.attributes.later, undefined);
+  const restored = deserializeNode(snapshot);
+  assert.equal(restored.GetAttribute('direction').Magnitude, Math.hypot(2, 3));
+  assert.deepEqual(restored.GetAttribute('config'), { items: [1, true, 'hello'] });
+  const engine = scripted(`
+    workspace:SetAttribute('data', { score = 12, nested = { value = 'ok' } })
+    assert(workspace:GetAttributes().data.score == 12)
+    assert(workspace:GetAttribute('data').nested.value == 'ok')
+    workspace:SetAttribute('data', nil)
+    assert(workspace:GetAttribute('data') == nil)
+  `);
+  engine.start();
   assert.deepEqual(
     engine.logs.filter((l) => l.level === 'error'),
     [],

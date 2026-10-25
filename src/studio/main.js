@@ -22,7 +22,7 @@ app.innerHTML = `
   <nav class="toolbar" aria-label="Studio toolbar">
     <div class="toolbar-group"><button id="new-project" title="Create empty project">New</button><button id="open-project">Open</button><button id="save-project" title="Save project · Ctrl+S">Save <kbd>⌘ S</kbd></button></div>
     <div class="toolbar-group"><button id="undo" title="Undo · Ctrl+Z">↶</button><button id="redo" title="Redo · Ctrl+Shift+Z">↷</button></div>
-    <div class="toolbar-group"><select id="add-class" aria-label="Insert object"><option value="">＋ Insert</option><option>PhysicsObject</option><option>Folder</option><option>Script</option><option>ModuleScript</option></select></div>
+    <div class="toolbar-group"><select id="add-class" aria-label="Insert object"><option value="">＋ Insert</option><option>Object2D</option><option>Folder</option><option>Script</option><option>ModuleScript</option></select></div>
     <div class="toolbar-spacer"></div>
     <button id="build-project" class="build-button">↗ Build game</button>
     <button id="play" class="primary play-button">▶ <span>Play</span><kbd>F5</kbd></button>
@@ -109,7 +109,7 @@ function guide() {
   for (const [title, description] of [
     [
       'Build something',
-      'Insert PhysicsObjects, folders, scripts and modules from the toolbar. Select a node in Explorer to edit its properties. Drag nodes onto other nodes to change their Parent.',
+      'Insert Object2Ds, folders, scripts and modules from the toolbar. Select a node in Explorer to edit its properties. Drag nodes onto other nodes to change their Parent.',
     ],
     [
       'Shape the scene',
@@ -239,9 +239,7 @@ $('snap').onclick = () => {
 $('frame-selection').onclick = () => {
   const node = store.selected;
   renderer.camera.Position =
-    node?.ClassName === 'PhysicsObject'
-      ? new Vector2(node.Position.X, node.Position.Y)
-      : new Vector2();
+    node?.ClassName === 'Object2D' ? new Vector2(node.Position.X, node.Position.Y) : new Vector2();
 };
 $('clear-console').onclick = () => {
   $('console').replaceChildren();

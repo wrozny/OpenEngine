@@ -4,7 +4,7 @@ import { Vector2 } from '../src/engine/math.js';
 const workspace = new SceneNode('Folder', 'Workspace', 'workspace');
 const scripts = new SceneNode('Folder', 'ScriptService', 'scripts');
 function object(name, x, y, w, h, color, extra = {}) {
-  const node = new SceneNode('PhysicsObject', name, name.toLowerCase().replaceAll(' ', '-'));
+  const node = new SceneNode('Object2D', name, name.toLowerCase().replaceAll(' ', '-'));
   Object.assign(node, { Position: new Vector2(x, y), Size: { X: w, Y: h }, Color: color }, extra);
   node.Parent = workspace;
   return node;

@@ -63,7 +63,7 @@ export class Renderer {
     }
     ctx.stroke();
     const objects = [...nodes]
-      .filter((n) => n.ClassName === 'PhysicsObject' && n.Visible && !n.Destroyed)
+      .filter((n) => n.ClassName === 'Object2D' && n.Visible && !n.Destroyed)
       .sort((a, b) => a.Layer - b.Layer);
     for (const node of objects) {
       const { X: x, Y: y } = node.Position;
@@ -125,8 +125,7 @@ export class Renderer {
       }
       ctx.restore();
     }
-    if (options.selected?.ClassName === 'PhysicsObject')
-      this.drawSelection(ctx, options.selected, zoom);
+    if (options.selected?.ClassName === 'Object2D') this.drawSelection(ctx, options.selected, zoom);
     ctx.restore();
   }
   drawSelection(ctx, node, zoom) {
@@ -146,7 +145,7 @@ export class Renderer {
   }
   hitTest(nodes, point) {
     return [...nodes]
-      .filter((n) => n.ClassName === 'PhysicsObject' && n.Visible)
+      .filter((n) => n.ClassName === 'Object2D' && n.Visible)
       .sort((a, b) => b.Layer - a.Layer)
       .find((n) => {
         const dx = point.X - n.Position.X,

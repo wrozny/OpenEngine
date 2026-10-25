@@ -1,8 +1,10 @@
 import { Signal } from './signal.js';
+import { encodeAttribute, decodeAttribute } from './attributes.js';
 import { Vector2 } from './math.js';
 
 let nextId = 1;
-export const CLASSES = ['Folder', 'PhysicsObject', 'Script', 'ModuleScript'];
+export const canonicalClass = (name) => (name === 'PhysicsObject' ? 'Object2D' : name);
+export const CLASSES = ['Folder', 'Object2D', 'Script', 'ModuleScript'];
 export const OBJECT_DEFAULTS = {
   Texture: '',
   ShowHealthBar: false,
@@ -22,6 +24,7 @@ export const OBJECT_DEFAULTS = {
 /** A scene instance owns its children; parenting never permits cycles. */
 export class SceneNode {
   constructor(className = 'Folder', name = className, id) {
+    className = canonicalClass(className);
     if (!CLASSES.includes(className)) throw new Error(`Unknown class: ${className}`);
     this.Id = id || `node-${nextId++}-${Math.random().toString(36).slice(2, 7)}`;
     this.ClassName = className;
@@ -36,7 +39,7 @@ export class SceneNode {
     this.Destroyed = false;
     this.OnCollision = new Signal();
     this.OnCollisionEnd = new Signal();
-    if (className === 'PhysicsObject') Object.assign(this, structuredClone(OBJECT_DEFAULTS));
+    if (className === 'Object2D') Object.assign(this, structuredClone(OBJECT_DEFAULTS));
     if (className.endsWith('Script')) {
       this.Source = '';
       this.Enabled = true;
@@ -90,7 +93,7 @@ export class SceneNode {
     return this._children.find((child) => child.ClassName === className);
   }
   IsA(className) {
-    return this.ClassName === className || className === 'Instance';
+    return this.ClassName === canonicalClass(className) || className === 'Instance';
   }
   GetAttribute(name) {
     return this._attributes[name];
@@ -100,12 +103,10 @@ export class SceneNode {
       delete this._attributes[name];
       return;
     }
-    if (
-      !['string', 'number', 'boolean'].includes(typeof value) ||
-      (typeof value === 'number' && !Number.isFinite(value))
-    )
-      throw new Error('Attributes must be finite numbers, strings, booleans, or nil');
     this._attributes[name] = value;
+  }
+  GetAttributes() {
+    return { ...this._attributes };
   }
   GetFullName() {
     return this.Parent ? `${this.Parent.GetFullName()}.${this.Name}` : this.Name;
@@ -128,10 +129,10 @@ export function serializeNode(node) {
     id: node.Id,
     className: node.ClassName,
     name: node.Name,
-    attributes: node._attributes,
+    attributes: encodeAttribute(node._attributes),
     children: node.GetChildren().map(serializeNode),
   };
-  if (node.ClassName === 'PhysicsObject') {
+  if (node.ClassName === 'Object2D') {
     for (const key of Object.keys(OBJECT_DEFAULTS)) data[key] = node[key];
     data.Position = { X: node.Position.X, Y: node.Position.Y };
   }
@@ -143,8 +144,8 @@ export function serializeNode(node) {
 }
 export function deserializeNode(data, preserveIds = true) {
   const node = new SceneNode(data.className, data.name, preserveIds ? data.id : undefined);
-  if (data.attributes) node._attributes = { ...data.attributes };
-  if (node.ClassName === 'PhysicsObject') {
+  if (data.attributes) node._attributes = decodeAttribute(data.attributes);
+  if (node.ClassName === 'Object2D') {
     for (const key of Object.keys(OBJECT_DEFAULTS))
       if (data[key] !== undefined) node[key] = structuredClone(data[key]);
     node.Position = data.Position || new Vector2();
@@ -174,20 +175,13 @@ export function validateProject(project) {
   let count = 0;
   const visit = (node, depth = 0) => {
     if (++count > 20000 || depth > 100) throw new Error('Scene exceeds supported size/depth');
-    if (!CLASSES.includes(node.className) || typeof node.name !== 'string')
+    if (!CLASSES.includes(canonicalClass(node.className)) || typeof node.name !== 'string')
       throw new Error('Invalid scene node');
     if (typeof node.id !== 'string' || ids.has(node.id))
       throw new Error('Missing or duplicate instance id');
     ids.add(node.id);
-    if (node.attributes)
-      for (const value of Object.values(node.attributes)) {
-        if (
-          !['string', 'number', 'boolean'].includes(typeof value) ||
-          (typeof value === 'number' && !Number.isFinite(value))
-        )
-          throw new Error('Attributes must contain JSON primitives');
-      }
-    if (node.className === 'PhysicsObject') {
+    if (node.attributes) encodeAttribute(node.attributes);
+    if (canonicalClass(node.className) === 'Object2D') {
       for (const n of [
         node.Position?.X,
         node.Position?.Y,

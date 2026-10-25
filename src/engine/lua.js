@@ -74,6 +74,25 @@ export class LuaRuntime {
   unwrap(value) {
     return value && (this.targets.get(value) || value);
   }
+  attributeValue(value, depth = 0) {
+    value = this.unwrap(value);
+    if (depth > 50) throw new Error('Attribute table is too deeply nested or cyclic');
+    if (typeof value === 'function' && value.get && value[Symbol.iterator]) {
+      let entries;
+      try {
+        entries = [...value];
+      } catch {
+        return value;
+      }
+      const result = Object.create(null);
+      for (const [key, item] of entries) result[key] = this.attributeValue(item, depth + 1);
+      const keys = Object.keys(result);
+      return keys.length && keys.every((key, i) => Number(key) === i + 1)
+        ? keys.map((key) => result[key])
+        : result;
+    }
+    return value;
+  }
   wrap(value) {
     if (value == null || typeof value !== 'object') return value;
     if (this.proxies.has(value)) return this.proxies.get(value);
@@ -115,6 +134,10 @@ export class LuaRuntime {
             connection._onDisconnect = () => runtime.connections.delete(connection);
             runtime.connections.add(connection);
             return runtime.wrap(connection);
+          }
+          if (target instanceof SceneNode && key === 'SetAttribute') {
+            target.SetAttribute(args[0], runtime.attributeValue(args[1]));
+            return;
           }
           return runtime.wrap(
             result.apply(

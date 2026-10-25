@@ -15,7 +15,7 @@ export function download(name, data, type = 'application/json') {
 export const icon = (node) =>
   ({
     Folder: node.Name === 'Workspace' ? '◈' : node.Name === 'ScriptService' ? '⌘' : '▱',
-    PhysicsObject: node.Shape === 'Circle' ? '●' : '◆',
+    Object2D: node.Shape === 'Circle' ? '●' : '◆',
     Script: '⌁',
     ModuleScript: '◇',
   })[node.ClassName];

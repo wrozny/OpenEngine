@@ -23,7 +23,7 @@
       "children": [
         {
           "id": "player",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "Player",
           "attributes": {},
           "children": [],
@@ -50,7 +50,7 @@
         },
         {
           "id": "north-wall",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "North wall",
           "attributes": {},
           "children": [],
@@ -77,7 +77,7 @@
         },
         {
           "id": "south-wall",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "South wall",
           "attributes": {},
           "children": [],
@@ -104,7 +104,7 @@
         },
         {
           "id": "west-wall",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "West wall",
           "attributes": {},
           "children": [],
@@ -131,7 +131,7 @@
         },
         {
           "id": "east-wall",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "East wall",
           "attributes": {},
           "children": [],
@@ -158,7 +158,7 @@
         },
         {
           "id": "supply-crate",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "Supply crate",
           "attributes": {},
           "children": [
@@ -196,7 +196,7 @@
         },
         {
           "id": "abandoned-vehicle",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "Abandoned vehicle",
           "attributes": {},
           "children": [],
@@ -223,7 +223,7 @@
         },
         {
           "id": "concrete-block",
-          "className": "PhysicsObject",
+          "className": "Object2D",
           "name": "Concrete block",
           "attributes": {},
           "children": [],

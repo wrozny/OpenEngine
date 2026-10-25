@@ -163,9 +163,7 @@ export class Engine {
     this.workspace.GetObjectsInRadius = (center, radius) =>
       [...this.nodes].filter(
         (node) =>
-          node.ClassName === 'PhysicsObject' &&
-          node._body &&
-          node.Position.Distance(center) <= radius,
+          node.ClassName === 'Object2D' && node._body && node.Position.Distance(center) <= radius,
       );
     this.attach(this.root);
     for (const event of ['begin-contact', 'end-contact'])
@@ -198,7 +196,7 @@ export class Engine {
 
       if (this.running && node.ClassName === 'Script' && node.Enabled) this.lua.run(node);
     }
-    if (node.ClassName === 'PhysicsObject') {
+    if (node.ClassName === 'Object2D') {
       if (this.isInWorkspace(node) && !node._body) this.createBody(node);
       else if (!this.isInWorkspace(node) && node._body) {
         this.world.destroyBody(node._body);

@@ -81,7 +81,7 @@ export class StudioStore {
     const selected = this.selected;
     let parent = selected || this.workspace;
     if (
-      className === 'PhysicsObject' &&
+      className === 'Object2D' &&
       (!selected || (selected.Parent === this.root && selected.Name === 'ScriptService'))
     )
       parent = this.workspace;
@@ -106,7 +106,7 @@ export class StudioStore {
     if (!this.canRemove(this.selected)) return;
     const node = this.selected.Clone();
     node.Name += ' Copy';
-    if (node.ClassName === 'PhysicsObject') node.Position = node.Position.Add({ X: 30, Y: 30 });
+    if (node.ClassName === 'Object2D') node.Position = node.Position.Add({ X: 30, Y: 30 });
     this.transact(() => {
       node.Parent = this.selected.Parent;
     });

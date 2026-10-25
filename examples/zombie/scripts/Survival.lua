@@ -88,7 +88,7 @@ local function hitZombie(zombie, amount)
 end
 
 local function spawnZombie()
-    local zombie = Instance.new("PhysicsObject")
+    local zombie = Instance.new("Object2D")
     zombie.Name = "Zombie"
     zombie.Shape = "Circle"
     zombie.Size = Vector2.new(34, 34)

@@ -5,7 +5,7 @@ local Weapons = {}
 -- Each projectile is a real sensor body. Collision dispatch happens after physics,
 -- so destroying an instance inside the handler is safe.
 function Weapons.Fire(player, direction, damage, onHit)
-    local bullet = Instance.new("PhysicsObject")
+    local bullet = Instance.new("Object2D")
     bullet.Name = "Projectile"
     bullet.Shape = "Circle"
     bullet.Size = Vector2.new(8, 8)

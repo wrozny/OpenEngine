@@ -38,7 +38,7 @@ const browser = await chromium.launch({
   executablePath:
     process.env.CHROMIUM_PATH ||
     (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined),
-  args: ['--no-sandbox'],
+  args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 950 } });
@@ -46,6 +46,12 @@ try {
   page.on('pageerror', (error) => errors.push(error.message));
   const base = `http://127.0.0.1:${server.address().port}`;
   await page.goto(base);
+  await page.locator('.example-card').filter({ hasText: 'Dead Signal' }).click();
+  await page
+    .locator('.tree-row')
+    .filter({ has: page.locator('.tree-name', { hasText: /^Survival$/ }) })
+    .click();
+  await page.locator('.monaco-editor').waitFor();
   await page.locator('#play').click();
   await page.locator('.hud-health').waitFor();
   assert.match(await page.locator('.hud-health').textContent(), /100 \/ 100/);
@@ -56,7 +62,9 @@ try {
   await page.waitForTimeout(1200);
   assert.match(await page.locator('.hud-stats').textContent(), /7 infected/);
   assert.deepEqual(errors, []);
-  console.log('Production Studio Play and standalone runtime passed with desktop CSP.');
+  console.log(
+    'Production launcher, Monaco, Studio Play and standalone runtime passed with desktop CSP.',
+  );
 } finally {
   await browser.close();
   await new Promise((done) => server.close(done));

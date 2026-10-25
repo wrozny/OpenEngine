@@ -33,10 +33,15 @@
   },
   "homepage": "https://github.com/wrozny/OpenEngine#readme",
   "dependencies": {
+    "cannon-es": "0.20.0",
     "fengari": "0.1.5",
     "fengari-interop": "0.1.4",
     "fflate": "0.8.3",
-    "planck": "1.5.1"
+    "golden-layout": "2.6.0",
+    "lucide": "1.61.0",
+    "monaco-editor": "0.57.0",
+    "planck": "1.5.1",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@electron/get": "5.1.0",

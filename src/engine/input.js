@@ -15,7 +15,8 @@ export class InputService {
     this.cleanup = [];
   }
   IsKeyDown(key) {
-    return this.keys.has(String(key).toLowerCase());
+    const name = String(key).toLowerCase();
+    return this.keys.has({ space: ' ', ctrl: 'control', esc: 'escape' }[name] || name);
   }
   IsMouseDown(button = 0) {
     return this.buttons.has(button);

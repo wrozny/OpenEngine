@@ -64,9 +64,7 @@ export class StudioDock {
     } catch {}
     this.layout.loadLayout(config);
     this.layout.on('stateChanged', () => {
-      try {
-        localStorage.setItem(KEY, JSON.stringify(this.layout.saveLayout()));
-      } catch {}
+      this.persist();
       onResize();
     });
     this.observer = new ResizeObserver(() => {
@@ -85,7 +83,29 @@ export class StudioDock {
     this.layout.loadLayout(defaultLayout());
     this.onResize();
   }
+  persist() {
+    if (this.disposed) return;
+    try {
+      const config = this.layout.saveLayout(),
+        types = [];
+      const visit = (node) => {
+        if (node?.type === 'component') types.push(node.componentType);
+        for (const child of node?.content || []) visit(child);
+      };
+      visit(config.root);
+      if (
+        types.length === 5 &&
+        new Set(types).size === 5 &&
+        types.every((type) => this.panels[type])
+      )
+        localStorage.setItem(KEY, JSON.stringify(config));
+    } catch {
+      /* Incomplete drag/drop graphs must never replace the last complete layout. */
+    }
+  }
   dispose() {
+    this.persist();
+    this.disposed = true;
     this.observer.disconnect();
     this.layout.destroy();
   }

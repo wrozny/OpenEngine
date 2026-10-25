@@ -103,7 +103,9 @@ export class LuaRuntime {
       get(target, key) {
         if (
           typeof key === 'string' &&
-          (key.startsWith('_') || key === 'constructor' || key === '__proto__')
+          ((key.startsWith('_') && (target instanceof SceneNode || target instanceof Signal)) ||
+            key === 'constructor' ||
+            key === '__proto__')
         )
           return undefined;
         if (Array.isArray(target) && /^\d+$/.test(String(key)))
@@ -112,6 +114,7 @@ export class LuaRuntime {
         if (result === undefined && target instanceof SceneNode)
           result = target.FindFirstChild(key);
         if (typeof result !== 'function') return runtime.wrap(result);
+        if (result.invoke && result.get) return result;
         return function (...args) {
           if (target instanceof Signal && key === 'Connect') {
             const callback = args[0];

@@ -191,8 +191,10 @@ export class Engine {
     if (node._engine !== this) {
       node._engine = this;
       this.nodes.add(node);
-      node.OnCollision.onError = node.OnCollisionEnd.onError = (error) =>
-        this.log('error', error.message);
+      node.OnCollision.onError =
+        node.OnCollisionEnd.onError =
+        node.OnFallen.onError =
+          (error) => this.log('error', error.message);
 
       if (this.running && isRunnableScript(node) && node.Enabled) this.lua.run(node);
     }

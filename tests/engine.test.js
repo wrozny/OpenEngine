@@ -367,3 +367,19 @@ test('PlayerController2D platformer grounds, jumps and lands without air jumping
   );
   engine.dispose();
 });
+
+test('runtime attributes accept Lua callbacks and private-looking data labels', () => {
+  const engine = scripted(`
+    workspace:SetAttribute('_score', 12)
+    workspace:SetAttribute('callback', function(value) return value + 1 end)
+    assert(workspace:GetAttributes()._score == 12)
+    local callback = workspace:GetAttributes().callback
+    assert(callback(2) == 3)
+  `);
+  engine.start();
+  assert.deepEqual(
+    engine.logs.filter((entry) => entry.level === 'error'),
+    [],
+  );
+  engine.dispose();
+});

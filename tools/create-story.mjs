@@ -46,12 +46,21 @@ object('Football', [0, 1, 5], [1.3, 1.3, 1.3], {
   Texture: 'asset:football',
   TextureScale: 1.3,
 });
+const goal = new SceneNode('Folder', 'Goal', 'goal');
+goal.Parent = world;
 for (const x of [-3, 3])
   object('Goal post ' + x, [x, 1.5, -16], [0.3, 3, 0.3], { Color: '#f4eee0', Material: 'Metal' });
 object('Goal crossbar', [0, 3, -16], [6.3, 0.3, 0.3], { Color: '#f4eee0' });
 object('Goal backstop', [0, 1.5, -18], [6, 3, 0.2], { Color: '#536a76', Visible: false });
-for (let x = -3; x <= 3; x += 0.6)
-  object('Net bar ' + x, [x, 1.5, -18], [0.035, 3, 0.035], { Color: '#e0e5d5' });
+for (let i = 0; i <= 10; i++)
+  object(
+    'Net strand ' + (i + 1),
+    [Number((-3 + i * 0.6).toFixed(1)), 1.5, -18],
+    [0.035, 3, 0.035],
+    { Color: '#e0e5d5' },
+  );
+for (const child of world.GetChildren())
+  if (child.Name.startsWith('Goal ') || child.Name.startsWith('Net strand')) child.Parent = goal;
 for (let i = 0; i < 3; i++)
   object('Garden step ' + i, [5 + i * 2, 0.3 + i * 0.3, -7], [2, 0.6 + i * 0.6, 3], {
     Material: 'Brick',

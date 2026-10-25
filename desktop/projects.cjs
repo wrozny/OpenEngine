@@ -6,6 +6,7 @@ const MAX_PROJECT_BYTES = 64 * 1024 * 1024;
 class ProjectRegistry {
   constructor(storagePath) {
     this.storagePath = storagePath;
+    this.authorizedPaths = new Set();
   }
   async entries() {
     try {
@@ -51,6 +52,7 @@ class ProjectRegistry {
     await this.writeEntries((await this.entries()).filter((item) => item.path !== file));
   }
   async authorize(file) {
+    if (this.authorizedPaths.has(file)) return;
     if (!(await this.entries()).some((item) => item.path === file))
       throw new Error('Choose this project using Open first');
   }
@@ -67,6 +69,7 @@ class ProjectRegistry {
       typeof project.name !== 'string'
     )
       throw new Error('Invalid OpenEngine project');
+    this.authorizedPaths.add(file);
     await this.remember(file, project.name);
     return { text, path: file, name: project.name };
   }
@@ -78,6 +81,7 @@ class ProjectRegistry {
     const temp = `${file}.${process.pid}.tmp`;
     await fs.writeFile(temp, text, 'utf8');
     await fs.rename(temp, file);
+    this.authorizedPaths.add(file);
     await this.remember(file, project.name);
     return { path: file, name: project.name };
   }

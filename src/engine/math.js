@@ -3,6 +3,8 @@ export class Vector2 {
   constructor(x = 0, y = 0) {
     this.X = Number(x);
     this.Y = Number(y);
+    if (![this.X, this.Y, ...(this.Z === undefined ? [] : [this.Z])].every(Number.isFinite))
+      throw new TypeError('Vector components must be finite');
     Object.freeze(this);
   }
   get Magnitude() {

@@ -67,3 +67,21 @@ test('recent projects track real files, missing paths and explicit removal', asy
     await rm(temp, { recursive: true, force: true });
   }
 });
+
+test('removing an active project from recents does not revoke the ability to save it', async () => {
+  const { ProjectRegistry } = await import('../desktop/projects.cjs');
+  const directory = await mkdtemp(join(tmpdir(), 'openengine-active-'));
+  try {
+    const registry = new ProjectRegistry(join(directory, 'recents.json')),
+      file = join(directory, 'Active.openengine'),
+      project = await loadProject('examples/zombie/project.openengine');
+    await registry.save(file, JSON.stringify(project), true);
+    await registry.forget(file);
+    assert.deepEqual(await registry.list(), []);
+    project.name = 'Still editable';
+    await registry.save(file, JSON.stringify(project));
+    assert.equal(JSON.parse(await readFile(file, 'utf8')).name, 'Still editable');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

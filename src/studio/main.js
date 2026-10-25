@@ -186,6 +186,9 @@ function render() {
       dock.activate('script');
     }
   } else {
+    const previous = store.nodes.find((node) => node.Id === code.node?.Id && isScriptNode(node));
+    code.setNode(previous);
+    if (!previous) find('code-path').textContent = 'Select a Script or controller in Explorer';
     lastScriptId = undefined;
     if (store.selected) dock.activate('scene');
   }

@@ -82,7 +82,19 @@ export function renderInspector(container, store, onError) {
     section('World');
     set('FallenHeight', 'number');
     set('BackgroundColor', 'color');
-    field('Skybox', node.Skybox, (value) => (node.Skybox = value), 'text', ['builtin:sky', '']);
+    const customSky = node.Skybox && node.Skybox !== 'builtin:sky';
+    const sky = field(
+      'Skybox',
+      customSky ? 'custom' : node.Skybox,
+      (value) => {
+        if (value !== 'custom') node.Skybox = value;
+      },
+      'text',
+      ['builtin:sky', '', ...(customSky ? ['custom'] : [])],
+    );
+    sky.options[0].textContent = 'Simple sky';
+    sky.options[1].textContent = 'None';
+    if (customSky) sky.options[2].textContent = 'Custom image';
     texturePicker(container, store, node, 'Skybox', 'Upload sky image', onError);
     container.append(
       el(

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Vector2, Vector3 } from './math.js';
+import { tileGeometry } from './texture-uv.js';
 import { MATERIALS, BUILTIN_SKY } from './materials.js';
 
 /** Scene projection and GPU resources are shared by Studio and exported games. */
@@ -114,10 +115,7 @@ export class Renderer3D {
           map = base?.clone();
         if (map) {
           map.needsUpdate = true;
-          map.repeat.set(
-            Math.max(0.01, node.Size.X / node.TextureScale),
-            Math.max(0.01, node.Size.Z / node.TextureScale),
-          );
+          map.repeat.set(1, 1);
         }
         const material = new THREE.MeshStandardMaterial({
           color: node.Color,
@@ -125,7 +123,7 @@ export class Renderer3D {
           roughness: node.Material === 'Metal' ? 0.35 : 0.85,
           metalness: node.Material === 'Metal' ? 0.65 : 0,
         });
-        const mesh = new THREE.Mesh(this.geometry(node), material);
+        const mesh = new THREE.Mesh(tileGeometry(this.geometry(node), node), material);
         mesh.userData.node = node;
         mesh.castShadow = mesh.receiveShadow = true;
         this.scene.add(mesh);

@@ -146,3 +146,26 @@ test('Parcel Panic tasks, football recovery, player respawn, goal and restart ru
   );
   engine.dispose();
 });
+
+test('box textures repeat by each face’s world dimensions', async () => {
+  const { BoxGeometry } = await import('three');
+  const { tileGeometry } = await import('../src/engine/texture-uv.js');
+  const geometry = tileGeometry(new BoxGeometry(1, 1, 1), {
+    Shape: 'Box',
+    Size: new Vector3(2, 4, 6),
+    TextureScale: 2,
+  });
+  const uv = geometry.attributes.uv,
+    n = geometry.attributes.normal;
+  const maximum = (axis, component) =>
+    Math.max(
+      ...Array.from({ length: uv.count }, (_, i) =>
+        Math.abs(n.getComponent(i, axis)) > 0.9 ? uv.getComponent(i, component) : 0,
+      ),
+    );
+  assert.equal(maximum(0, 0), 3);
+  assert.equal(maximum(0, 1), 2);
+  assert.equal(maximum(1, 0), 1);
+  assert.equal(maximum(1, 1), 3);
+  geometry.dispose();
+});

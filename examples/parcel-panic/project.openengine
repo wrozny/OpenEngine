@@ -321,494 +321,537 @@
           }
         },
         {
-          "id": "goal-post--3",
-          "className": "Object3D",
-          "name": "Goal post -3",
+          "id": "goal",
+          "className": "Folder",
+          "name": "Goal",
           "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#f4eee0",
-          "Size": {
-            "X": 0.3,
-            "Y": 3,
-            "Z": 0.3
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Metal",
-          "TextureScale": 1,
-          "Position": {
-            "X": -3,
-            "Y": 1.5,
-            "Z": -16
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "goal-post-3",
-          "className": "Object3D",
-          "name": "Goal post 3",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#f4eee0",
-          "Size": {
-            "X": 0.3,
-            "Y": 3,
-            "Z": 0.3
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Metal",
-          "TextureScale": 1,
-          "Position": {
-            "X": 3,
-            "Y": 1.5,
-            "Z": -16
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "goal-crossbar",
-          "className": "Object3D",
-          "name": "Goal crossbar",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#f4eee0",
-          "Size": {
-            "X": 6.3,
-            "Y": 0.3,
-            "Z": 0.3
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 0,
-            "Y": 3,
-            "Z": -16
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "goal-backstop",
-          "className": "Object3D",
-          "name": "Goal backstop",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#536a76",
-          "Size": {
-            "X": 6,
-            "Y": 3,
-            "Z": 0.2
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": false,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 0,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar--3",
-          "className": "Object3D",
-          "name": "Net bar -3",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": -3,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar--2.4",
-          "className": "Object3D",
-          "name": "Net bar -2.4",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": -2.4,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar--1.7999999999999998",
-          "className": "Object3D",
-          "name": "Net bar -1.7999999999999998",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": -1.7999999999999998,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar--1.1999999999999997",
-          "className": "Object3D",
-          "name": "Net bar -1.1999999999999997",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": -1.1999999999999997,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar--0.5999999999999998",
-          "className": "Object3D",
-          "name": "Net bar -0.5999999999999998",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": -0.5999999999999998,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar-2.220446049250313e-16",
-          "className": "Object3D",
-          "name": "Net bar 2.220446049250313e-16",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 2.220446049250313e-16,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar-0.6000000000000002",
-          "className": "Object3D",
-          "name": "Net bar 0.6000000000000002",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 0.6000000000000002,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar-1.2000000000000002",
-          "className": "Object3D",
-          "name": "Net bar 1.2000000000000002",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 1.2000000000000002,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar-1.8000000000000003",
-          "className": "Object3D",
-          "name": "Net bar 1.8000000000000003",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 1.8000000000000003,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
-        },
-        {
-          "id": "net-bar-2.4000000000000004",
-          "className": "Object3D",
-          "name": "Net bar 2.4000000000000004",
-          "attributes": {},
-          "children": [],
-          "Texture": "",
-          "Shape": "Box",
-          "Color": "#e0e5d5",
-          "Size": {
-            "X": 0.035,
-            "Y": 3,
-            "Z": 0.035
-          },
-          "Anchored": true,
-          "Sensor": false,
-          "Visible": true,
-          "CollisionGroup": "world",
-          "Restitution": 0.1,
-          "Friction": 0.5,
-          "Mass": 1,
-          "FixedRotation": false,
-          "Material": "Default",
-          "TextureScale": 1,
-          "Position": {
-            "X": 2.4000000000000004,
-            "Y": 1.5,
-            "Z": -18
-          },
-          "Rotation": {
-            "X": 0,
-            "Y": 0,
-            "Z": 0
-          }
+          "children": [
+            {
+              "id": "goal-post--3",
+              "className": "Object3D",
+              "name": "Goal post -3",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#f4eee0",
+              "Size": {
+                "X": 0.3,
+                "Y": 3,
+                "Z": 0.3
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Metal",
+              "TextureScale": 1,
+              "Position": {
+                "X": -3,
+                "Y": 1.5,
+                "Z": -16
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "goal-post-3",
+              "className": "Object3D",
+              "name": "Goal post 3",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#f4eee0",
+              "Size": {
+                "X": 0.3,
+                "Y": 3,
+                "Z": 0.3
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Metal",
+              "TextureScale": 1,
+              "Position": {
+                "X": 3,
+                "Y": 1.5,
+                "Z": -16
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "goal-crossbar",
+              "className": "Object3D",
+              "name": "Goal crossbar",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#f4eee0",
+              "Size": {
+                "X": 6.3,
+                "Y": 0.3,
+                "Z": 0.3
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 3,
+                "Z": -16
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "goal-backstop",
+              "className": "Object3D",
+              "name": "Goal backstop",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#536a76",
+              "Size": {
+                "X": 6,
+                "Y": 3,
+                "Z": 0.2
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": false,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-1",
+              "className": "Object3D",
+              "name": "Net strand 1",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": -3,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-2",
+              "className": "Object3D",
+              "name": "Net strand 2",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": -2.4,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-3",
+              "className": "Object3D",
+              "name": "Net strand 3",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": -1.8,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-4",
+              "className": "Object3D",
+              "name": "Net strand 4",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": -1.2,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-5",
+              "className": "Object3D",
+              "name": "Net strand 5",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": -0.6,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-6",
+              "className": "Object3D",
+              "name": "Net strand 6",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-7",
+              "className": "Object3D",
+              "name": "Net strand 7",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0.6,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-8",
+              "className": "Object3D",
+              "name": "Net strand 8",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 1.2,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-9",
+              "className": "Object3D",
+              "name": "Net strand 9",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 1.8,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-10",
+              "className": "Object3D",
+              "name": "Net strand 10",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 2.4,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "net-strand-11",
+              "className": "Object3D",
+              "name": "Net strand 11",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#e0e5d5",
+              "Size": {
+                "X": 0.035,
+                "Y": 3,
+                "Z": 0.035
+              },
+              "Anchored": true,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 3,
+                "Y": 1.5,
+                "Z": -18
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            }
+          ]
         },
         {
           "id": "garden-step-0",

@@ -177,6 +177,16 @@ test('3D project renders, edits materials and world settings, and executes the s
   await page.getByLabel('TextureScale', { exact: true }).press('Tab');
   await tree(page, 'Workspace').click();
   await expect(page.getByLabel('FallenHeight', { exact: true })).toHaveValue('-40');
+  await page
+    .getByLabel('Upload sky image', { exact: true })
+    .setInputFiles({
+      name: 'sky.svg',
+      mimeType: 'image/svg+xml',
+      buffer: Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="8"><rect width="16" height="8" fill="#abc"/></svg>',
+      ),
+    });
+  await expect(page.getByLabel('Skybox', { exact: true })).toHaveValue('custom');
   await page.getByLabel('Skybox', { exact: true }).selectOption('');
   await page.getByLabel('Skybox', { exact: true }).selectOption('builtin:sky');
   await page.locator('#play').click();

@@ -1,13 +1,22 @@
-import { SceneNode, deserializeNode, serializeNode, validateProject } from '../engine/scene.js';
+import {
+  SceneNode,
+  deserializeNode,
+  serializeNode,
+  validateProject,
+  isObject,
+  isScriptNode,
+} from '../engine/scene.js';
+import { Vector2, Vector3 } from '../engine/math.js';
 import { Signal } from '../engine/signal.js';
 
-/** Editor documents never share instance state with a running game. */
+/** The authoring document owns history and selection; Play receives only serialized copies. */
 export class StudioStore {
   constructor(project) {
     this.Changed = new Signal();
     this.undoStack = [];
     this.redoStack = [];
-    this.selectedId = 'player';
+    this.selectedId = undefined;
+    this.selectedIds = new Set();
     this.expanded = new Set(['workspace', 'scripts']);
     this.restore(project);
   }
@@ -20,8 +29,14 @@ export class StudioStore {
   get selected() {
     return this.nodes.find((node) => node.Id === this.selectedId);
   }
+  get selection() {
+    return this.nodes.filter((node) => this.selectedIds.has(node.Id));
+  }
   get workspace() {
     return this.root.FindFirstChild('Workspace');
+  }
+  get dimension() {
+    return this.metadata.dimension || '2D';
   }
   restore(project) {
     validateProject(project);
@@ -30,8 +45,20 @@ export class StudioStore {
     this.root = new SceneNode('Folder', 'game');
     for (const data of project.services) deserializeNode(data).Parent = this.root;
   }
-  select(node) {
-    this.selectedId = node?.Id;
+  select(node, additive = false) {
+    if (!additive) this.selectedIds.clear();
+    if (node) {
+      if (additive && this.selectedIds.has(node.Id)) this.selectedIds.delete(node.Id);
+      else this.selectedIds.add(node.Id);
+    }
+    this.selectedId =
+      node && this.selectedIds.has(node.Id) ? node.Id : [...this.selectedIds].at(-1);
+    this.Changed.Fire('selection');
+  }
+  selectMany(nodes, additive = false) {
+    if (!additive) this.selectedIds.clear();
+    for (const node of nodes) this.selectedIds.add(node.Id);
+    this.selectedId = nodes.at(-1)?.Id;
     this.Changed.Fire('selection');
   }
   transact(action, group) {
@@ -40,10 +67,10 @@ export class StudioStore {
       action();
     } catch (error) {
       this.restore(before);
+      this.Changed.Fire('document');
       throw error;
     }
-    if (JSON.stringify(before) === JSON.stringify(this.project)) return;
-    this.record(before, group);
+    if (JSON.stringify(before) !== JSON.stringify(this.project)) this.record(before, group);
   }
   record(before, group) {
     if (!group || this.lastGroup !== group || performance.now() - this.lastEdit > 1000) {
@@ -71,28 +98,53 @@ export class StudioStore {
   }
   load(project) {
     this.transact(() => this.restore(project));
+    this.selectedIds.clear();
     this.selectedId = undefined;
+    this.expanded.add(this.workspace.Id);
+    this.expanded.add(this.root.FindFirstChild('ScriptService').Id);
     this.Changed.Fire('selection');
   }
   canRemove(node) {
     return node && node.Parent !== this.root;
   }
-  add(className) {
-    const selected = this.selected;
-    let parent = selected || this.workspace;
+  topSelection() {
+    return this.selection.filter(
+      (node) =>
+        this.canRemove(node) &&
+        !this.selection.some((other) => other !== node && other.GetDescendants().includes(node)),
+    );
+  }
+  add(className, { position } = {}) {
+    if (className === 'PhysicsObject') className = 'Object2D';
     if (
-      className === 'Object2D' &&
-      (!selected || (selected.Parent === this.root && selected.Name === 'ScriptService'))
+      (className === 'Object2D' && this.dimension === '3D') ||
+      (className === 'Object3D' && this.dimension !== '3D')
     )
+      throw new Error('Insert an object matching this project’s dimension');
+    let parent = this.selected || this.workspace;
+    if (isScriptNode(parent) || (parent.Name === 'ScriptService' && className.startsWith('Object')))
       parent = this.workspace;
-    if (parent.ClassName.endsWith('Script')) parent = parent.Parent;
+    if (className.startsWith('PlayerController')) {
+      const required = className.endsWith('3D') ? 'Object3D' : 'Object2D';
+      if (required !== (this.dimension === '3D' ? 'Object3D' : 'Object2D'))
+        throw new Error('Controller must match the project dimension');
+      if (parent.ClassName !== required) {
+        const actor = new SceneNode(required, 'Player');
+        actor.Anchored = false;
+        actor.Position = position || actor.Position;
+        parent = actor;
+      }
+    }
     const node = new SceneNode(className);
     if (className === 'Script')
       node.Source = 'local object = script.Parent\n\nprint("Hello from", object.Name)\n';
     if (className === 'ModuleScript')
       node.Source =
         'local Module = {}\n\nfunction Module.Hello()\n    return "Hello"\nend\n\nreturn Module\n';
+    if (position && isObject(node)) node.Position = position;
     this.transact(() => {
+      if (!parent.Parent && parent !== this.root && parent !== this.workspace)
+        parent.Parent = this.workspace;
       node.Parent = parent;
     });
     this.expanded.add(parent.Id);
@@ -100,20 +152,32 @@ export class StudioStore {
     return node;
   }
   remove() {
-    if (this.canRemove(this.selected)) this.transact(() => this.selected.Destroy());
+    const targets = this.topSelection();
+    if (!targets.length) return;
+    this.transact(() => {
+      for (const target of targets) target.Destroy();
+    });
+    this.select(undefined);
   }
   duplicate() {
-    if (!this.canRemove(this.selected)) return;
-    const node = this.selected.Clone();
-    node.Name += ' Copy';
-    if (node.ClassName === 'Object2D') node.Position = node.Position.Add({ X: 30, Y: 30 });
-    this.transact(() => {
-      node.Parent = this.selected.Parent;
+    const targets = this.topSelection();
+    if (!targets.length) return;
+    const clones = targets.map((target) => {
+      const clone = target.Clone();
+      clone.Name += ' Copy';
+      if (isObject(clone))
+        clone.Position = clone.Position.Add(
+          this.dimension === '3D' ? new Vector3(1, 0, 1) : new Vector2(30, 30),
+        );
+      return { clone, parent: target.Parent };
     });
-    this.select(node);
+    this.transact(() => {
+      for (const { clone, parent } of clones) clone.Parent = parent;
+    });
+    this.selectMany(clones.map((item) => item.clone));
   }
   reparent(node, parent) {
-    if (!this.canRemove(node) || parent.ClassName.endsWith('Script')) return;
+    if (!this.canRemove(node) || isScriptNode(parent)) return;
     this.transact(() => {
       node.Parent = parent;
     });

@@ -1,42 +1,67 @@
-import { el, icon } from './dom.js';
-export function renderHierarchy(container, store, onError) {
+import { el } from './dom.js';
+import { nodeGlyph, glyph } from './icons.js';
+import { isScriptNode } from '../engine/scene.js';
+export function renderHierarchy(container, store, onError, onMenu = () => {}) {
   container.replaceChildren();
+  const visible = [];
   function row(node, depth) {
+    visible.push(node);
     const children = node.GetChildren();
-    const item = el('div', `tree-row ${node.Id === store.selectedId ? 'selected' : ''}`);
-    item.style.paddingLeft = `${10 + depth * 16}px`;
+    const selected = store.selectedIds.has(node.Id);
+    const item = el('div', `tree-row ${selected ? 'selected' : ''}`);
+    item.style.paddingLeft = `${8 + depth * 18}px`;
     item.dataset.id = node.Id;
     item.setAttribute('role', 'treeitem');
-    item.setAttribute('aria-selected', String(node.Id === store.selectedId));
+    item.setAttribute('aria-selected', String(selected));
     item.tabIndex = 0;
-    const arrow = el(
-      'button',
-      'tree-arrow',
-      children.length ? (store.expanded.has(node.Id) ? '▾' : '▸') : '',
-    );
-    arrow.setAttribute('aria-label', `Expand ${node.Name}`);
+    const arrow = el('button', 'tree-arrow');
+    arrow.type = 'button';
+    arrow.setAttribute('aria-label', 'Expand ' + node.Name);
     arrow.tabIndex = -1;
+    if (children.length)
+      arrow.append(glyph(store.expanded.has(node.Id) ? 'ChevronDown' : 'ChevronRight', 14));
     arrow.onclick = (event) => {
       event.stopPropagation();
       store.expanded.has(node.Id) ? store.expanded.delete(node.Id) : store.expanded.add(node.Id);
-      renderHierarchy(container, store, onError);
+      renderHierarchy(container, store, onError, onMenu);
     };
-    item.append(
-      arrow,
-      el('span', `tree-icon ${node.ClassName.toLowerCase()}`, icon(node)),
-      el('span', 'tree-name', node.Name),
-    );
-    if (node.ClassName.endsWith('Script') && !node.Enabled) item.classList.add('disabled-script');
-    item.onclick = () => store.select(node);
+    const icon = el('span', 'tree-icon ' + node.ClassName.toLowerCase());
+    icon.append(nodeGlyph(node));
+    item.append(arrow, icon, el('span', 'tree-name', node.Name));
+    if (isScriptNode(node) && !node.Enabled) item.classList.add('disabled-script');
+    item.onclick = (event) => {
+      if (event.shiftKey && store.selectedId) {
+        const a = visible.findIndex((n) => n.Id === store.selectedId),
+          b = visible.indexOf(node);
+        if (a >= 0) {
+          store.selectMany(
+            visible.slice(Math.min(a, b), Math.max(a, b) + 1),
+            event.ctrlKey || event.metaKey,
+          );
+          return;
+        }
+      }
+      store.select(node, event.ctrlKey || event.metaKey);
+    };
     item.onkeydown = (event) => {
-      if (event.key === 'Enter') store.select(node);
+      if (event.key === 'Enter') store.select(node, event.ctrlKey || event.metaKey);
+    };
+    item.oncontextmenu = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!selected) store.select(node);
+      onMenu(event);
     };
     item.draggable = store.canRemove(node);
     item.ondragstart = (event) => {
-      event.dataTransfer.setData('text/openengine', node.Id);
+      if (!selected) store.select(node);
+      event.dataTransfer.setData(
+        'text/openengine',
+        JSON.stringify(store.topSelection().map((n) => n.Id)),
+      );
     };
     item.ondragover = (event) => {
-      if (event.dataTransfer.types.includes('text/openengine')) {
+      if (event.dataTransfer.types.includes('text/openengine') && !isScriptNode(node)) {
         event.preventDefault();
         item.classList.add('drop-target');
       }
@@ -45,18 +70,25 @@ export function renderHierarchy(container, store, onError) {
     item.ondrop = (event) => {
       event.preventDefault();
       item.classList.remove('drop-target');
-      const source = store.nodes.find(
-        (n) => n.Id === event.dataTransfer.getData('text/openengine'),
-      );
-      if (source)
-        try {
-          store.reparent(source, node);
-        } catch (error) {
-          onError(error.message);
-        }
+      try {
+        if (isScriptNode(node)) throw new Error('Scripts cannot contain scene objects');
+        const ids = JSON.parse(event.dataTransfer.getData('text/openengine'));
+        const targets = store.nodes.filter((n) => ids.includes(n.Id) && store.canRemove(n));
+        store.transact(() => {
+          for (const target of targets) target.Parent = node;
+        });
+        store.expanded.add(node.Id);
+        store.Changed.Fire('selection');
+      } catch (error) {
+        onError(error.message);
+      }
     };
     container.append(item);
     if (store.expanded.has(node.Id)) children.forEach((child) => row(child, depth + 1));
   }
   store.root.GetChildren().forEach((node) => row(node, 0));
+  container.oncontextmenu = (event) => {
+    event.preventDefault();
+    onMenu(event);
+  };
 }

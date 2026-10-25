@@ -125,7 +125,8 @@ export class Renderer {
       }
       ctx.restore();
     }
-    if (options.selected?.ClassName === 'Object2D') this.drawSelection(ctx, options.selected, zoom);
+    for (const node of Array.isArray(options.selected) ? options.selected : [options.selected])
+      if (node?.ClassName === 'Object2D') this.drawSelection(ctx, node, zoom);
     ctx.restore();
   }
   drawSelection(ctx, node, zoom) {

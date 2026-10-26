@@ -4,9 +4,12 @@ local run = game:GetService("RunService")
 local config = require(script.Parent.Config)
 local remote = workspace.CityAction
 local templates = script.Parent.Templates
+local Vehicles = require(script.Vehicles)
+local Residents = require(script.Residents)
 local state = {}
 local cars = {}
-local pedestrians = {}
+local pedestrians = Residents.Load()
+local nextSlot = 0
 local tracers = {}
 
 local function notify(player, text)
@@ -39,9 +42,10 @@ local function spawn(player)
     if player.Character then player.Character:Destroy() end
     local actor = templates.Avatar:Clone()
     actor.Name = player.Name
-    actor.Position = config.Spawn:Add(Vector3.new((data.slot % 5) * 2 - 4, 0, 0))
+    actor.Position = config.Spawn:Add(Vector3.new((data.slot % 5) * 2 - 4, 0, math.floor(data.slot / 5) * 2))
     actor.Color = ({"#62b6f2", "#f5b85b", "#c891f2", "#65ce9b", "#f07883"})[data.slot % 5 + 1]
     actor:SetAttribute("Health", config.Health)
+    actor:SetAttribute("Score", data.kills)
     actor:SetAttribute("Driving", "")
     actor:SetAttribute("UserId", player.UserId)
     actor.Parent = workspace
@@ -51,7 +55,8 @@ local function spawn(player)
 end
 
 local function join(player)
-    state[player.UserId] = { slot = #players:GetPlayers(), lastShot = -10, lastAction = -10, kills = 0 }
+    nextSlot = nextSlot + 1
+    state[player.UserId] = { slot = nextSlot, lastShot = -10, lastAction = -10, kills = 0 }
     spawn(player)
 end
 players.PlayerAdded:Connect(join)
@@ -61,28 +66,12 @@ players.PlayerRemoving:Connect(function(player)
     state[player.UserId] = nil
 end)
 
-for _, body in ipairs(workspace.Cars:GetChildren()) do
-    if body:IsA("Object3D") and body:GetAttribute("Vehicle") then
-        local parts = {}
-        for _, part in ipairs(workspace.CarDetails:GetChildren()) do
-            if part:GetAttribute("Car") == body.Name then
-                table.insert(parts, { object = part, offset = part.Position:Sub(body.Position) })
-            end
-        end
-        table.insert(cars, { body = body, home = body.Position, parts = parts,
-            heading = 0, throttle = 0, steer = 0, lastInput = 0 })
-    end
-end
-for i, actor in ipairs(workspace.Pedestrians:GetChildren()) do
-    table.insert(pedestrians, { actor = actor, home = actor.Position, direction = i % 2 == 0 and 1 or -1 })
-end
-
 local function damage(target, amount, attacker)
     local health = target:GetAttribute("Health")
     if not health or health <= 0 then return end
     health = math.max(0, health - amount)
     target:SetAttribute("Health", health)
-    if health > 0 then return end
+    if health > 0 then return true end
     local victim = players:GetPlayerFromCharacter(target)
     if victim then
         exitCar(victim)
@@ -97,7 +86,7 @@ local function damage(target, amount, attacker)
         target.Visible = false
         target.Sensor = true
         target.Velocity = Vector3.new()
-        target:SetAttribute("RespawnAt", run.Time + 8)
+        target:SetAttribute("RespawnAt", run.Time + config.ResidentRespawnDelay)
     end
     if attacker and state[attacker.UserId] then
         local data = state[attacker.UserId]
@@ -105,7 +94,10 @@ local function damage(target, amount, attacker)
         if attacker.Character then attacker.Character:SetAttribute("Score", data.kills) end
         notify(attacker, "+1 takedown")
     end
+    return true
 end
+
+cars = Vehicles.Load(damage)
 
 local function shoot(player, direction)
     local data = state[player.UserId]
@@ -130,7 +122,7 @@ local function shoot(player, direction)
     streak.Color = "#ffe3a1"
     streak.Parent = workspace
     table.insert(tracers, { object = streak, expires = run.Time + 0.12 })
-    if hit then damage(hit.Instance, config.Damage, player) end
+    if hit and damage(hit.Instance, config.Damage, player) then remote:FireClient(player, "hit") end
     remote:FireAllClients("shot", origin)
 end
 
@@ -176,44 +168,11 @@ run.Heartbeat:Connect(function(dt)
             damage(actor, config.Health, nil)
         end
     end
-    for _, car in ipairs(cars) do
-        if car.driver and run.Time - car.lastInput > 0.5 then car.throttle, car.steer = 0, 0 end
-        local speed = car.throttle * (car.throttle >= 0 and config.CarSpeed or config.CarReverseSpeed)
-        if math.abs(speed) > 0.1 then car.heading = car.heading - car.steer * config.CarTurnSpeed * dt * (speed > 0 and 1 or -1) end
-        car.body.Rotation = Vector3.new(0, car.heading, 0)
-        car.body.Velocity = Vector3.new(-math.sin(car.heading) * speed, car.body.Velocity.Y, -math.cos(car.heading) * speed)
-        if car.body.Position.Y < -10 or car.body.Position.Magnitude > 200 then
-            if car.driver then exitCar(car.driver) end
-            car.body.Position = car.home
-            car.body.Velocity = Vector3.new()
-            car.heading = 0
-        end
-        local c, s = math.cos(car.heading), math.sin(car.heading)
-        for _, part in ipairs(car.parts) do
-            local o = part.offset
-            part.object.Position = car.body.Position:Add(Vector3.new(o.X * c + o.Z * s, o.Y, -o.X * s + o.Z * c))
-            part.object.Rotation = car.body.Rotation
-        end
-        if car.driver and car.driver.Character then
-            car.driver.Character.Position = car.body.Position:Add(Vector3.new(0, 0.8, 0))
-            car.driver.Character.Velocity = Vector3.new()
-            car.driver.Character.Visible = false
-        end
-    end
-    for _, npc in ipairs(pedestrians) do
-        local actor = npc.actor
-        local respawnAt = actor:GetAttribute("RespawnAt")
-        if respawnAt and run.Time >= respawnAt then
-            actor:SetAttribute("RespawnAt", nil)
-            actor:SetAttribute("Health", config.Health)
-            actor.Position, actor.Visible, actor.Sensor = npc.home, true, false
-        elseif not respawnAt then
-            if math.abs(actor.Position.Z - npc.home.Z) > 12 and (actor.Position.Z - npc.home.Z) * npc.direction > 0 then npc.direction = -npc.direction end
-            actor.Velocity = Vector3.new(0, actor.Velocity.Y, npc.direction * 1.7)
-            actor.Rotation = Vector3.new(0, npc.direction > 0 and math.pi or 0, 0)
-        end
-    end
+    Vehicles.Update(cars, dt, exitCar)
+    Residents.Update(pedestrians, dt)
     for i = #tracers, 1, -1 do
         if run.Time >= tracers[i].expires then tracers[i].object:Destroy(); table.remove(tracers, i) end
     end
 end)
+
+run.PostSimulation:Connect(function() Vehicles.Follow(cars) end)

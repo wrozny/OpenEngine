@@ -33,8 +33,8 @@ for (const axis of [0, 1])
     for (const offset of [-6.5, 6.5])
       object(
         'Sidewalk',
-        axis === 0 ? [road + offset, 0.15, 0] : [0, 0.15, road + offset],
-        axis === 0 ? [2, 0.3, 140] : [140, 0.3, 2],
+        axis === 0 ? [road + offset, 0.06, 0] : [0, 0.06, road + offset],
+        axis === 0 ? [2, 0.12, 140] : [140, 0.12, 2],
         { Color: '#a0a49e' },
         streets,
       );
@@ -104,12 +104,12 @@ for (let i = 0; i < 3; i++) {
   const body = object(
     name,
     p,
-    [1.9, 1, 3.8],
+    [1.9, 0.8, 3.8],
     {
       Anchored: false,
       Mass: 900,
       FixedRotation: true,
-      Friction: 0.15,
+      Friction: 0,
       Color: ['#d16c5e', '#5ca6ae', '#d6bd68'][i],
     },
     cars,
@@ -118,7 +118,7 @@ for (let i = 0; i < 3; i++) {
   body.SetAttribute('Driver', '');
   const roof = object(
     name + ' cabin',
-    [p[0], p[1] + 0.75, p[2] + 0.1],
+    [p[0], p[1] + 0.65, p[2] + 0.1],
     [1.6, 0.7, 1.9],
     { Sensor: true, Color: '#315564' },
     details,
@@ -128,7 +128,7 @@ for (let i = 0; i < 3; i++) {
     for (const z of [-1.2, 1.2]) {
       const wheel = object(
         name + ' wheel',
-        [p[0] + x, p[1] - 0.35, p[2] + z],
+        [p[0] + x, p[1] - 0.05, p[2] + z],
         [0.35, 0.7, 0.7],
         { Sensor: true, Color: '#232831' },
         details,
@@ -168,6 +168,11 @@ for (const [className, name, file] of [
   node.Source = '';
   node.SourceFile = 'scripts/' + file;
 }
+for (const name of ['Vehicles', 'Residents']) {
+  const module = new SceneNode('ModuleScript', name, 'city-private-' + name);
+  module.SourceFile = 'scripts/' + name + '.lua';
+  module.Parent = scripts.FindFirstChild('City Server');
+}
 const project = {
   format: 'openengine',
   version: 1,
@@ -179,12 +184,20 @@ const project = {
   controls: 'WASD move · Space jump · Right drag look · Left click shoot · E enter / exit car',
   services: [workspace, scripts].map(serializeNode),
 };
-for (const data of project.services[1].children)
-  if (data.className.endsWith('Script')) {
-    const live = scripts.FindFirstChild(data.name);
-    data.SourceFile = live.SourceFile;
+const sourceFiles = new Map(
+  scripts
+    .GetDescendants()
+    .filter((node) => node.SourceFile)
+    .map((node) => [node.Id, node.SourceFile]),
+);
+function sources(data) {
+  if (sourceFiles.has(data.id)) {
+    data.SourceFile = sourceFiles.get(data.id);
     delete data.Source;
   }
+  data.children.forEach(sources);
+}
+project.services.forEach(sources);
 await mkdir('examples/neon-borough', { recursive: true });
 await writeFile(
   'examples/neon-borough/project.openengine',

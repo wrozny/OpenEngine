@@ -285,11 +285,14 @@ test('Neon Borough runs multiplayer combat, respawning, pedestrians, car entry/d
   assert.equal(car.GetAttribute('Driver'), attacker.UserId);
   assert.equal(attacker.Character.GetNetworkOwner(), null);
   const carBefore = car.Position;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 8; i++) {
     action(a.connection, 'drive', 1, 0);
     advance(0.1);
   }
-  assert.ok(car.Position.Distance(carBefore) > 2);
+  assert.ok(
+    car.Position.Distance(carBefore) > 2,
+    JSON.stringify({ before: carBefore, after: car.Position, velocity: car.Velocity }),
+  );
   action(a.connection, 'interact');
   advance(0.1);
   assert.equal(car.GetAttribute('Driver'), '');

@@ -12,7 +12,10 @@ and expand **Assets**:
 - **OpenEngineStudio-Windows.zip** — extract the entire ZIP and run `OpenEngineStudio.exe`.
   Keep the executable beside its runtime files. No Node.js or Lua installation is needed.
 - **Example Projects.zip** — extract, then use Studio's **Open** button to select
-  `Dead Signal/Dead Signal.openengine` or `Parcel Panic/Parcel Panic.openengine`.
+  `Dead Signal/Dead Signal.openengine`, `Parcel Panic/Parcel Panic.openengine`, or `Neon Borough/Neon Borough.openengine`.
+- **NeonBorough-Windows.zip** — ready-to-run online city client and Server applications.
+- **NeonBorough-web.zip** — web client and bundled Node.js server. Run `node server.cjs`
+  with Node.js 24 LTS, then visit `http://localhost:7777`.
 - **SHA256SUMS.txt** — checksums for the downloads. GitHub's **Source code** links contain
   the complete engine source for the release.
 
@@ -46,8 +49,7 @@ name, description, and in-game control hint.
 - **Play:** F5 starts/stops a disposable session. Edit-time data survives unchanged.
 - **Save:** desktop Studio writes a .openengine project file; the browser downloads one.
   Ctrl/Cmd+Shift+S uses Save As. Browser copies are convenient, not permanent backups.
-- **Build:** export a fully offline web ZIP, or use packaged desktop Studio to export
-  a standalone native game for the current operating system.
+- **Build:** export an offline single-player web ZIP or a multiplayer web client/server ZIP. Packaged desktop Studio exports native games; online games include separate client and Server applications.
 
 Ctrl/Cmd+S saves; Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo/redo scene changes; Ctrl/Cmd+D
 duplicates; Delete removes the selection. Monaco retains standard text editing shortcuts.
@@ -69,9 +71,9 @@ Existing version 1 **PhysicsObject** documents and Lua constructors migrate to O
 2D uses pixels with Y pointing down; 3D uses meters with Y pointing up. Parenting organizes
 objects and scripts; it does not imply inherited transforms.
 
-This is a local single-player engine, not a Roblox implementation. Lua is **Lua 5.3**
-through Fengari, not Luau. There is no networking, skeletal animation system, polygon
-collider editor or touch/gamepad controller. Scripts are trusted code, not a security sandbox.
+This engine supports standalone and dedicated-server multiplayer projects. Lua is **Lua 5.3**
+through Fengari, not Luau; Roblox compatibility is not provided. There is no skeletal animation
+system, polygon collider editor or touch/gamepad controller. Scripts are trusted code, not a security sandbox.
 3D needs a WebGL-capable machine. Native packages include Chromium and are unsigned.
 
 ## Example projects
@@ -157,3 +159,11 @@ matching package.json is pushed. New releases remain drafts until asset uploads 
 - [Third-party licenses](THIRD_PARTY_NOTICES.md)
 
 MIT licensed. Art and texture patterns shipped with the examples were created for this project.
+
+## Multiplayer (0.3)
+
+Enable **Multiplayer** when creating a project or in **Project settings**. Play opens a dedicated server and a client; **Add client** tests another player over a real WebSocket connection. Lua now supports `ServerScript`, `LocalScript`, `Players`, `RemoteEvent`, and `Object2D/3D:SetNetworkOwner(player)`. Legacy Scripts run on the host; PlayerControllers run on their owning client.
+
+**Neon Borough** is an original online 3D city sandbox with walking/jumping, shooting, respawning, eight pedestrians and three enterable arcade cars. Open it from the launcher and press Play, then Add client. WASD moves/drives, Space jumps, right drag looks, left click shoots, and E enters/exits a nearby car.
+
+Multiplayer web builds contain a web client and a self-contained Node.js host: extract, install Node.js 24 LTS, run `node server.cjs`, then visit `http://localhost:7777`. Multiplayer Windows builds produce separate client and Server applications; run the Server first, then join `ws://SERVER-IP:7777/socket` from each client. Native hosting needs no Node install. See [multiplayer API, deployment and limits](docs/MULTIPLAYER.md) before hosting publicly.

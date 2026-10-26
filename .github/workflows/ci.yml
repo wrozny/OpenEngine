@@ -16,5 +16,6 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: npm run test:production
+      - run: node tools/smoke-network.mjs
       - run: npm run package:examples
       - run: npm run package:game -- --platform web

@@ -116,3 +116,11 @@ or formal large-world performance target. Shape colliders are primitives. The zo
 intentionally chases directly and can be blocked by cover. History snapshots and embedded
 images trade memory for simple portable documents. Native packages are comparatively
 large because they include Chromium; exported code/data remain inspectable.
+
+## Networking boundary
+
+`src/network/server.js` owns an authoritative Engine and the player registry. It accepts bounded input through a transport-independent interface, enforces physics leases, redacts server script subtrees, and sends an initial snapshot plus per-instance deltas. `src/network/client.js` maintains stable scene/Player identities, starts only local/owned scripts, reconciles server corrections, and submits owned physics samples. `presentation.js` interpolates render transforms without moving collision/query state. `codec.js` bounds data and reconstructs vectors/instance references; wire input never selects code to execute.
+
+`server/host.js` adapts the same authority to Node HTTP and the established `ws` WebSocket implementation, with payload limits, rate/backpressure bounds and dead-peer cleanup. The development Vite plugin and desktop main process each own the lifetime of a localhost testing host; Studio's `network-session.js` controls independent browser runtimes over actual sockets. The offline runtime uses `runtime/multiplayer.js` for its connect screen. No server runs in a browser tab, so background client rendering cannot pause host logic.
+
+`tools/build-server.mjs` uses esbuild to bundle all non-built-in server dependencies into CommonJS artifacts. Web builds ship the headless CLI host; Electron packages include the host API and a native Server mode. Client documents are redacted before export, while the separate server distribution retains private scripts. Scene ownership generations prevent an old client sample from undoing a server teleport or respawn. This is deliberately an initial explicit protocol, with its boundaries described in MULTIPLAYER.md.

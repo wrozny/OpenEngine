@@ -388,3 +388,9 @@ The view direction at yaw/pitch zero is (0,0,-1); a positive yaw turns toward ne
 Vector3 supports X/Y/Z, Magnitude, Unit, Add/Sub/Mul/Div/Dot/Cross/Distance/Lerp with
 the same immutable-value conventions as Vector2. Assign whole vectors to transforms.
 No parent transform inheritance, joints, skeletons or multiplayer replication are provided.
+
+## Multiplayer APIs (0.3)
+
+See [Multiplayer](MULTIPLAYER.md) for ServerScript/LocalScript execution, Players and session IDs, RemoteEvents, physics ownership, replication, deployable web/native servers, examples and practical limits. Single-player projects remain standalone unless multiplayer is enabled in their project settings.
+
+`Camera.Offset` is the Vector3 offset added to a followed 3D object's position (default `(0, 1, 0)`). LocalScripts can use it for shoulder cameras; Neon Borough computes its crosshair ray from this camera position and converts the target into a server muzzle direction.

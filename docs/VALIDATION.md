@@ -1,27 +1,22 @@
-# Validation and platform coverage — 0.2
+# Validation and platform coverage — 0.3
 
-Verification was performed in the Linux cloud workspace. Windows executables are
-cross-packaged, not launch-tested on Windows.
+Verification runs in the Linux cloud workspace. Windows executables are cross-packaged, not launch-tested on Windows.
 
-| Check                                             | Result                                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`                                        | 29 tests passed, with no skips. Covers hierarchy, clone/history, legacy Object2D migration, nested/typed attributes and callbacks, Lua modules/budgets, contacts/rays, 2D and 3D controllers, physics, world bounds, zombie waves/upgrades/death/restart, Parcel Panic tasks/football/respawn/restart, per-face UV repeats, recent-file permissions, and native assembly. |
-| `npm run test:browser`                            | All 8 Chromium integration tests passed in one run. Covers explicit startup and missing recents, dragging/attributes/portable save, context insertion and batch deletion, Monaco highlighting/completion/diagnostics/source saving, resized and rearranged panel persistence, actual 3D editing and custom sky upload, and execution of offline 2D/3D exports.            |
-| `npm run build`                                   | Production Studio, worker/font assets, game runtime and offline runtime template built.                                                                                                                                                                                                                                                                                   |
-| `node tools/smoke-production.mjs`                 | Production launcher, Monaco, Studio Play and standalone runtime ran under desktop CSP.                                                                                                                                                                                                                                                                                    |
-| Packaged Linux Studio plus `npm run test:desktop` | Real packaged executables exercised launcher, Monaco, file save/open/recents, 2D/3D Play, in-app native exports, then launched both exported games with their own bundled data.                                                                                                                                                                                           |
-| `npm run package:examples`                        | ZIP unpacked and both named project documents validated; editable Lua and embedded artwork verified present.                                                                                                                                                                                                                                                              |
-| `npm run format:check`                            | Pinned Prettier checks passed.                                                                                                                                                                                                                                                                                                                                            |
+| Check                                                    | Coverage                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                                               | 42 tests: existing scene/Lua/physics/controllers/examples plus player lifecycle, server/client roles, private-source redaction, typed remotes, real WebSockets, ownership and teleports, dynamic/late-joined scenes, gravity, local cosmetics, client disposal, combat/respawn, pedestrians, cars and native paired assembly. |
+| `npm run test:browser`                                   | 10 Chromium integrations: the eight existing launcher/editor/Monaco/docking/2D+3D export cases, plus a real Studio host with two independent clients and multiplayer project settings/web build contents.                                                                                                                     |
+| `node tools/smoke-production.mjs`                        | Production launcher, Monaco, single-player Studio Play and project-backed runtime under desktop CSP.                                                                                                                                                                                                                          |
+| `node tools/smoke-network.mjs`                           | An actual extracted web ZIP runs its bundled Node server, serves its redacted client, connects two browser players, accepts input and handles disconnect with clean logs.                                                                                                                                                     |
+| Packaged Linux Studio + `tools/smoke-desktop.mjs`        | Real launcher, Monaco, files/recents, single-player 2D+3D Play/export; both exported native games launch independently with their own data.                                                                                                                                                                                   |
+| Packaged Linux Studio + `tools/smoke-native-network.mjs` | Studio server + two clients over WebSockets; paired in-app native export; separate Server application and two exported native clients; connection counts, disconnects, private-source exclusion and stop-button shutdown.                                                                                                     |
+| `npm run package:examples`                               | Three portable projects and editable Lua source folders: Dead Signal, Parcel Panic and Neon Borough.                                                                                                                                                                                                                          |
+| `npm run format:check`                                   | Pinned Prettier checks for supported source/document/config files.                                                                                                                                                                                                                                                            |
+| `npm audit --omit=dev`                                   | No known reported production dependency vulnerabilities at verification time; ws and the Monaco sanitizer dependency are pinned to patched releases.                                                                                                                                                                          |
 
-Browser tests use system Chromium when available, otherwise Playwright's installed
-Chromium. The headless Linux native runner uses `--ozone-platform=headless`, software
-WebGL and `--no-sandbox` for the container only, with temporary writable XDG config/cache
-paths. Distributed applications do not force those flags or paths. Temporary exports
-and profiles are removed after the native test.
+Browsers use system Chromium where available, otherwise Playwright's install. Native tests run with headless ozone, software WebGL, `--no-sandbox` and temporary writable XDG config/cache directories **only in the container**. Distributed apps do not force those flags or paths. Headless server windows have explicit minimum bounds so controls remain usable. Native test exports/profiles are removed afterwards.
 
-The editor and both games were also visually inspected. Built-in materials, scene
-selection and story HUD were checked in rendered screenshots. Idle 3D views invalidate
-only when camera, objects, selection, controls, size or textures change.
+Rendered screenshots were inspected for the Studio multiplayer layout, online city, player silhouettes, cars, UI, materials and existing editor/example presentation. Remote render interpolation is separate from collision/query transforms. No long-duration or high-player-count load test is claimed.
 
 ## Reproduce
 
@@ -31,24 +26,19 @@ npm test
 npm run build
 npx playwright install chromium
 npm run test:browser
-npm run test:production
+node tools/smoke-production.mjs
+node tools/smoke-network.mjs
 npm run package:examples
 npm run package:studio -- --platform linux
 npm run test:desktop -- --executable release/OpenEngineStudio-linux-x64/OpenEngineStudio
+node tools/smoke-native-network.mjs --executable release/OpenEngineStudio-linux-x64/OpenEngineStudio
 ```
 
 ## Limits
 
-- Windows-specific launch, native dialogs, drivers/audio devices and unsigned-app
-  reputation prompts require verification on Windows. macOS/ARM/signing are unvalidated.
-- Browser tests use Chromium; Firefox/Safari, touch/gamepad and assistive technologies
-  are not tested. 3D needs WebGL and a functional graphics driver/software implementation.
-- Monaco completion is engine-aware assistance with basic alias/scene inference, not
-  a full Lua language server or type checker. Syntax diagnostics compile without running.
-- Primitive physics is tested in representative scenarios, not every possible Box2D or
-  Cannon configuration. Circular primitives should use matching circular dimensions.
-- No long-duration soak test, arbitrary imported-mesh collider support, inherited
-  transforms, skeletal animation, networking or formal large-world performance target
-  is claimed. Direct-chase zombie AI can be blocked by cover.
-- GitHub Actions runs checks/builds after pushes. A locally successful build or pushed
-  version tag does not itself prove that the remote release upload completed.
+- Windows-specific launch, native dialogs, hardware drivers/audio, unsigned-app reputation prompts, macOS/ARM and signing need platform-specific verification.
+- Chromium is covered; Firefox/Safari, gamepads, touch and assistive technologies are not. 3D requires WebGL.
+- Monaco supplies engine-aware assistance, not a full Lua language server/type checker.
+- Primitive physics is covered in representative scenarios, not every configuration. Circular primitives should have matching circular dimensions. No mesh collider editor, inherited transforms or skeletal animation is provided.
+- Multiplayer is an initial small-session protocol: no competitive anti-cheat, hit rewind, reconnect, accounts, matchmaking, interest management, soak test or capacity guarantee. See [MULTIPLAYER.md](MULTIPLAYER.md). Use the Node host for headless deployment and TLS/WSS for public web hosting.
+- GitHub Actions validates and builds pushed tags. A successful local package/tag push does not itself prove that the remote release upload completed.

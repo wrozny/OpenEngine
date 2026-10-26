@@ -9,6 +9,7 @@ await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 for (const [source, name] of [
   ['zombie', 'Dead Signal'],
+  ['neon-borough', 'Neon Borough'],
   ['parcel-panic', 'Parcel Panic'],
 ]) {
   const directory = join(output, name);
@@ -19,7 +20,7 @@ for (const [source, name] of [
 await cp('LICENSE', join(output, 'LICENSE'));
 await writeFile(
   join(output, 'START HERE.txt'),
-  'OpenEngine example projects\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
+  'OpenEngine example projects\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\nNeon Borough/Neon Borough.openengine - online 3D city, cars, shooting and pedestrians\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
 );
 const files = {};
 async function collect(directory) {

@@ -85,3 +85,74 @@ test('removing an active project from recents does not revoke the ability to sav
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test('native multiplayer export produces separate client/server applications and redacts private client source', async () => {
+  const temp = await mkdtemp(join(tmpdir(), 'openengine-online-export-'));
+  try {
+    const runtime = join(temp, 'studio'),
+      appRoot = join(runtime, 'resources', 'app'),
+      destination = join(temp, 'exports');
+    await mkdir(join(appRoot, 'dist', 'network'), { recursive: true });
+    await mkdir(join(appRoot, 'desktop'), { recursive: true });
+    await mkdir(destination);
+    await writeFile(join(runtime, 'Studio.exe'), 'runtime');
+    await writeFile(join(appRoot, 'dist', 'runtime.html'), 'entry');
+    await writeFile(join(appRoot, 'desktop', 'main.cjs'), 'main');
+    const project = await loadProject('examples/neon-borough/project.openengine');
+    const output = await exporter.buildNativeGame({
+      appRoot,
+      executable: join(runtime, 'Studio.exe'),
+      destination,
+      project,
+      platform: 'win32',
+    });
+    const { readdir } = await import('node:fs/promises');
+    const entries = await readdir(output);
+    assert.equal(entries.length, 2);
+    for (const entry of entries) {
+      const root = join(output, entry, 'resources', 'app');
+      const info = JSON.parse(await readFile(join(root, 'package.json')));
+      const game = await readFile(join(root, 'project.json'), 'utf8');
+      if (info.openengineMode === 'server') {
+        assert.match(game, /ServerScript/);
+        await access(join(output, entry, 'NeonBoroughServer.exe'));
+      } else {
+        assert.equal(info.openengineMode, 'game');
+        assert.ok(!game.includes('ServerScript'));
+        assert.ok(!game.includes('lastAction'));
+        await access(join(output, entry, 'NeonBorough.exe'));
+      }
+    }
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+});
+
+test('native client distribution copies only the runtime dependency graph and excludes Studio example sources', async () => {
+  const { copyGameDist } = await import('../desktop/dist.cjs');
+  const directory = await mkdtemp(join(tmpdir(), 'openengine-dist-'));
+  try {
+    const source = join(directory, 'source'),
+      output = join(directory, 'client');
+    await mkdir(join(source, '.vite'), { recursive: true });
+    await mkdir(join(source, 'assets'));
+    await writeFile(join(source, 'runtime.html'), 'runtime');
+    await writeFile(join(source, 'assets', 'runtime.js'), 'client');
+    await writeFile(join(source, 'assets', 'shared.js'), 'engine');
+    await writeFile(join(source, 'assets', 'studio.js'), 'private examples');
+    await writeFile(
+      join(source, '.vite', 'manifest.json'),
+      JSON.stringify({
+        'runtime.html': { file: 'assets/runtime.js', imports: ['_shared.js'] },
+        '_shared.js': { file: 'assets/shared.js' },
+        'index.html': { file: 'assets/studio.js' },
+      }),
+    );
+    await copyGameDist(source, output);
+    await access(join(output, 'runtime.html'));
+    await access(join(output, 'assets', 'shared.js'));
+    await assert.rejects(access(join(output, 'assets', 'studio.js')));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

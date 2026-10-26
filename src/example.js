@@ -42,6 +42,11 @@ export function loadExample(folder) {
 export const exampleProject = () => loadExample('zombie');
 export const exampleProjects = [
   {
+    name: 'Neon Borough',
+    description: '3D · Online city, shooting, pedestrians and drivable cars',
+    load: () => loadExample('neon-borough'),
+  },
+  {
     name: 'Dead Signal',
     description: '2D · Lua zombie survival, waves and upgrades',
     load: () => loadExample('zombie'),

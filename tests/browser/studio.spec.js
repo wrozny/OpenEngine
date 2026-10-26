@@ -247,3 +247,58 @@ test('panel tabs dock into a new split and restore after reload', async ({ page 
   await page.locator('#reset-layout').click();
   await expect(page.locator('.lm_stack')).toHaveCount(4);
 });
+
+test('multiplayer Studio starts a real server, adds clients, drives owned characters and removes players', async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await example(page, 'Neon Borough');
+  await page.locator('#play').click();
+  const clients = page.locator('.network-client');
+  await expect(clients).toHaveCount(1);
+  await expect(clients.nth(0).locator('[data-widget="identity"]')).toContainText('1 online');
+  await page.getByRole('button', { name: 'Add client', exact: true }).click();
+  await expect(clients).toHaveCount(2);
+  await expect(clients.nth(0).locator('[data-widget="identity"]')).toContainText('2 online');
+  await expect(clients.nth(1).locator('[data-widget="identity"]')).toContainText('2 online');
+  await expect(page.getByLabel('Server instance')).toContainText('2 players');
+  const canvas = clients.nth(0).locator('canvas');
+  await canvas.focus();
+  await page.keyboard.down('w');
+  await page.waitForTimeout(350);
+  await page.keyboard.up('w');
+  await canvas.click();
+  await clients.nth(1).getByRole('button', { name: 'Disconnect', exact: true }).click();
+  await expect(clients).toHaveCount(1);
+  await expect(clients.nth(0).locator('[data-widget="identity"]')).toContainText('1 online');
+  await expect(page.getByLabel('Server instance')).toContainText('1 players');
+  await page.screenshot({ path: 'artifacts/multiplayer-studio.png', fullPage: true });
+  await page.getByRole('button', { name: 'Stop server', exact: true }).click();
+  await expect(page.locator('#play-host')).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+test('multiplayer selection persists through project settings and web builds include a runnable host', async ({
+  page,
+}) => {
+  await page.getByLabel('New project name').fill('Online starter');
+  await page.getByLabel('Enable multiplayer').check();
+  await page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await page.locator('#project-settings').click();
+  await expect(page.getByRole('dialog').getByLabel('Enable multiplayer')).toBeChecked();
+  await page.getByRole('button', { name: 'Save settings', exact: true }).click();
+  await page.locator('#build-project').click();
+  const downloading = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Web game ZIP/ }).click();
+  const download = await downloading;
+  const files = unzipSync(new Uint8Array(await readFile(await download.path())));
+  expect(Object.keys(files)).toEqual(
+    expect.arrayContaining(['index.html', 'server.cjs', 'project.json']),
+  );
+  const project = JSON.parse(strFromU8(files['project.json']));
+  expect(project.multiplayer).toBe(true);
+  expect(strFromU8(files['server.cjs'])).toContain('WebSocketServer');
+  expect(project.services[1].children.some((n) => n.className === 'ServerScript')).toBe(true);
+});

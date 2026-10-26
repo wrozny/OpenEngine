@@ -1,4 +1,4 @@
-OpenEngine 0.4 improves character traversal and Neon Borough, with server-authoritative swag displayed above player heads.
+OpenEngine 0.4.1 improves character traversal and Neon Borough, with server-authoritative swag displayed above player heads.
 
 ## Downloads
 
@@ -13,6 +13,7 @@ OpenEngine 0.4 improves character traversal and Neon Borough, with server-author
 
 - Default 3D controllers and 2D platformer controllers follow walkable slopes and step over low curbs without jumping.
 - Editable StepHeight and MaxSlopeAngle settings, multiple foot probes, diagonal corner detection, headroom/destination clearance, and steep-ramp rejection.
+- Uphill jumps retain their launch speed, including ramps near the walkable-angle limit.
 - A real Wedge primitive with shared rendering/convex collision geometry, raycasting and tiled materials. The ramp rises toward local +Z.
 - Exact untouched older default controller scripts upgrade automatically; custom Lua stays intact.
 - Reusable PhysicsService.GetGround / MoveCharacter helpers and a post-physics PostSimulation event.

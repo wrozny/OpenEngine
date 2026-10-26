@@ -172,3 +172,27 @@ test('2D platformer follows an inclined surface onto a raised landing without ju
   assert.ok(session.actor.Position.Y < -65, JSON.stringify(session.actor.Position));
   session.engine.dispose();
 });
+
+test('uphill jumping near the maximum slope angle keeps the jump launch instead of projecting it away', () => {
+  const depth = 8 / Math.tan((49.9 * Math.PI) / 180),
+    doc = createProject('Slope jump', '3D');
+  const ramp = object('Ramp', new Vector3(0, 4, 0), new Vector3(8, 8, depth), { Shape: 'Wedge' });
+  const actor = object(
+    'Actor',
+    new Vector3(0, 1 + (8 * (-2 + 0.5 + depth / 2)) / depth, -2),
+    new Vector3(1, 2, 1),
+    { Anchored: false },
+  );
+  new SceneNode('PlayerController3D').Parent = actor;
+  doc.services[0].children = [ramp, actor].map(serializeNode);
+  const engine = new Engine(doc);
+  engine.start();
+  engine.input.keys.add('s');
+  engine.input.keys.add(' ');
+  engine.update(1 / 60);
+  assert.ok(
+    engine.workspace.FindFirstChild('Actor').Velocity.Y > 8,
+    'ground projection must not cancel a valid jump',
+  );
+  engine.dispose();
+});

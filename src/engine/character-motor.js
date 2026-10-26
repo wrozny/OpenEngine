@@ -79,7 +79,7 @@ export function moveCharacter(engine, actor, velocity, deltaTime, stepHeight, sl
   const tolerance = three ? 0.5 : 15;
   const walking =
     horizontal.Magnitude > 1e-6 &&
-    (vertical <= tolerance || (support && velocity.Dot(support.Normal) <= tolerance));
+    (vertical <= tolerance || (support && velocity.Dot(support.Normal) <= 1e-6));
   if (support && walking) {
     const direction = horizontal.Unit;
     const travel = horizontal.Mul(Math.min(deltaTime, 0.1));

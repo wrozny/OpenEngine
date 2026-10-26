@@ -120,8 +120,10 @@ The CLI produces `NeonBorough-win32-x64/NeonBorough.exe` and `NeonBoroughServer-
 This original, primitive-art online city sandbox demonstrates eight walking residents, three enterable arcade coupes, shared combat and respawning. It uses no franchise assets or external artwork.
 
 - WASD walks; Space jumps; hold right mouse and drag to look.
-- Left mouse fires along the center crosshair. The host raycasts, limits the firing rate and applies 25 damage. Four hits cause a takedown; players respawn after four seconds and residents after eight.
+- Left mouse fires along the center crosshair. The host raycasts, limits the firing rate and applies 25 damage. Four hits cause a takedown; players respawn after four seconds and residents after eight. Resident takedowns award 10 swag, player takedowns 50; swag and takedown counts survive respawns in the same connection. Overhead labels show every player’s replicated swag, and high-speed vehicle impacts can also earn it.
 - Walk beside a car and press E to enter. WASD drives/steers; E exits. Cars are server-controlled, and stale input brakes them after half a second.
 - Player names, online count, HP and takedowns appear in each client's own UI. Resident movement, tracers, vehicle movement and game-state attributes replicate to all players.
+
+Cars accelerate/brake gradually and climb the lowered curbs. Default controllers step onto low edges and follow walkable ramps. Vehicles and residents use the same movement helper; lost/destroyed residents recover. `NeonBorough-source.zip` contains a dedicated portable project plus editable Lua/scene source.
 
 `examples/neon-borough/scripts/Config.lua` holds shared tuning. `Server.lua` owns the rules and `Client.lua` handles presentation/input. `tools/create-city.mjs` regenerates the editable city scene. It is a compact demonstration, not a full open-world commercial game: vehicles use an arcade body rather than wheel suspension; characters/residents use simple colliders rather than skeletal animation.

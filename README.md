@@ -11,7 +11,7 @@ and expand **Assets**:
 
 - **OpenEngineStudio-Windows.zip** — extract the entire ZIP and run `OpenEngineStudio.exe`.
   Keep the executable beside its runtime files. No Node.js or Lua installation is needed.
-- **Example Projects.zip** — extract, then use Studio's **Open** button to select
+- **Example.Projects.zip** — extract, then use Studio's **Open** button to select
   `Dead Signal/Dead Signal.openengine`, `Parcel Panic/Parcel Panic.openengine`, or `Neon Borough/Neon Borough.openengine`.
 - **NeonBorough-Windows.zip** — ready-to-run online city client and Server applications.
 - **NeonBorough-web.zip** — web client and bundled Node.js server. Run `node server.cjs`
@@ -56,7 +56,7 @@ duplicates; Delete removes the selection. Monaco retains standard text editing s
 
 ## Engine features
 
-- Object2D boxes/circles and Object3D boxes/spheres/cylinders, with configurable physics.
+- Object2D boxes/circles and Object3D boxes/spheres/cylinders/wedges, with configurable physics.
 - Planck/Box2D 2D physics and Cannon 3D physics: contacts, sensors, filtering and rays.
 - Three.js rendering, lights/shadows, tiled materials and textures, configurable sky images.
 - Workspace and ScriptService hierarchy, script.Parent, events, cloning, and modules.
@@ -167,3 +167,9 @@ Enable **Multiplayer** when creating a project or in **Project settings**. Play 
 **Neon Borough** is an original online 3D city sandbox with walking/jumping, shooting, respawning, eight pedestrians and three enterable arcade cars. Open it from the launcher and press Play, then Add client. WASD moves/drives, Space jumps, right drag looks, left click shoots, and E enters/exits a nearby car.
 
 Multiplayer web builds contain a web client and a self-contained Node.js host: extract, install Node.js 24 LTS, run `node server.cjs`, then visit `http://localhost:7777`. Multiplayer Windows builds produce separate client and Server applications; run the Server first, then join `ws://SERVER-IP:7777/socket` from each client. Native hosting needs no Node install. See [multiplayer API, deployment and limits](docs/MULTIPLAYER.md) before hosting publicly.
+
+## Traversal and city update (0.4)
+
+Default 3D and 2D platformer controllers now climb walkable ramps and low steps. StepHeight and MaxSlopeAngle are editable, and Wedge is available as an Object3D shape. Ground, ceiling, diagonal-corner and destination checks keep characters from climbing through obstacles. Untouched old default controller scripts migrate automatically; custom Lua is preserved.
+
+Neon Borough has lower curbs, improved car handling, and server-controlled swag: residents award 10, players 50. Swag appears above player heads and survives respawns within a connection. Cars can cross pathways, fast impacts earn takedowns, and pedestrians recover when lost. The release includes ready-to-run game builds and **NeonBorough-source.zip**. See the [new traversal and world-label APIs](docs/API.md#traversal-and-wedges-04).

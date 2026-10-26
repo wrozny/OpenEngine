@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag to publish (for example v0.3.0)
+        description: Existing version tag to publish (for example v0.4.0)
         required: true
-        default: v0.3.0
+        default: v0.4.0
         type: string
 
 permissions:
@@ -53,7 +53,7 @@ jobs:
           (cd release/OpenEngineStudio-win32-x64 && zip -q -r ../OpenEngineStudio-Windows.zip .)
           (cd release && zip -q -r NeonBorough-Windows.zip NeonBorough-win32-x64 NeonBoroughServer-win32-x64)
           cd release
-          sha256sum OpenEngineStudio-Windows.zip "Example Projects.zip" NeonBorough-Windows.zip NeonBorough-web.zip > SHA256SUMS.txt
+          sha256sum OpenEngineStudio-Windows.zip Example.Projects.zip NeonBorough-Windows.zip NeonBorough-web.zip NeonBorough-source.zip > SHA256SUMS.txt
       - name: Upload assets and publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -64,8 +64,9 @@ jobs:
           fi
           gh release upload "$RELEASE_TAG" \
             release/OpenEngineStudio-Windows.zip \
-            "release/Example Projects.zip" \
+            release/Example.Projects.zip \
             release/NeonBorough-Windows.zip \
             release/NeonBorough-web.zip \
+            release/NeonBorough-source.zip \
             release/SHA256SUMS.txt --clobber
           gh release edit "$RELEASE_TAG" --draft=false --latest

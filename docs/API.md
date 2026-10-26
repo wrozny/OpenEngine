@@ -335,7 +335,7 @@ being negative Z at camera yaw zero. Rotation is a Vector3 of radians in YZX ord
 
 ```lua
 local ball = Instance.new("Object3D")
-ball.Shape = "Sphere" -- Box, Sphere or Cylinder
+ball.Shape = "Sphere" -- Box, Sphere, Cylinder or Wedge
 ball.Size = Vector3.new(1, 1, 1)
 ball.Position = Vector3.new(0, 5, 0)
 ball.Rotation = Vector3.new(0, math.pi / 4, 0)
@@ -394,3 +394,36 @@ No parent transform inheritance, joints, skeletons or multiplayer replication ar
 See [Multiplayer](MULTIPLAYER.md) for ServerScript/LocalScript execution, Players and session IDs, RemoteEvents, physics ownership, replication, deployable web/native servers, examples and practical limits. Single-player projects remain standalone unless multiplayer is enabled in their project settings.
 
 `Camera.Offset` is the Vector3 offset added to a followed 3D object's position (default `(0, 1, 0)`). LocalScripts can use it for shoulder cameras; Neon Borough computes its crosshair ray from this camera position and converts the target into a server muzzle direction.
+
+## Traversal and wedges (0.4)
+
+`Object3D.Shape = "Wedge"` creates a triangular ramp with matching rendered and convex physics geometry. The low edge is local −Z and the high edge is local +Z; rotate around Y to aim the ramp. Width, Height and Depth define its bounding box. The incline angle is `atan(Height / Depth)`. Its faces support world-sized tiled materials, collisions and raycasts.
+
+Default PlayerController3D and platformer PlayerController2D scripts now use an upright movement helper:
+
+```lua
+local physics = game:GetService("PhysicsService")
+local support = physics:GetGround(actor, 50) -- maximum walkable slope, in degrees
+physics:MoveCharacter(actor, desiredVelocity, dt, script.StepHeight, script.MaxSlopeAngle)
+```
+
+`GetGround(actor, maxSlopeAngle = 50, distance?)` casts multiple foot probes and returns a normal raycast result, or nil. The optional probe distance defaults to 0.18 meters in 3D or 6 pixels in 2D, reduced for tiny bodies. Sensors and bodies excluded by the actor's collision mask are ignored. Edges and rotated footprints are supported.
+
+`MoveCharacter(actor, velocity, dt, stepHeight?, maxSlopeAngle = 50)` sets the body's velocity, follows walkable slopes, and lifts it onto low steps only while grounded and not jumping. The helper checks the full footprint, swept headroom and the destination body volume; it does not climb tall walls, steep ramps, or steps without clearance. It targets upright character/arcade-vehicle bodies; it is not a wheel-suspension or arbitrary-orientation controller. `dt` is seconds; movement lookahead is capped at 0.1 seconds. Maximum slope must be 0–85 degrees. A zero StepHeight disables step lifting.
+
+Default editable properties are `StepHeight = 0.45`, `MaxSlopeAngle = 50` for 3D, and `StepHeight = 14`, `MaxSlopeAngle = 50` for 2D platformers. Units are meters and pixels respectively. Top-down 2D and free-camera movement retain their existing behavior. On import, exact untouched pre-0.4 controller templates upgrade; customized Lua source is preserved.
+
+`RunService.PostSimulation` fires once per fixed step after physics, transform synchronization and contact callbacks. Use it for visual followers and passenger attachments. Heartbeat remains before physics for input/movement logic. Connections follow normal script cleanup rules.
+
+## World labels (0.4)
+
+```lua
+-- LocalScript: UI stays local; display server-replicated data.
+local ui = game:GetService("UIService")
+ui:CreateWorldLabel("badge", "Alice\n50 SWAG", actor, Vector3.new(0, 2.1, 0))
+ui:SetText("badge", "Alice\n60 SWAG")
+ui:SetColor("badge", "#ffe4a1")
+-- ui:Remove("badge")
+```
+
+`CreateWorldLabel(id, text, target, offset?)` follows an Object3D with a world-space Vector3 offset (default `(0, 2, 0)`). Labels use the rendered camera and smoothed replica pose. They hide behind solid geometry, behind/outside the camera, beyond 80 meters, or when their target is invisible, destroyed or outside Workspace. Text is plain text, not HTML. Reuse SetText, SetColor and Remove; normal screen anchors/SetPosition apply to screen widgets. Unchanged text/color updates do not rebuild the UI every frame.

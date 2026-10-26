@@ -31,5 +31,18 @@ async function collect(directory) {
   }
 }
 await collect(output);
-await writeFile('release/Example Projects.zip', zipSync(files));
-console.log('Packaged release/Example Projects.zip');
+const examplesZip = zipSync(files);
+await writeFile('release/Example Projects.zip', examplesZip);
+await writeFile('release/Example.Projects.zip', examplesZip);
+const citySource = Object.fromEntries(
+  Object.entries(files)
+    .filter(([name]) => name.startsWith('Neon Borough/'))
+    .map(([name, data]) => [name.slice('Neon Borough/'.length), data]),
+);
+citySource['LICENSE'] = new Uint8Array(await readFile('LICENSE'));
+citySource['MULTIPLAYER.md'] = new Uint8Array(await readFile('docs/MULTIPLAYER.md'));
+citySource['API.md'] = new Uint8Array(await readFile('docs/API.md'));
+await writeFile('release/NeonBorough-source.zip', zipSync(citySource));
+console.log(
+  'Packaged release/Example Projects.zip, release/Example.Projects.zip and release/NeonBorough-source.zip',
+);

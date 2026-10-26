@@ -53,10 +53,22 @@ export const API = {
     ConsumeMouseDelta: ['', 'Read and reset pointer movement for mouse look.'],
   },
   PhysicsService: {
+    GetGround: [
+      'actor, maxSlopeAngle, distance',
+      'Find walkable support beneath an upright body with multiple foot probes.',
+    ],
+    MoveCharacter: [
+      'actor, velocity, dt, stepHeight, maxSlopeAngle',
+      'Move an upright body along ramps and climb low steps only with ground and head clearance.',
+    ],
     SetGravity: ['vector', 'Set the world acceleration. 2D uses pixels/s²; 3D uses meters/s².'],
     GetGravity: ['', 'Read the current gravity vector.'],
   },
   UIService: {
+    CreateWorldLabel: [
+      'id, text, target, offset',
+      'Create a 3D overhead label that follows a target and hides behind walls.',
+    ],
     CreateLabel: ['id, text, x, y', 'Create a screen-space label.'],
     CreateButton: ['id, text, x, y, width, height', 'Create a button; OnAction receives its ID.'],
     CreateBar: ['id, value, maximum, x, y, width', 'Create a progress bar.'],
@@ -130,6 +142,8 @@ export const PROPERTIES = {
     'Speed',
     'Mode',
     'JumpSpeed',
+    'StepHeight',
+    'MaxSlopeAngle',
     'FlySpeed',
     'FollowCamera',
     'LeftKey',
@@ -137,7 +151,7 @@ export const PROPERTIES = {
     'JumpKey',
   ],
   Workspace: ['Skybox', 'FallenHeight', 'BackgroundColor'],
-  RunService: ['Heartbeat', 'Time', 'DeltaTime'],
+  RunService: ['Heartbeat', 'PostSimulation', 'Time', 'DeltaTime'],
   Players: ['PlayerAdded', 'PlayerRemoving', 'OnPlayerAdded', 'OnPlayerRemoving', 'LocalPlayer'],
   InputService: ['MousePosition', 'Began', 'Ended'],
   UIService: ['OnAction'],
@@ -187,7 +201,7 @@ export function completionContext(receiver, source, node, workspace) {
   );
   if (service) type = service[1];
   if (
-    /\.OnCollision(?:End)?$|\.Heartbeat$|\.OnAction$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
+    /\.OnCollision(?:End)?$|\.Heartbeat$|\.PostSimulation$|\.OnAction$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
       receiver || '',
     )
   )

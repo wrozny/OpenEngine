@@ -322,3 +322,25 @@ button.primary:hover {
 .network-connect p {
   line-height: 1.5;
 }
+
+.game-widget.world-label {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  padding: 5px 10px;
+  border: 1px solid #bba76166;
+  background: #111720df;
+  color: #f3e8bd;
+  font: 600 12px/1.4 system-ui;
+  white-space: pre-line;
+  text-align: center;
+  border-radius: 5px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px #0006;
+}
+.game-widget.world-label[hidden] {
+  display: none;
+}
+
+.game-widget.label:empty {
+  display: none;
+}

@@ -31,6 +31,18 @@ export class UIService {
     };
     this.Changed.Fire();
   }
+  CreateWorldLabel(id, text, target, offset = new Vector3(0, 2, 0)) {
+    if (!(target instanceof SceneNode) || target.ClassName !== 'Object3D')
+      throw new Error('World labels need an Object3D target');
+    this.widgets[id] = {
+      type: 'world-label',
+      text: String(text),
+      target,
+      offset: new Vector3(offset.X, offset.Y, offset.Z),
+      color: '#f3e8bd',
+    };
+    this.Changed.Fire();
+  }
   CreateButton(id, text, x = 20, y = 150, width = 140, height = 36) {
     this.widgets[id] = {
       type: 'button',
@@ -58,6 +70,7 @@ export class UIService {
     this.Changed.Fire();
   }
   SetText(id, text) {
+    if (this.widget(id).text === String(text)) return;
     this.widget(id).text = String(text);
     this.Changed.Fire();
   }
@@ -72,6 +85,7 @@ export class UIService {
     this.Changed.Fire();
   }
   SetColor(id, color) {
+    if (this.widget(id).color === color) return;
     this.widget(id).color = color;
     this.Changed.Fire();
   }
@@ -84,6 +98,7 @@ export class UIService {
     return this.widgets[id];
   }
   Set(key, value) {
+    if (this.hud[key] === String(value)) return;
     this.hud[key] = String(value);
     this.Changed.Fire();
   }

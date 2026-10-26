@@ -206,6 +206,19 @@ export class Renderer3D {
       .intersectObjects([...this.meshes.values()].map((entry) => entry.mesh))
       .find((hit) => hit.object.visible)?.object.userData.node;
   }
+  projectWorld(position) {
+    const point = new THREE.Vector3(position.X, position.Y, position.Z);
+    const distance = point.distanceTo(this.viewCamera.position);
+    point.project(this.viewCamera);
+    const origin = this.viewCamera.position;
+    return {
+      X: ((point.x + 1) * this.width) / 2,
+      Y: ((1 - point.y) * this.height) / 2,
+      Visible: point.z >= -1 && point.z <= 1 && Math.abs(point.x) <= 1 && Math.abs(point.y) <= 1,
+      Distance: distance,
+      Origin: new Vector3(origin.x, origin.y, origin.z),
+    };
+  }
   screenToWorld(x, y) {
     return new Vector2(x, y);
   }

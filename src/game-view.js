@@ -1,3 +1,4 @@
+import { WorldLabels } from './world-labels.js';
 import { Engine } from './engine/engine.js';
 import { Renderer3D } from './engine/renderer3d.js';
 import { Renderer } from './engine/renderer.js';
@@ -45,6 +46,7 @@ export class GameView {
       project.assets,
     );
     this.renderer.camera = this.engine.camera;
+    this.worldLabels = new WorldLabels(this.engine, this.renderer, this.network);
     this.renderer.resize();
     this.engine.input.attach(
       this.canvas,
@@ -83,6 +85,7 @@ export class GameView {
         this.renderUI();
         this.dirtyUI = false;
       }
+      this.worldLabels.update();
       this.frameId = requestAnimationFrame(frame);
     };
     this.frameId = requestAnimationFrame(frame);
@@ -114,6 +117,7 @@ export class GameView {
       this.hud.append(identity, stats);
     }
     this.widgets.replaceChildren();
+    this.worldLabels.reset();
     for (const [id, widget] of Object.entries(ui.widgets)) {
       const node = element(
         widget.type === 'button' ? 'button' : 'div',
@@ -121,6 +125,12 @@ export class GameView {
         widget.type === 'bar' ? undefined : widget.text,
       );
       node.dataset.widget = id;
+      if (widget.type === 'world-label') {
+        if (widget.color) node.style.color = widget.color;
+        this.widgets.append(node);
+        this.worldLabels.add(node, widget);
+        continue;
+      }
       const right = widget.anchor.includes('Right'),
         bottom = widget.anchor.includes('Bottom');
       node.style[right ? 'right' : 'left'] = widget.x + 'px';

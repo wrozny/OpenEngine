@@ -1,0 +1,87 @@
+.ui-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.ui-tools,
+.ui-palette {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #303949;
+}
+.ui-tools select {
+  background: #202633;
+  color: #edf1fa;
+  border: 1px solid #49546a;
+  border-radius: 5px;
+  padding: 4px;
+}
+.ui-tools label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+.ui-palette button {
+  font-size: 11px;
+  padding: 5px 8px;
+  cursor: grab;
+}
+.ui-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  min-height: 100px;
+  background: #141923;
+  background-image: radial-gradient(#303949 1px, transparent 1px);
+  background-size: 16px 16px;
+  touch-action: none;
+}
+.ui-artboard {
+  position: absolute;
+  transform-origin: 0 0;
+  background: #202b3c;
+  box-shadow: 0 8px 40px #0008;
+}
+.ui-canvas-hint {
+  padding: 7px;
+  font-size: 10px;
+  color: #a3adbd;
+}
+.ui-selection {
+  position: absolute;
+  border: 2px solid #7fa8ff;
+  pointer-events: none;
+  z-index: 2147483647;
+  box-sizing: border-box;
+}
+.ui-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #edf1fa;
+  border: 2px solid #4777c3;
+  pointer-events: auto;
+}
+.ui-handle.nw {
+  left: -6px;
+  top: -6px;
+  cursor: nwse-resize;
+}
+.ui-handle.ne {
+  right: -6px;
+  top: -6px;
+  cursor: nesw-resize;
+}
+.ui-handle.sw {
+  left: -6px;
+  bottom: -6px;
+  cursor: nesw-resize;
+}
+.ui-handle.se {
+  right: -6px;
+  bottom: -6px;
+  cursor: nwse-resize;
+}

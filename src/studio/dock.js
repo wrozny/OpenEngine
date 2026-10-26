@@ -1,7 +1,7 @@
 import { GoldenLayout, LayoutConfig } from 'golden-layout';
 import 'golden-layout/dist/css/goldenlayout-base.css';
 import 'golden-layout/dist/css/themes/goldenlayout-dark-theme.css';
-const KEY = 'openengine.layout.v2';
+const KEY = 'openengine.layout.v3';
 const component = (type, title) => ({
   type: 'component',
   componentType: type,
@@ -22,7 +22,11 @@ const defaultLayout = () => ({
           {
             type: 'stack',
             size: '77%',
-            content: [component('scene', 'Scene'), component('script', 'Script')],
+            content: [
+              component('scene', 'Scene'),
+              component('ui', 'UI'),
+              component('script', 'Script'),
+            ],
           },
           { ...component('output', 'Output'), size: '23%' },
         ],
@@ -58,7 +62,7 @@ export class StudioDock {
           for (const child of n?.content || []) visit(child);
         };
         visit(saved.root);
-        if (types.length === 5 && new Set(types).size === 5 && types.every((type) => panels[type]))
+        if (types.length === 6 && new Set(types).size === 6 && types.every((type) => panels[type]))
           config = LayoutConfig.fromResolved(saved);
       }
     } catch {}
@@ -94,8 +98,8 @@ export class StudioDock {
       };
       visit(config.root);
       if (
-        types.length === 5 &&
-        new Set(types).size === 5 &&
+        types.length === 6 &&
+        new Set(types).size === 6 &&
         types.every((type) => this.panels[type])
       )
         localStorage.setItem(KEY, JSON.stringify(config));

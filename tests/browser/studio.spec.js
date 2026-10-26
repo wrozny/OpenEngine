@@ -34,7 +34,7 @@ test('launcher creates an explicit dimension and keeps removable, missing browse
   await page.getByLabel('Project template').selectOption('empty');
   await page.getByRole('button', { name: 'Create project', exact: true }).click();
   await expect(page.locator('#project-name')).toHaveText('Fresh scene');
-  await expect(page.locator('#tree .tree-row')).toHaveCount(2);
+  await expect(page.locator('#tree .tree-row')).toHaveCount(3);
   await page.locator('#home').click();
   await expect(page.locator('.recent-open')).toContainText('Fresh scene');
   await page.addInitScript(() => {

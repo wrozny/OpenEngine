@@ -1,3 +1,5 @@
+import { validateProject } from '../engine/scene.js';
+import { renderUIInspector } from './ui-inspector.js';
 import { el } from './dom.js';
 import { nodeGlyph } from './icons.js';
 import { Vector2, Vector3 } from '../engine/math.js';
@@ -59,6 +61,7 @@ export function renderInspector(container, store, onError) {
           if (type === 'number' && !Number.isFinite(value))
             throw new Error('Enter a finite number');
           callback(value);
+          validateProject(store.project);
         });
       } catch (error) {
         onError(error.message);
@@ -217,6 +220,9 @@ export function renderInspector(container, store, onError) {
           : undefined,
       );
   }
+  renderUIInspector(container, store, node, { section, field });
+  if (node.ClassName === 'ImageLabel')
+    texturePicker(container, store, node, 'Image', 'Upload UI image', onError);
   renderAttributes(container, store, node, { section, field }, onError);
   if (store.canRemove(node)) {
     const actions = el('div', 'inspector-actions'),

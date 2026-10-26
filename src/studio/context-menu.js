@@ -70,6 +70,12 @@ export function sceneMenu(store, { frame, insert, onError }, position) {
   return [
     ...[
       object,
+      'ScreenGui',
+      'Frame',
+      'TextLabel',
+      'TextButton',
+      'ImageLabel',
+      'TextInput',
       'Folder',
       'Script',
       'ServerScript',

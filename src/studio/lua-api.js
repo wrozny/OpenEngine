@@ -1,6 +1,9 @@
 /** Shared completion/hover descriptions for the public scripting API. */
 export const API = {
   Instance: { new: ['className, parent', 'Create a detached instance, or parent it immediately.'] },
+  UDim2: {
+    new: ['xScale, xOffset, yScale, yOffset', 'Responsive parent fractions plus pixel offsets.'],
+  },
   Vector2: { new: ['x, y', 'Create an immutable two-dimensional value.'] },
   Vector3: { new: ['x, y, z', 'Create an immutable Y-up vector measured in meters.'] },
   game: { GetService: ['name', 'Get an engine service by its registered name.'] },
@@ -27,6 +30,18 @@ export const API = {
     FindFirstChild: ['name, recursive', 'Return a named child, or nil.'],
     FindFirstChildOfClass: ['className', 'Find a direct child of a class.'],
     IsA: ['className', 'Check an instance class.'],
+    Tween: [
+      'goals, duration, easing',
+      'Animate UI properties; returns a cancellable tween with Completed.',
+    ],
+    GetTouchingObjects: [
+      '',
+      'Current touching instances. OnCollisionStart / OnCollisionEnd report transitions.',
+    ],
+    SetSiblingIndex: [
+      'index',
+      'Move to a one-based order within the parent, including UI flow layouts.',
+    ],
     Clone: ['', 'Deep detached copy with fresh IDs.'],
     Destroy: ['', 'Remove this instance, descendants, bodies and owned subscriptions.'],
     SetAttribute: [
@@ -126,6 +141,23 @@ export const PROPERTIES = {
     'CollisionGroup',
     'Friction',
     'Restitution',
+    'OnClick',
+    'OnHoverStart',
+    'OnHoverEnd',
+    'OnValueChanged',
+    'OnCollisionStart',
+    'AnchorPoint',
+    'Opacity',
+    'BackgroundColor',
+    'BackgroundOpacity',
+    'Text',
+    'TextColor',
+    'TextSize',
+    'Layout',
+    'Padding',
+    'Gap',
+    'Interactable',
+    'Disabled',
     'OnCollision',
     'OnCollisionEnd',
     'OnFallen',
@@ -201,7 +233,7 @@ export function completionContext(receiver, source, node, workspace) {
   );
   if (service) type = service[1];
   if (
-    /\.OnCollision(?:End)?$|\.Heartbeat$|\.PostSimulation$|\.OnAction$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
+    /\.OnCollision(?:Start|End)?$|\.Heartbeat$|\.PostSimulation$|\.OnAction$|\.OnClick$|\.OnHoverStart$|\.OnHoverEnd$|\.OnValueChanged$|\.Completed$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
       receiver || '',
     )
   )
@@ -209,7 +241,7 @@ export function completionContext(receiver, source, node, workspace) {
   if (/\.(Position|Velocity|Size|Unit)$/.test(receiver || '')) type = 'Vector';
   if (!API[type] && !PROPERTIES[type]) type = 'Object';
   const methods = {
-    ...(type === 'Object' || type === 'Workspace' || type === 'Script' ? API.Object : {}),
+    ...(['Object', 'Workspace', 'Script', 'UIService'].includes(type) ? API.Object : {}),
     ...API[type],
   };
   const properties = [

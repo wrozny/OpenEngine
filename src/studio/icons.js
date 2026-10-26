@@ -73,6 +73,13 @@ export function nodeGlyph(node) {
   return glyph(
     {
       Folder: 'Folder',
+      UIService: 'LayoutTemplate',
+      ScreenGui: 'LayoutTemplate',
+      Frame: 'Square',
+      TextLabel: 'Code',
+      TextButton: 'Play',
+      ImageLabel: 'Square',
+      TextInput: 'Code',
       Object2D: 'Square',
       Object3D: 'Box',
       Script: 'FileCode',

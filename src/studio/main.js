@@ -1,3 +1,5 @@
+import { UIEditor } from './ui-editor.js';
+import { isUINode } from '../engine/ui-schema.js';
 import { StudioNetworkSession } from './network-session.js';
 import '../game.css';
 import './studio.css';
@@ -30,7 +32,7 @@ app.innerHTML = `
   <button id="insert-object">Insert</button><div class="toolbar-spacer"></div><button id="build-project">Build game</button><button id="play" class="primary"><span>Play</span><kbd>F5</kbd></button>
 </nav>
 <main id="dock-host"></main>
-<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.4</span></footer>
+<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.5</span></footer>
 <div id="play-host" hidden></div><div id="launch-host" hidden></div><div id="dialog-host"></div><input type="file" id="open-file" accept=".openengine,.json" hidden>
 `;
 const $ = (id) => document.getElementById(id);
@@ -99,10 +101,11 @@ const viewport = new SceneViewport(find('viewport'), store, {
   onStatus: status,
   onError,
 });
+const uiEditor = new UIEditor(store, onError);
 const code = new LuaEditor(find('code-editor'), store);
 const dock = new StudioDock(
   $('dock-host'),
-  { explorer, scene, script: scriptPanel, output, inspector },
+  { explorer, scene, ui: uiEditor.host, script: scriptPanel, output, inspector },
   () => code.layout(),
 );
 for (const [id, name] of Object.entries({
@@ -155,6 +158,7 @@ function render() {
   renderHierarchy(find('tree'), store, onError, (event) =>
     openContext(event.clientX, event.clientY),
   );
+  uiEditor.refresh();
   renderInspector(find('inspector'), store, onError);
   $('project-name').textContent = projectOpen ? store.metadata.name : 'No project';
   $('project-dimension').textContent = store.dimension;
@@ -191,7 +195,10 @@ function render() {
     code.setNode(previous);
     if (!previous) find('code-path').textContent = 'Select a Script or controller in Explorer';
     lastScriptId = undefined;
-    if (store.selected) dock.activate('scene');
+    if (store.selected)
+      dock.activate(
+        isUINode(store.selected) || store.selected === store.uiService ? 'ui' : 'scene',
+      );
   }
 }
 store.Changed.Connect((reason) => {
@@ -365,6 +372,7 @@ window.addEventListener('beforeunload', () => {
   gameView?.dispose();
   viewport.dispose();
   code.dispose();
+  uiEditor.dispose();
   dock.dispose();
 });
 render();

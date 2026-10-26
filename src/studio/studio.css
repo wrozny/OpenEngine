@@ -507,6 +507,8 @@ kbd {
   flex: 1;
 }
 .context-menu {
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
   position: fixed;
   z-index: 100;
   min-width: 230px;

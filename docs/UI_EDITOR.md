@@ -1,5 +1,7 @@
 # Visual UI authoring
 
+For all Lua APIs, exact defaults and complete scripting recipes in one file, see [LUA_REFERENCE.md](LUA_REFERENCE.md).
+
 UIService is a real service in Explorer in both 2D and 3D projects. Existing version 1 projects gain this service automatically when opened; their existing scripted widgets continue to work.
 
 ## Build your first interface

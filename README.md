@@ -152,6 +152,7 @@ matching package.json is pushed. New releases remain drafts until asset uploads 
 
 ## Documentation
 
+- [Complete Lua reference and coding-model prompt](docs/LUA_REFERENCE.md) — self-contained 0.5.0 API, defaults, script placement, examples and unsupported APIs. Attach this file when asking another model for scripting help.
 - [Lua and engine API](docs/API.md)
 - [Make your own game](docs/TUTORIAL.md)
 - [Architecture](docs/ARCHITECTURE.md)

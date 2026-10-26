@@ -1,5 +1,7 @@
 # Engine and Lua API
 
+For the self-contained 0.5.0 scripting contract, exact defaults, complete recipes and a prompt to give another coding model, use [LUA_REFERENCE.md](LUA_REFERENCE.md). This page is the shorter narrative guide.
+
 ## Execution model
 
 Each Play/game session owns one Lua 5.3 VM. Player controllers are ordinary editable Lua templates with exposed properties and the same lifecycle as Scripts. Enabled `Script` instances execute
@@ -48,8 +50,8 @@ visible in the editor; only Workspace descendants create physics bodies. ScriptS
 
 ## Instances and hierarchy
 
-Supported classes: `Folder`, `Object2D`, `Object3D`, `Script`, `ModuleScript`,
-`PlayerController2D`, and `PlayerController3D`. Legacy PhysicsObject names are accepted as Object2D aliases.
+Supported classes: `Folder`, `Object2D`, `Object3D`, `Script`, `ServerScript`, `LocalScript`, `ModuleScript`, `RemoteEvent`,
+`PlayerController2D`, `PlayerController3D`, `ScreenGui`, `Frame`, `TextLabel`, `TextButton`, `ImageLabel`, `TextInput`, and the built-in `UIService` root. Legacy PhysicsObject names are accepted as Object2D aliases.
 
 ```lua
 local object = Instance.new("Object2D")
@@ -131,8 +133,7 @@ object.OnCollisionEnd:Connect(function(other) print("Separated", other.Name) end
 ```
 
 Begin-contact fires once when contact begins, not every frame of sustained contact.
-Two anchored/static bodies do not generate contacts. Destroyed bodies do not emit
-end-contact callbacks. Sensors need an involved dynamic body.
+Two anchored/static bodies do not generate contacts. Body removal, destruction or rebuilding also ends an overlap and emits OnCollisionEnd to remaining participants. Sensors need an involved dynamic body.
 
 | Group        | Collides with                     |
 | ------------ | --------------------------------- |
@@ -143,7 +144,7 @@ end-contact callbacks. Sensors need an involved dynamic body.
 | `decoration` | nothing                           |
 
 These are built-in convenience groups for the example; extend `GROUPS` and `MASKS`
-in `engine.js` for different filtering. `Sensor=true` does not override filtering.
+in `src/engine/physics/planck-world.js` for different filtering (both physics adapters share them). `Sensor=true` does not override filtering.
 
 ```lua
 local origin = Vector2.new(0, 0)
@@ -322,7 +323,7 @@ to one actor, since they would compete for the same velocity.
 | PlayerController2D | Mode: TopDown or Platformer; Speed, JumpSpeed, Gravity, FollowCamera, LeftKey, RightKey, UpKey, DownKey, JumpKey.                                    |
 | PlayerController3D | Mode: Platformer or FreeCamera; Speed, JumpSpeed, FlySpeed, LookSensitivity, FollowCamera, LeftKey, RightKey, ForwardKey, BackKey, JumpKey, DownKey. |
 
-2D Platformer sets world gravity to (0, Gravity). Platformers use a downward ray and
+2D Platformer sets world gravity to (0, Gravity). Platformers use multiple foot probes and
 a new jump-key press to prevent air jumping. The 3D platformer keeps its actor upright
 and removes actor friction so movement does not fight ground contact. FreeCamera
 anchors its actor and moves it directly, passing through geometry. Hold right mouse
@@ -387,7 +388,7 @@ The view direction at yaw/pitch zero is (0,0,-1); a positive yaw turns toward ne
 
 Vector3 supports X/Y/Z, Magnitude, Unit, Add/Sub/Mul/Div/Dot/Cross/Distance/Lerp with
 the same immutable-value conventions as Vector2. Assign whole vectors to transforms.
-No parent transform inheritance, joints, skeletons or multiplayer replication are provided.
+Parent transform inheritance, joints and skeletons are not provided. Multiplayer replication is supported when enabled; see below.
 
 ## Multiplayer APIs (0.3)
 

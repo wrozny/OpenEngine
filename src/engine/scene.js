@@ -1,3 +1,5 @@
+import { UI_DEFAULTS, isUIElement, isUINode, validateUIData } from './ui-schema.js';
+import { UDim2 } from './ui-types.js';
 import { Signal } from './signal.js';
 import { Vector2, Vector3 } from './math.js';
 import { encodeAttribute, decodeAttribute } from './attributes.js';
@@ -13,6 +15,8 @@ let nextId = 1;
 export const canonicalClass = (name) => (name === 'PhysicsObject' ? 'Object2D' : name);
 export const CLASSES = [
   'Folder',
+  'UIService',
+  ...Object.keys(UI_DEFAULTS),
   'Object2D',
   'Object3D',
   'Script',
@@ -86,6 +90,7 @@ export class SceneNode {
     this._attributes = Object.create(null);
     this.Destroyed = false;
     this.OnCollision = new Signal();
+    this.OnCollisionStart = this.OnCollision;
     this.OnCollisionEnd = new Signal();
     this.OnFallen = new Signal();
     this._networkOwner = null;
@@ -94,6 +99,19 @@ export class SceneNode {
     if (className === 'RemoteEvent') {
       this.OnServerEvent = new Signal();
       this.OnClientEvent = new Signal();
+    }
+    if (isUIElement(this)) {
+      this.OnClick = new Signal();
+      this.OnHoverStart = new Signal();
+      this.OnHoverEnd = new Signal();
+      this.OnValueChanged = new Signal();
+    }
+    if (isUINode(this)) {
+      Object.assign(this, structuredClone(UI_DEFAULTS[className]));
+      if (isUIElement(this)) {
+        this.Size = UDim2.from(this.Size);
+        this.AnchorPoint = new Vector2(this.AnchorPoint.X, this.AnchorPoint.Y);
+      }
     }
     if (isObject(this)) Object.assign(this, structuredClone(objectDefaults(this)));
     if (className === 'Folder' && name === 'Workspace') Object.assign(this, WORKSPACE_DEFAULTS);
@@ -114,6 +132,12 @@ export class SceneNode {
     if (this.Destroyed) throw new Error('Cannot parent a destroyed object');
     if (parent != null && !(parent instanceof SceneNode))
       throw new Error('Parent must be an Instance or nil');
+    if (parent && this.ClassName === 'ScreenGui' && parent.ClassName !== 'UIService')
+      throw new Error('ScreenGui belongs under UIService');
+    if (parent && isUIElement(this) && !['Frame', 'ScreenGui'].includes(parent.ClassName))
+      throw new Error('UI elements belong under a ScreenGui or Frame');
+    if (parent && this.ClassName === 'UIService' && parent.Name !== 'game')
+      throw new Error('UIService is a root service');
     for (let p = parent; p; p = p.Parent) if (p === this) throw new Error('Parenting cycle');
     const engine = this._engine,
       targetEngine = parent?._engine ?? null;
@@ -136,6 +160,10 @@ export class SceneNode {
     return this._position;
   }
   set Position(value) {
+    if (isUIElement(this)) {
+      this._position = UDim2.from(value);
+      return;
+    }
     this._position = this.vector(value);
     if (this._engine?.role === 'server' && !this._engine._applyingPhysics) this._networkEpoch++;
     this._engine?.physicsWorld.setPosition(this, this._position);
@@ -157,6 +185,24 @@ export class SceneNode {
       this._rotation = value;
     }
     this._engine?.physicsWorld.setRotation(this);
+  }
+  Tween(goals, duration = 0.25, easing = 'OutCubic') {
+    if (!isUIElement(this) || !this._engine)
+      throw new Error('Tween needs a UI element in a running game');
+    return this._engine.uiTweens.create(this, goals, duration, easing);
+  }
+  SetSiblingIndex(index) {
+    if (!this.Parent) return;
+    if (!Number.isInteger(index)) throw new Error('Sibling index must be an integer');
+    const children = this.Parent._children;
+    children.splice(children.indexOf(this), 1);
+    children.splice(Math.max(0, Math.min(children.length, index - 1)), 0, this);
+  }
+  GetSiblingIndex() {
+    return this.Parent ? this.Parent._children.indexOf(this) + 1 : 0;
+  }
+  GetTouchingObjects() {
+    return this._engine?.collisions.touching(this) || [];
   }
   SetNetworkOwner(player) {
     if (!this._engine?.network || this._engine.role !== 'server')
@@ -234,6 +280,8 @@ export class SceneNode {
     this.OnCollision.Clear();
     this.OnCollisionEnd.Clear();
     this.OnFallen.Clear();
+    for (const key of ['OnClick', 'OnHoverStart', 'OnHoverEnd', 'OnValueChanged'])
+      this[key]?.Clear();
     this.OnServerEvent?.Clear();
     this.OnClientEvent?.Clear();
   }
@@ -246,6 +294,9 @@ export function serializeNode(node) {
     attributes: encodeAttribute(node._attributes),
     children: node.GetChildren().map(serializeNode),
   };
+  if (isUINode(node))
+    for (const key of Object.keys(UI_DEFAULTS[node.ClassName]))
+      data[key] = structuredClone(node[key]);
   if (isObject(node)) {
     for (const key of Object.keys(objectDefaults(node))) data[key] = structuredClone(node[key]);
     data.Position = { ...node.Position };
@@ -265,6 +316,14 @@ export function serializeNode(node) {
 }
 export function deserializeNode(data, preserveIds = true) {
   const node = new SceneNode(data.className, data.name, preserveIds ? data.id : undefined);
+  if (isUINode(node)) {
+    for (const key of Object.keys(UI_DEFAULTS[node.ClassName]))
+      if (data[key] !== undefined) node[key] = structuredClone(data[key]);
+    if (isUIElement(node)) {
+      node.Size = UDim2.from(node.Size);
+      node.AnchorPoint = new Vector2(node.AnchorPoint.X, node.AnchorPoint.Y);
+    }
+  }
   if (data.attributes) node._attributes = decodeAttribute(data.attributes);
   if (isObject(node)) {
     for (const key of Object.keys(objectDefaults(node)))
@@ -306,7 +365,13 @@ export function validateProject(project) {
   }
   const ids = new Set();
   let count = 0;
-  const visit = (node, depth = 0) => {
+  const visit = (node, depth = 0, parentClass = null) => {
+    if (node.className === 'ScreenGui' && parentClass !== 'UIService')
+      throw new Error('ScreenGui belongs under UIService');
+    if (isUIElement({ ClassName: node.className }) && !['ScreenGui', 'Frame'].includes(parentClass))
+      throw new Error('UI elements belong under a ScreenGui or Frame');
+    if (node.className === 'UIService' && depth !== 0)
+      throw new Error('UIService is a root service');
     const className = canonicalClass(node.className);
     if (++count > 20000 || depth > 100) throw new Error('Scene exceeds supported size/depth');
     if (!CLASSES.includes(className) || typeof node.name !== 'string')
@@ -315,6 +380,7 @@ export function validateProject(project) {
       throw new Error('Missing or duplicate instance id');
     ids.add(node.id);
     if (node.attributes) encodeAttribute(node.attributes);
+    validateUIData(node);
     if (isObject({ ClassName: className })) {
       const three = className === 'Object3D';
       if (three !== (project.dimension === '3D'))
@@ -357,15 +423,35 @@ export function validateProject(project) {
     if (node.settings?.FallenHeight !== undefined && !Number.isFinite(node.settings.FallenHeight))
       throw new Error('Fallen height must be finite');
     if (!Array.isArray(node.children)) throw new Error('Children must be an array');
-    node.children.forEach((child) => visit(child, depth + 1));
+    node.children.forEach((child) => visit(child, depth + 1, className));
   };
   project.services.forEach((node) => visit(node));
   if (
-    project.services.length !== 2 ||
+    ![2, 3].includes(project.services.length) ||
+    (project.services.length === 3 &&
+      !project.services.some((n) => n.name === 'UIService' && n.className === 'UIService')) ||
     !['Workspace', 'ScriptService'].every((name) =>
       project.services.some((n) => n.name === name && n.className === 'Folder'),
     )
   )
     throw new Error('Project needs Workspace and ScriptService folders');
   return project;
+}
+
+export function normalizeProject(project) {
+  validateProject(project);
+  const copy = structuredClone(project);
+  if (!copy.services.some((n) => n.name === 'UIService')) {
+    const ids = new Set();
+    const visit = (n) => {
+      ids.add(n.id);
+      n.children.forEach(visit);
+    };
+    copy.services.forEach(visit);
+    let id = 'ui-service',
+      suffix = 1;
+    while (ids.has(id)) id = 'ui-service-' + suffix++;
+    copy.services.push(serializeNode(new SceneNode('UIService', 'UIService', id)));
+  }
+  return copy;
 }

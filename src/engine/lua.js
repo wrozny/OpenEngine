@@ -1,3 +1,4 @@
+import { UDim2 } from './ui-types.js';
 import fengari from 'fengari';
 import interop from 'fengari-interop';
 import { SceneNode, isRunnableScript } from './scene.js';
@@ -9,6 +10,7 @@ const BOOTSTRAP = `
 local host = __host
 __host = nil
 typeof = function(value) return host:TypeOf(value) end
+UDim2 = { new = function(xs, xo, ys, yo) return host:UDim2(xs or 0, xo or 0, ys or 0, yo or 0) end }
 Vector2 = { new = function(x, y) return host:Vector(x or 0, y or 0) end }
 Vector3 = { new = function(x, y, z) return host:Vector3(x or 0, y or 0, z or 0) end }
 Instance = { new = function(className, parent) return host:Create(className, parent) end }
@@ -59,14 +61,17 @@ export class LuaRuntime {
     this.setGlobal('__host', {
       TypeOf: (value) => {
         value = this.unwrap(value);
-        return value instanceof Vector3
-          ? 'Vector3'
-          : value instanceof Vector2
-            ? 'Vector2'
-            : value instanceof SceneNode
-              ? 'Instance'
-              : typeof value;
+        return value instanceof UDim2
+          ? 'UDim2'
+          : value instanceof Vector3
+            ? 'Vector3'
+            : value instanceof Vector2
+              ? 'Vector2'
+              : value instanceof SceneNode
+                ? 'Instance'
+                : typeof value;
       },
+      UDim2: (xs, xo, ys, yo) => new UDim2(xs, xo, ys, yo),
       Vector: (x, y) => new Vector2(x, y),
       Vector3: (x, y, z) => new Vector3(x, y, z),
       Create: (className, parent) => {
@@ -158,7 +163,7 @@ export class LuaRuntime {
           }
           if (
             target instanceof SceneNode &&
-            ['FireServer', 'FireClient', 'FireAllClients'].includes(key)
+            ['FireServer', 'FireClient', 'FireAllClients', 'Tween'].includes(key)
           )
             args = args.map((arg) => runtime.attributeValue(arg));
           return runtime.wrap(
@@ -264,6 +269,7 @@ export class LuaRuntime {
     }
   }
   stopScript(node) {
+    this.engine.uiTweens.cancelOwner(node);
     for (const connection of this.connections)
       if (connection._owner === node) {
         connection.Disconnect();

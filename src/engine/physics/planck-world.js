@@ -13,6 +13,8 @@ export class PlanckWorld {
         onContact({
           a: contact.getFixtureA().getBody().getUserData(),
           b: contact.getFixtureB().getBody().getUserData(),
+          bodyA: contact.getFixtureA().getBody(),
+          bodyB: contact.getFixtureB().getBody(),
           event,
         }),
       );

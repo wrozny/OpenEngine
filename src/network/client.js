@@ -1,3 +1,6 @@
+import { isUINode, UI_DEFAULTS } from '../engine/ui-schema.js';
+import { UDim2 } from '../engine/ui-types.js';
+import { Vector2 } from '../engine/math.js';
 import { ReplicaPresentation } from './presentation.js';
 import { Engine } from '../engine/engine.js';
 import { deserializeNode, isObject, isScriptNode } from '../engine/scene.js';
@@ -10,6 +13,7 @@ export class NetworkClient {
   constructor(send, { onReady, onLog, onDisconnect } = {}) {
     Object.assign(this, { send, onReady, onLog, onDisconnect });
     this.runningScripts = new Set();
+    this.uiValues = new WeakMap();
     this.presentation = new ReplicaPresentation();
     this.elapsed = 0;
   }
@@ -121,6 +125,19 @@ export class NetworkClient {
           if (data.Velocity) node.Velocity = data.Velocity;
         }
         if (rebuild && node._body) engine.rebuildBody(node);
+      } else if (isUINode(node)) {
+        const previous = this.uiValues.get(node) || {};
+        for (const key of Object.keys(UI_DEFAULTS[node.ClassName])) {
+          const value = JSON.stringify(data[key]);
+          if (value !== previous[key] && data[key] !== undefined)
+            node[key] = structuredClone(data[key]);
+          previous[key] = value;
+        }
+        this.uiValues.set(node, previous);
+        if (node.ClassName !== 'ScreenGui') {
+          node.Size = UDim2.from(node.Size);
+          node.AnchorPoint = new Vector2(node.AnchorPoint.X, node.AnchorPoint.Y);
+        }
       } else if (isScriptNode(node)) {
         node.Source = data.Source;
         node.Enabled = data.Enabled;

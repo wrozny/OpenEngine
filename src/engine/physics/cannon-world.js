@@ -20,7 +20,7 @@ export class CannonWorld {
       this.world.addEventListener(event, ({ bodyA, bodyB }) => {
         // Cannon can retire an overlap after one body has already been removed.
         if (bodyA?.userData && bodyB?.userData)
-          onContact({ a: bodyA.userData, b: bodyB.userData, event: name });
+          onContact({ a: bodyA.userData, b: bodyB.userData, bodyA, bodyB, event: name });
       });
   }
   setGravity(v) {

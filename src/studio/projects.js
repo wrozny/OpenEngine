@@ -57,7 +57,9 @@ export function createProject(
       dimension === '3D'
         ? 'WASD move · Space jump · Right drag look'
         : 'WASD move · Space jump (platformer)',
-    services: [workspace, scripts].map(serializeNode),
+    services: [workspace, scripts, new SceneNode('UIService', 'UIService', 'ui-service')].map(
+      serializeNode,
+    ),
   };
 }
 

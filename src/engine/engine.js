@@ -1,123 +1,28 @@
+import { initializeUIService } from './ui-service.js';
+export { UIService } from './ui-service.js';
+import { UITweens } from './ui-tweens.js';
+import { CollisionEvents } from './collision-events.js';
 import { getCharacterGround, moveCharacter } from './character-motor.js';
 import { PlanckWorld } from './physics/planck-world.js';
 import { CannonWorld } from './physics/cannon-world.js';
 import { Signal } from './signal.js';
-import { SceneNode, deserializeNode, validateProject, isRunnableScript } from './scene.js';
+import {
+  SceneNode,
+  deserializeNode,
+  validateProject,
+  normalizeProject,
+  isRunnableScript,
+} from './scene.js';
 import { Vector2, Vector3, math } from './math.js';
 import { LuaRuntime } from './lua.js';
 import { InputService } from './input.js';
 import { AudioService } from './audio.js';
 import { PlayersService } from '../network/players.js';
 
-export class UIService {
-  constructor() {
-    this.State = 'playing';
-    this.Title = '';
-    this.Subtitle = '';
-    this.hud = Object.create(null);
-    this.upgrades = Object.create(null);
-    this.widgets = Object.create(null);
-    this.OnAction = new Signal();
-    this.Changed = new Signal();
-  }
-  CreateLabel(id, text, x = 20, y = 100) {
-    this.widgets[id] = {
-      type: 'label',
-      text: String(text),
-      x,
-      y,
-      anchor: 'TopLeft',
-      color: '#d5e9df',
-    };
-    this.Changed.Fire();
-  }
-  CreateWorldLabel(id, text, target, offset = new Vector3(0, 2, 0)) {
-    if (!(target instanceof SceneNode) || target.ClassName !== 'Object3D')
-      throw new Error('World labels need an Object3D target');
-    this.widgets[id] = {
-      type: 'world-label',
-      text: String(text),
-      target,
-      offset: new Vector3(offset.X, offset.Y, offset.Z),
-      color: '#f3e8bd',
-    };
-    this.Changed.Fire();
-  }
-  CreateButton(id, text, x = 20, y = 150, width = 140, height = 36) {
-    this.widgets[id] = {
-      type: 'button',
-      text: String(text),
-      x,
-      y,
-      width,
-      height,
-      anchor: 'TopLeft',
-    };
-    this.Changed.Fire();
-  }
-  CreateBar(id, value, maximum, x = 20, y = 200, width = 200) {
-    this.widgets[id] = {
-      type: 'bar',
-      value,
-      maximum,
-      x,
-      y,
-      width,
-      height: 8,
-      anchor: 'TopLeft',
-      color: '#a0dfce',
-    };
-    this.Changed.Fire();
-  }
-  SetText(id, text) {
-    if (this.widget(id).text === String(text)) return;
-    this.widget(id).text = String(text);
-    this.Changed.Fire();
-  }
-  SetValue(id, value, maximum) {
-    Object.assign(this.widget(id), { value, maximum });
-    this.Changed.Fire();
-  }
-  SetPosition(id, x, y, anchor = 'TopLeft') {
-    if (!['TopLeft', 'TopRight', 'BottomLeft', 'BottomRight', 'Center'].includes(anchor))
-      throw new Error('Unknown UI anchor');
-    Object.assign(this.widget(id), { x, y, anchor });
-    this.Changed.Fire();
-  }
-  SetColor(id, color) {
-    if (this.widget(id).color === color) return;
-    this.widget(id).color = color;
-    this.Changed.Fire();
-  }
-  Remove(id) {
-    delete this.widgets[id];
-    this.Changed.Fire();
-  }
-  widget(id) {
-    if (!this.widgets[id]) throw new Error('Unknown UI widget: ' + id);
-    return this.widgets[id];
-  }
-  Set(key, value) {
-    if (this.hud[key] === String(value)) return;
-    this.hud[key] = String(value);
-    this.Changed.Fire();
-  }
-  SetState(state, title = '', subtitle = '') {
-    this.State = state;
-    this.Title = title;
-    this.Subtitle = subtitle;
-    this.Changed.Fire();
-  }
-  SetUpgrade(id, title, description, cost, affordable = true) {
-    this.upgrades[id] = { title, description, cost, affordable };
-    this.Changed.Fire();
-  }
-}
-
 /** Fixed-step simulation shared unchanged by Studio, browser builds and desktop builds. */
 export class Engine {
   constructor(project, options = {}) {
-    validateProject(project);
+    project = normalizeProject(project);
     this.project = structuredClone(project);
     this.role = options.role || 'standalone';
     this.network = options.network || null;
@@ -126,6 +31,7 @@ export class Engine {
     this.onLog = options.onLog || (() => {});
     this.dimension = project.dimension || '2D';
     this.contacts = [];
+    this.collisions = new CollisionEvents();
     this.physicsWorld = new (this.dimension === '3D' ? CannonWorld : PlanckWorld)((contact) =>
       this.contacts.push(contact),
     );
@@ -140,7 +46,8 @@ export class Engine {
     this.scriptService = this.root.FindFirstChild('ScriptService');
     this.input = new InputService();
     this.audio = new AudioService();
-    this.ui = new UIService();
+    this.ui = initializeUIService(this.root.FindFirstChild('UIService'));
+    this.uiTweens = new UITweens(this);
     this.camera = {
       Position: this.dimension === '3D' ? new Vector3(0, 4, 10) : new Vector2(),
       Zoom: 1,
@@ -225,6 +132,8 @@ export class Engine {
         node.OnFallen.onError =
           (error) => this.log('error', error.message);
 
+      for (const key of ['OnClick', 'OnHoverStart', 'OnHoverEnd', 'OnValueChanged'])
+        if (node[key]) node[key].onError = (error) => this.log('error', error.message);
       if (node.ClassName === 'RemoteEvent') {
         node.OnServerEvent.onError = node.OnClientEvent.onError = (error) =>
           this.log('error', error.message);
@@ -237,6 +146,7 @@ export class Engine {
     if (this.isPhysical(node)) {
       if (this.isInWorkspace(node) && !node._body) this.createBody(node);
       else if (!this.isInWorkspace(node) && node._body) {
+        this.collisions.remove(node);
         this.physicsWorld.remove(node);
         node._body = null;
       }
@@ -249,6 +159,8 @@ export class Engine {
       this.network?.runningScripts?.delete(node.Id);
     }
     for (const child of node.GetChildren()) this.detach(child);
+    this.collisions.remove(node);
+    this.uiTweens.cancelTarget(node);
     if (node._body) this.physicsWorld.remove(node);
     node._body = null;
     node._engine = null;
@@ -277,6 +189,7 @@ export class Engine {
     node.Anchored = anchored;
   }
   rebuildBody(node) {
+    this.collisions.remove(node);
     this.physicsWorld.remove(node);
     this.createBody(node);
   }
@@ -308,12 +221,9 @@ export class Engine {
         }
       const contacts = this.contacts;
       this.contacts = [];
-      for (const { a, b, event } of contacts) {
-        if (a.Destroyed || b.Destroyed) continue;
-        const signal = event === 'begin-contact' ? 'OnCollision' : 'OnCollisionEnd';
-        a[signal].Fire(b);
-        if (!a.Destroyed && !b.Destroyed) b[signal].Fire(a);
-      }
+      for (const { a, b, bodyA, bodyB, event } of contacts)
+        if (a?._body === bodyA && b?._body === bodyB) this.collisions.dispatch(a, b, event);
+      this.uiTweens.update(this.stepSize);
       this.runService.PostSimulation.Fire(this.stepSize);
       this.accumulator -= this.stepSize;
     }
@@ -327,6 +237,8 @@ export class Engine {
     if (this.disposed) return;
     this.disposed = true;
     this.running = false;
+    this.uiTweens.dispose();
+    this.collisions.clear();
     this.lua?.dispose();
     this.runService.Heartbeat.Clear();
     this.runService.PostSimulation.Clear();

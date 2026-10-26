@@ -1,3 +1,5 @@
+import { UIRenderer } from './ui/renderer.js';
+import './ui/ui.css';
 import { WorldLabels } from './world-labels.js';
 import { Engine } from './engine/engine.js';
 import { Renderer3D } from './engine/renderer3d.js';
@@ -23,6 +25,9 @@ export class GameView {
       'Game viewport. WASD to move, mouse to aim, left click to fire.',
     );
     this.root.append(this.canvas);
+    this.authoredHost = element('div', 'authored-ui');
+    this.root.append(this.authoredHost);
+    this.authoredUI = new UIRenderer(this.authoredHost, { assets: project.assets });
     this.hud = element('div', 'game-hud');
     this.root.append(this.hud);
     this.widgets = element('div', 'game-widgets');
@@ -85,6 +90,7 @@ export class GameView {
         this.renderUI();
         this.dirtyUI = false;
       }
+      this.authoredUI.render(this.engine.ui, this.renderer.width, this.renderer.height);
       this.worldLabels.update();
       this.frameId = requestAnimationFrame(frame);
     };
@@ -204,6 +210,7 @@ export class GameView {
   dispose() {
     this.disposed = true;
     cancelAnimationFrame(this.frameId);
+    this.authoredUI.dispose();
     this.engine.dispose();
     this.renderer.dispose?.();
     this.root.remove();

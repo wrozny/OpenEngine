@@ -1,8 +1,11 @@
+import { isUINode, isUIElement } from '../engine/ui-schema.js';
+import { UDim2 } from '../engine/ui-types.js';
 import {
   SceneNode,
   deserializeNode,
   serializeNode,
   validateProject,
+  normalizeProject,
   isObject,
   isScriptNode,
 } from '../engine/scene.js';
@@ -35,11 +38,34 @@ export class StudioStore {
   get workspace() {
     return this.root.FindFirstChild('Workspace');
   }
+  get uiService() {
+    return this.root.FindFirstChild('UIService');
+  }
+  addUI(className) {
+    let parent = this.selected;
+    if (className === 'ScreenGui') parent = this.uiService;
+    else {
+      while (parent && !['Frame', 'ScreenGui'].includes(parent.ClassName)) parent = parent.Parent;
+      if (!parent) parent = this.uiService.GetChildren().find((n) => n.ClassName === 'ScreenGui');
+    }
+    const node = new SceneNode(className);
+    this.transact(() => {
+      if (!parent) {
+        parent = new SceneNode('ScreenGui', 'ScreenGui');
+        parent.Parent = this.uiService;
+      }
+      node.Parent = parent;
+    });
+    this.expanded.add(this.uiService.Id);
+    this.expanded.add(parent.Id);
+    this.select(node);
+    return node;
+  }
   get dimension() {
     return this.metadata.dimension || '2D';
   }
   restore(project) {
-    validateProject(project);
+    project = normalizeProject(project);
     this.metadata = structuredClone(project);
     delete this.metadata.services;
     this.root = new SceneNode('Folder', 'game');
@@ -115,6 +141,7 @@ export class StudioStore {
     );
   }
   add(className, { position } = {}) {
+    if (isUINode({ ClassName: className })) return this.addUI(className);
     if (className === 'PhysicsObject') className = 'Object2D';
     if (
       (className === 'Object2D' && this.dimension === '3D') ||
@@ -122,6 +149,12 @@ export class StudioStore {
     )
       throw new Error('Insert an object matching this project’s dimension');
     let parent = this.selected || this.workspace;
+    if (className.startsWith('Object'))
+      for (let p = parent; p; p = p.Parent)
+        if (p === this.uiService) {
+          parent = this.workspace;
+          break;
+        }
     if (isScriptNode(parent) || (parent.Name === 'ScriptService' && className.startsWith('Object')))
       parent = this.workspace;
     if (className.startsWith('PlayerController')) {
@@ -165,6 +198,13 @@ export class StudioStore {
     const clones = targets.map((target) => {
       const clone = target.Clone();
       clone.Name += ' Copy';
+      if (isUIElement(clone))
+        clone.Position = new UDim2(
+          clone.Position.XScale,
+          clone.Position.XOffset + 16,
+          clone.Position.YScale,
+          clone.Position.YOffset + 16,
+        );
       if (isObject(clone))
         clone.Position = clone.Position.Add(
           this.dimension === '3D' ? new Vector3(1, 0, 1) : new Vector2(30, 30),

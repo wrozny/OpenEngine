@@ -1,3 +1,4 @@
+import { getCharacterGround, moveCharacter } from './character-motor.js';
 import { PlanckWorld } from './physics/planck-world.js';
 import { CannonWorld } from './physics/cannon-world.js';
 import { Signal } from './signal.js';
@@ -136,11 +137,16 @@ export class Engine {
       FirstPerson: false,
     };
     this.physics = {
+      GetGround: (actor, slopeAngle, distance) =>
+        getCharacterGround(this, actor, slopeAngle, distance),
+      MoveCharacter: (actor, velocity, deltaTime, stepHeight, slopeAngle) =>
+        moveCharacter(this, actor, velocity, deltaTime, stepHeight, slopeAngle),
       SetGravity: (vector) => this.physicsWorld.setGravity(vector),
       GetGravity: () => this.physicsWorld.getGravity(),
     };
     this.runService = {
       Heartbeat: new Signal((error) => this.log('error', error.message)),
+      PostSimulation: new Signal((error) => this.log('error', error.message)),
       Time: 0,
       DeltaTime: this.stepSize,
       IsServer: () => this.role !== 'client',
@@ -293,6 +299,7 @@ export class Engine {
         a[signal].Fire(b);
         if (!a.Destroyed && !b.Destroyed) b[signal].Fire(a);
       }
+      this.runService.PostSimulation.Fire(this.stepSize);
       this.accumulator -= this.stepSize;
     }
     if (this.camera.Follow && !this.camera.Follow.Destroyed)
@@ -307,6 +314,7 @@ export class Engine {
     this.running = false;
     this.lua?.dispose();
     this.runService.Heartbeat.Clear();
+    this.runService.PostSimulation.Clear();
     this.input.dispose();
     this.audio.dispose();
     this.players.dispose();

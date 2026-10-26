@@ -8,7 +8,11 @@ export function tileGeometry(geometry, node) {
       ny = Math.abs(normal.getY(i)),
       nz = Math.abs(normal.getZ(i));
     let width, height;
-    if (node.Shape === 'Box') {
+    if (node.Shape === 'Wedge') {
+      width = nx > 0.9 ? node.Size.Z : node.Size.X;
+      height =
+        ny > 0.9 ? node.Size.Z : ny > 0.1 ? Math.hypot(node.Size.Y, node.Size.Z) : node.Size.Y;
+    } else if (node.Shape === 'Box') {
       width = nx > 0.5 ? node.Size.Z : node.Size.X;
       height = ny > 0.5 ? node.Size.Z : node.Size.Y;
     } else if (node.Shape === 'Cylinder' && ny > 0.9) {

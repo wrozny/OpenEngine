@@ -2,6 +2,7 @@ import { Signal } from './signal.js';
 import { Vector2, Vector3 } from './math.js';
 import { encodeAttribute, decodeAttribute } from './attributes.js';
 import {
+  upgradeControllerSource,
   CONTROLLER_2D,
   CONTROLLER_3D,
   CONTROLLER_DEFAULTS_2D,
@@ -275,7 +276,9 @@ export function deserializeNode(data, preserveIds = true) {
     for (const key of Object.keys(WORKSPACE_DEFAULTS))
       if (data.settings[key] !== undefined) node[key] = data.settings[key];
   if (isScriptNode(node)) {
-    node.Source = data.Source ?? node.Source;
+    node.Source = isController(node)
+      ? upgradeControllerSource(data.Source, node.ClassName)
+      : (data.Source ?? node.Source);
     node.Enabled = data.Enabled !== false;
   }
   if (isController(node))
@@ -323,7 +326,9 @@ export function validateProject(project) {
           node.Size[axis] <= 0
         )
           throw new Error('Invalid transform: ' + node.name);
-      if (!(three ? ['Box', 'Sphere', 'Cylinder'] : ['Box', 'Circle']).includes(node.Shape))
+      if (
+        !(three ? ['Box', 'Sphere', 'Cylinder', 'Wedge'] : ['Box', 'Circle']).includes(node.Shape)
+      )
         throw new Error('Unknown shape');
       if (three) {
         for (const axis of ['X', 'Y', 'Z'])

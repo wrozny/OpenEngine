@@ -74,7 +74,48 @@ export class PlanckWorld {
     node._velocity = new Vector2(v.x * SCALE, v.y * SCALE);
     node._rotation = node._body.getAngle();
   }
-  raycast(origin, direction, ignore) {
+  canCollide(a, b) {
+    const x = a?._body?.getFixtureList(),
+      y = b?._body?.getFixtureList();
+    return (
+      x &&
+      y &&
+      x.getFilterCategoryBits() & y.getFilterMaskBits() &&
+      y.getFilterCategoryBits() & x.getFilterMaskBits()
+    );
+  }
+  overlapsBox(center, size, ignore) {
+    const shape = planck.Box(size.X / (2 * SCALE), size.Y / (2 * SCALE));
+    const transform = planck.Transform(this.vector(center), 0);
+    let overlaps = false;
+    const half = this.vector(size).mul(0.5),
+      point = this.vector(center);
+    this.world.queryAABB(
+      new planck.AABB(planck.Vec2.sub(point, half), planck.Vec2.add(point, half)),
+      (fixture) => {
+        const node = fixture.getBody().getUserData();
+        if (
+          node !== ignore &&
+          !node.Sensor &&
+          this.canCollide(node, ignore) &&
+          planck.testOverlap(
+            shape,
+            0,
+            fixture.getShape(),
+            0,
+            transform,
+            fixture.getBody().getTransform(),
+          )
+        ) {
+          overlaps = true;
+          return false;
+        }
+        return true;
+      },
+    );
+    return overlaps;
+  }
+  raycast(origin, direction, ignore, respectCollision = false) {
     let result;
     if (direction.Magnitude === 0) return;
     this.world.rayCast(
@@ -82,7 +123,13 @@ export class PlanckWorld {
       this.vector(origin.Add(direction)),
       (fixture, point, normal, fraction) => {
         const node = fixture.getBody().getUserData();
-        if (node === ignore || node.Sensor || node.Destroyed) return -1;
+        if (
+          node === ignore ||
+          node.Sensor ||
+          node.Destroyed ||
+          (respectCollision && !this.canCollide(node, ignore))
+        )
+          return -1;
         result = {
           Instance: node,
           Position: new Vector2(point.x * SCALE, point.y * SCALE),

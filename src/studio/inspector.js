@@ -146,7 +146,7 @@ export function renderInspector(container, store, onError) {
         'number',
       );
     section('Appearance');
-    set('Shape', 'text', three ? ['Box', 'Sphere', 'Cylinder'] : ['Box', 'Circle']);
+    set('Shape', 'text', three ? ['Box', 'Sphere', 'Cylinder', 'Wedge'] : ['Box', 'Circle']);
     set('Color', 'color');
     set('Visible', 'checkbox');
     if (three) {

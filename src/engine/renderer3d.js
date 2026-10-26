@@ -1,3 +1,4 @@
+import { wedgeGeometry } from './wedge-geometry.js';
 import * as THREE from 'three';
 import { Vector2, Vector3 } from './math.js';
 import { tileGeometry } from './texture-uv.js';
@@ -77,6 +78,7 @@ export class Renderer3D {
     }
   }
   geometry(node) {
+    if (node.Shape === 'Wedge') return wedgeGeometry();
     if (node.Shape === 'Sphere') return new THREE.SphereGeometry(0.5, 32, 20);
     if (node.Shape === 'Cylinder') return new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
     return new THREE.BoxGeometry(1, 1, 1);

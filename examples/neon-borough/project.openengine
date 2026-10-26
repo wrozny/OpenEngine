@@ -8115,6 +8115,15 @@
           "SourceFile": "scripts/Appearance.lua"
         },
         {
+          "id": "city-script-SwagLabels",
+          "className": "ModuleScript",
+          "name": "SwagLabels",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/SwagLabels.lua"
+        },
+        {
           "id": "city-script-Config",
           "className": "ModuleScript",
           "name": "Config",

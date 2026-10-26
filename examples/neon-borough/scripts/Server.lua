@@ -46,6 +46,7 @@ local function spawn(player)
     actor.Color = ({"#62b6f2", "#f5b85b", "#c891f2", "#65ce9b", "#f07883"})[data.slot % 5 + 1]
     actor:SetAttribute("Health", config.Health)
     actor:SetAttribute("Score", data.kills)
+    actor:SetAttribute("Swag", data.swag)
     actor:SetAttribute("Driving", "")
     actor:SetAttribute("UserId", player.UserId)
     actor.Parent = workspace
@@ -56,7 +57,7 @@ end
 
 local function join(player)
     nextSlot = nextSlot + 1
-    state[player.UserId] = { slot = nextSlot, lastShot = -10, lastAction = -10, kills = 0 }
+    state[player.UserId] = { slot = nextSlot, lastShot = -10, lastAction = -10, kills = 0, swag = 0 }
     spawn(player)
 end
 players.PlayerAdded:Connect(join)
@@ -91,8 +92,14 @@ local function damage(target, amount, attacker)
     if attacker and state[attacker.UserId] then
         local data = state[attacker.UserId]
         data.kills = data.kills + 1
-        if attacker.Character then attacker.Character:SetAttribute("Score", data.kills) end
-        notify(attacker, "+1 takedown")
+        local reward = victim and config.PlayerSwag or config.ResidentSwag
+        data.swag = data.swag + reward
+        if attacker.Character then
+            attacker.Character:SetAttribute("Score", data.kills)
+            attacker.Character:SetAttribute("Swag", data.swag)
+        end
+        notify(attacker, string.format("+%d SWAG · %s takedown", reward, victim and "player" or "resident"))
+        remote:FireAllClients("feed", string.format("%s earned +%d SWAG", attacker.Name, reward))
     end
     return true
 end

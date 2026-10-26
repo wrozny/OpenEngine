@@ -1,3 +1,4 @@
+import { loadProject } from '../../tools/project.mjs';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { unzipSync, strFromU8 } from 'fflate';
@@ -264,6 +265,8 @@ test('multiplayer Studio starts a real server, adds clients, drives owned charac
   await expect(clients.nth(0).locator('[data-widget="identity"]')).toContainText('2 online');
   await expect(clients.nth(1).locator('[data-widget="identity"]')).toContainText('2 online');
   await expect(page.getByLabel('Server instance')).toContainText('2 players');
+  await expect(clients.nth(0).locator('.world-label')).toHaveCount(2);
+  await expect(clients.nth(0).locator('.world-label').first()).toContainText('0 SWAG');
   const canvas = clients.nth(0).locator('canvas');
   await canvas.focus();
   await page.keyboard.down('w');
@@ -301,4 +304,63 @@ test('multiplayer selection persists through project settings and web builds inc
   expect(project.multiplayer).toBe(true);
   expect(strFromU8(files['server.cjs'])).toContain('WebSocketServer');
   expect(project.services[1].children.some((n) => n.className === 'ServerScript')).toBe(true);
+});
+
+test('default controller traversal settings and wedge shapes are editable and saved', async ({
+  page,
+}) => {
+  await page.locator('input[name="dimension"][value="3D"]').check();
+  await page.getByRole('button', { name: 'Create project', exact: true }).click();
+  await page.getByRole('button', { name: 'Expand Player', exact: true }).click();
+  await tree(page, 'PlayerController3D').click();
+  await expect(page.getByLabel('StepHeight', { exact: true })).toHaveValue('0.45');
+  await page.getByLabel('MaxSlopeAngle', { exact: true }).fill('40');
+  await page.getByLabel('MaxSlopeAngle', { exact: true }).press('Tab');
+  await insert(page, 'Object3D');
+  await page.getByLabel('Shape', { exact: true }).selectOption('Wedge');
+  const downloading = page.waitForEvent('download');
+  await page.locator('#save-project').click();
+  const download = await downloading;
+  const project = JSON.parse(await readFile(await download.path(), 'utf8'));
+  const nodes = [];
+  const visit = (node) => {
+    nodes.push(node);
+    node.children.forEach(visit);
+  };
+  project.services.forEach(visit);
+  expect(nodes.some((node) => node.Shape === 'Wedge')).toBe(true);
+  expect(nodes.find((node) => node.className === 'PlayerController3D').MaxSlopeAngle).toBe(40);
+});
+
+test('a real server-confirmed resident takedown updates HUD and overhead swag', async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  const project = await loadProject('examples/neon-borough/project.openengine');
+  const residents = project.services[0].children.find((node) => node.name === 'Pedestrians');
+  residents.children[0].Position = { X: -1, Y: 1.4, Z: 15 };
+  await page.locator('#open-file').setInputFiles({
+    name: 'Swag test.openengine',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(project)),
+  });
+  await expect(page.locator('#launch-host')).toBeHidden();
+  await page.locator('#play').click();
+  const client = page.locator('.network-client').first();
+  await expect(client.locator('.world-label')).toContainText('0 SWAG', { timeout: 15000 });
+  const canvas = client.locator('canvas');
+  const box = await canvas.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  try {
+    await expect(client.locator('[data-widget="stats"]')).toContainText('SWAG 10', {
+      timeout: 20000,
+    });
+  } finally {
+    await page.mouse.up();
+  }
+  await expect(client.locator('.world-label')).toContainText('10 SWAG');
+  await expect(client.locator('.world-label')).toBeVisible();
+  await page.screenshot({ path: 'artifacts/swag-award.png', fullPage: true });
+  await page.getByRole('button', { name: 'Stop server', exact: true }).click();
 });

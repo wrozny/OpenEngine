@@ -8,14 +8,16 @@ local camera = game:GetService("Camera")
 local remote = workspace.CityAction
 local config = require(script.Parent.Config)
 local appearance = require(script.Parent.Appearance)
+local swagLabels = require(script.Parent.SwagLabels)
 local player = players.LocalPlayer
-local lastShot, lastDrive, messageUntil = -10, -10, 0
+local lastShot, lastDrive, messageUntil, hitUntil, feedUntil = -10, -10, 6, 0, 0
 
 ui:CreateLabel("brand", "NEON BOROUGH / ONLINE", 22, 22)
 ui:SetColor("brand", "#86dacf")
 ui:CreateLabel("identity", "", 22, 52)
 ui:CreateLabel("stats", "", 22, 82)
 ui:CreateLabel("notice", "Meet friends at the plaza. Cars are parked along the main avenue.", 22, 112)
+ui:CreateLabel("feed", "", 22, 145)
 ui:CreateLabel("crosshair", "+", 0, 0)
 ui:SetPosition("crosshair", 0, 0, "Center")
 camera.Distance = 5
@@ -23,24 +25,25 @@ camera.Pitch = -0.08
 
 remote.OnClientEvent:Connect(function(action, value)
     if action == "notice" then ui:SetText("notice", value); messageUntil = run.Time + 5
+    elseif action == "hit" then audio:Play("hit"); hitUntil = run.Time + 0.12
+    elseif action == "feed" then ui:SetText("feed", value); feedUntil = run.Time + 4
     elseif action == "shot" and player.Character and player.Character.Position:Distance(value) < 50 then audio:Play("shoot") end
 end)
 input.Began:Connect(function(key)
     if key == "e" then remote:FireServer("interact") end
 end)
 run.Heartbeat:Connect(function()
-    for _, connected in ipairs(players:GetPlayers()) do appearance.Update(connected.Character, true) end
-    for _, resident in ipairs(workspace.Pedestrians:GetChildren()) do appearance.Update(resident, false) end
-    appearance.Clean()
+    ui:SetColor("crosshair", run.Time < hitUntil and "#ffcf78" or "#f3eee8")
+    if run.Time > feedUntil then ui:SetText("feed", "") end
     local actor = player.Character
     if not actor or actor.Destroyed then return end
     local health = actor:GetAttribute("Health") or config.Health
     local carId = actor:GetAttribute("Driving")
     local driving = carId and carId ~= ""
     ui:SetText("identity", player.Name .. " · " .. string.sub(player.UserId, 1, 8) .. " · " .. string.format("%d", #players:GetPlayers()) .. " online")
-    ui:SetText("stats", string.format("HP %d / %d    TAKEDOWNS %d", health, config.Health, actor:GetAttribute("Score") or 0))
+    ui:SetText("stats", string.format("HP %d / %d    SWAG %d    TAKEDOWNS %d", health, config.Health, actor:GetAttribute("Swag") or 0, actor:GetAttribute("Score") or 0))
     if run.Time > messageUntil then
-        ui:SetText("notice", driving and "WASD drive · E leave car" or "WASD walk · Space jump · Right drag aim · Left click shoot · E enter car")
+        ui:SetText("notice", driving and "WASD accelerate / steer · E leave car" or string.format("Residents +%d SWAG · players +%d SWAG", config.ResidentSwag, config.PlayerSwag))
     end
     if driving then
         local car = nil
@@ -56,6 +59,7 @@ run.Heartbeat:Connect(function()
             remote:FireServer("drive", input:GetAxis("s", "w"), input:GetAxis("a", "d"))
         end
     else
+        if health > 0 then actor.Rotation = Vector3.new(0, camera.Yaw, 0) end
         camera.Follow, camera.Distance = actor, 5
         camera.Offset = Vector3.new(math.cos(camera.Yaw), 1.4, -math.sin(camera.Yaw))
         if health > 0 and input:IsMouseDown(0) and run.Time - lastShot >= config.ShotInterval then
@@ -69,4 +73,11 @@ run.Heartbeat:Connect(function()
             remote:FireServer("shoot", point:Sub(muzzle).Unit)
         end
     end
+end)
+
+run.PostSimulation:Connect(function()
+    for _, connected in ipairs(players:GetPlayers()) do appearance.Update(connected.Character, true) end
+    for _, resident in ipairs(workspace.Pedestrians:GetChildren()) do appearance.Update(resident, false) end
+    appearance.Clean()
+    swagLabels.Update()
 end)

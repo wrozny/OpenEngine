@@ -159,6 +159,7 @@ new SceneNode('PlayerController3D', 'Movement', 'city-controller').Parent = avat
 new SceneNode('RemoteEvent', 'CityAction', 'city-action').Parent = workspace;
 for (const [className, name, file] of [
   ['ModuleScript', 'Appearance', 'Appearance.lua'],
+  ['ModuleScript', 'SwagLabels', 'SwagLabels.lua'],
   ['ModuleScript', 'Config', 'Config.lua'],
   ['ServerScript', 'City Server', 'Server.lua'],
   ['LocalScript', 'City Client', 'Client.lua'],

@@ -5,6 +5,8 @@ return {
     ShotInterval = 0.24,
     Range = 100,
     RespawnDelay = 4,
+    ResidentSwag = 10,
+    PlayerSwag = 50,
     ResidentRespawnDelay = 8,
     CarSpeed = 23,
     CarAcceleration = 16,

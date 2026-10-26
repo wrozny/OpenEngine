@@ -936,3 +936,77 @@ kbd {
     grid-template-columns: minmax(70px, 42%) minmax(60px, 1fr);
   }
 }
+
+.network-session {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px;
+  gap: 10px;
+  background: #14171d;
+}
+.network-toolbar,
+.network-client-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px;
+}
+.network-toolbar strong,
+.network-client-heading span {
+  flex: 1;
+}
+.network-server {
+  flex: none;
+  min-height: 64px;
+  max-height: 130px;
+  overflow: auto;
+  padding: 12px;
+  margin: 0;
+  background: #0c0e12;
+  color: #a5d4b5;
+  font: 12px/1.5 monospace;
+}
+.network-clients {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  grid-auto-rows: minmax(300px, 1fr);
+  gap: 10px;
+  flex: 1;
+  overflow: auto;
+}
+.network-client {
+  min-height: 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #434a58;
+}
+.network-client-heading {
+  background: #252a34;
+  font-size: 12px;
+}
+.network-client-view {
+  flex: 1;
+  min-height: 260px;
+  position: relative;
+  overflow: hidden;
+}
+.network-client-view .game-help {
+  font-size: 10px;
+}
+
+.new-project-form .network-option,
+.project-settings .network-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.new-project-form .network-option input,
+.project-settings .network-option input {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
+  margin: 0;
+}

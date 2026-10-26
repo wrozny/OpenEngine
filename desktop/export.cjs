@@ -1,3 +1,4 @@
+const { copyGameDist } = require('./dist.cjs');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 function safeName(name) {
@@ -9,10 +10,53 @@ function isInside(candidate, directory) {
 }
 
 /** Copy the installed Electron runtime into a new folder, then replace Studio with game data. */
-async function buildNativeGame({ appRoot, executable, destination, project, platform }) {
+async function buildNativeGame({
+  appRoot,
+  executable,
+  destination,
+  project,
+  platform,
+  server = false,
+  pair = true,
+}) {
+  if (project.multiplayer && pair) {
+    const output = path.join(destination, safeName(project.name) + '-online-' + Date.now());
+    await fs.mkdir(output, { recursive: false });
+    try {
+      const client = structuredClone(project);
+      const redact = (node) => {
+        node.children = node.children.filter(
+          (n) => !['Script', 'ServerScript'].includes(n.className),
+        );
+        node.children.forEach(redact);
+      };
+      client.services.forEach(redact);
+      await buildNativeGame({
+        appRoot,
+        executable,
+        destination: output,
+        project: client,
+        platform,
+        pair: false,
+      });
+      await buildNativeGame({
+        appRoot,
+        executable,
+        destination: output,
+        project,
+        platform,
+        server: true,
+        pair: false,
+      });
+      return output;
+    } catch (error) {
+      await fs.rm(output, { recursive: true, force: true });
+      throw error;
+    }
+  }
   if (platform === 'darwin')
     throw new Error('In-app macOS export is not supported yet. Use the CLI packager on macOS.');
-  const name = safeName(project.name);
+  const name = safeName(project.name) + (server ? 'Server' : '');
   const runtimeRoot = path.dirname(executable);
   const realDestination = await fs.realpath(destination);
   if (isInside(realDestination, runtimeRoot))
@@ -26,7 +70,7 @@ async function buildNativeGame({ appRoot, executable, destination, project, plat
     });
     const gameRoot = path.join(output, 'resources', 'app');
     await fs.mkdir(gameRoot, { recursive: true });
-    await fs.cp(path.join(appRoot, 'dist'), path.join(gameRoot, 'dist'), { recursive: true });
+    await copyGameDist(path.join(appRoot, 'dist'), path.join(gameRoot, 'dist'), server);
     await fs.cp(path.join(appRoot, 'desktop'), path.join(gameRoot, 'desktop'), { recursive: true });
     for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.md']) {
       try {
@@ -39,9 +83,9 @@ async function buildNativeGame({ appRoot, executable, destination, project, plat
       path.join(gameRoot, 'package.json'),
       JSON.stringify({
         name: 'openengine-game',
-        version: '0.2.0',
+        version: '0.3.0',
         main: 'desktop/main.cjs',
-        openengineMode: 'game',
+        openengineMode: server ? 'server' : 'game',
       }),
     );
     await fs.writeFile(path.join(gameRoot, 'project.json'), JSON.stringify(project));
@@ -49,7 +93,9 @@ async function buildNativeGame({ appRoot, executable, destination, project, plat
     await fs.rename(path.join(output, path.basename(executable)), path.join(output, name + suffix));
     await fs.writeFile(
       path.join(output, 'START-HERE.txt'),
-      `Run ${name}${suffix}. Keep all files in this folder together.\nPowered by OpenEngine.\n`,
+      server
+        ? `Run ${name}${suffix}. Connect clients to ws://SERVER-IP:7777/socket. Allow TCP 7777 through the firewall. PORT/HOST environment variables configure hosting. Keep private server files on the host.\n`
+        : `Run ${name}${suffix}. Keep all files in this folder together.\nPowered by OpenEngine.\n`,
     );
     return output;
   } catch (error) {

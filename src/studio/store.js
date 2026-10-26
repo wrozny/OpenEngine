@@ -136,7 +136,7 @@ export class StudioStore {
       }
     }
     const node = new SceneNode(className);
-    if (className === 'Script')
+    if (['Script', 'ServerScript', 'LocalScript'].includes(className))
       node.Source = 'local object = script.Parent\n\nprint("Hello from", object.Name)\n';
     if (className === 'ModuleScript')
       node.Source =

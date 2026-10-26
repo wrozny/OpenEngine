@@ -72,6 +72,9 @@ export function sceneMenu(store, { frame, insert, onError }, position) {
       object,
       'Folder',
       'Script',
+      'ServerScript',
+      'LocalScript',
+      'RemoteEvent',
       'ModuleScript',
       store.dimension === '3D' ? 'PlayerController3D' : 'PlayerController2D',
     ].map((className) => ({

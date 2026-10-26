@@ -1,3 +1,4 @@
+import { STARTER_SERVER, STARTER_CLIENT } from '../network/starter.js';
 import { SceneNode, serializeNode, validateProject } from '../engine/scene.js';
 import { Vector2, Vector3 } from '../engine/math.js';
 import { download } from './dom.js';
@@ -9,6 +10,7 @@ export function createProject(
   dimension = '2D',
   starter = false,
   platformer = false,
+  multiplayer = false,
 ) {
   const workspace = new SceneNode('Folder', 'Workspace', 'workspace');
   const scripts = new SceneNode('Folder', 'ScriptService', 'scripts');
@@ -25,6 +27,17 @@ export function createProject(
     );
     if (dimension === '2D') controller.Mode = platformer ? 'Platformer' : 'TopDown';
     controller.Parent = actor;
+    if (multiplayer) {
+      const templates = new SceneNode('Folder', 'Templates');
+      templates.Parent = scripts;
+      actor.Parent = templates;
+      const server = new SceneNode('ServerScript', 'Player lifecycle');
+      server.Source = STARTER_SERVER;
+      server.Parent = scripts;
+      const client = new SceneNode('LocalScript', 'Client UI');
+      client.Source = STARTER_CLIENT;
+      client.Parent = scripts;
+    }
     if (dimension === '3D' || platformer) {
       const floor = new SceneNode(dimension === '3D' ? 'Object3D' : 'Object2D', 'Ground');
       floor.Size = dimension === '3D' ? new Vector3(30, 1, 30) : new Vector2(1600, 60);
@@ -38,6 +51,7 @@ export function createProject(
     format: 'openengine',
     version: 1,
     dimension,
+    multiplayer,
     name,
     controls:
       dimension === '3D'

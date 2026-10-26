@@ -290,3 +290,35 @@ button.primary:hover {
   font-size: 13px;
   box-shadow: 0 2px 12px #0002;
 }
+
+.network-connect {
+  margin: auto;
+  width: min(440px, 90%);
+  padding: 32px;
+  background: #20242c;
+  color: #e4e7ed;
+  border: 1px solid #424957;
+  border-radius: 12px;
+  font: 15px system-ui;
+}
+.network-connect label {
+  display: block;
+}
+.network-connect input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  margin: 12px 0;
+  padding: 12px;
+  background: #12161d;
+  color: inherit;
+  border: 1px solid #525b6b;
+  border-radius: 4px;
+}
+.network-connect button {
+  padding: 12px 20px;
+  cursor: pointer;
+}
+.network-connect p {
+  line-height: 1.5;
+}

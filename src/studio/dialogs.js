@@ -1,4 +1,4 @@
-import { zipSync, strToU8 } from 'fflate';
+import { buildWebZip } from './build-web.js';
 import { el, download } from './dom.js';
 
 export function showDialog(host, title, content) {
@@ -104,6 +104,16 @@ export function showSettings(host, store) {
       `Project dimension: ${store.dimension}. Choose a dimension when creating a new project.`,
     ),
   );
+  const online = el('label', 'network-option'),
+    multiplayer = el('input');
+  multiplayer.type = 'checkbox';
+  multiplayer.checked = !!store.metadata.multiplayer;
+  multiplayer.setAttribute('aria-label', 'Enable multiplayer');
+  online.append(
+    multiplayer,
+    document.createTextNode(' Enable multiplayer (dedicated server + clients)'),
+  );
+  form.append(online);
   const apply = el('button', 'primary', 'Save settings');
   apply.type = 'submit';
   form.append(apply);
@@ -113,6 +123,7 @@ export function showSettings(host, store) {
     if (!fields.name.value.trim()) return;
     store.transact(() => {
       for (const [key, input] of Object.entries(fields)) store.metadata[key] = input.value.trim();
+      store.metadata.multiplayer = multiplayer.checked;
     });
     dismiss();
   };
@@ -123,33 +134,21 @@ export function showBuild(host, store, { status, onError, onLog }) {
   const web = el('button', 'export-option');
   web.append(
     el('strong', '', 'Web game ZIP'),
-    el('span', '', 'Offline HTML game. Extract the ZIP and open index.html.'),
+    el(
+      'span',
+      '',
+      store.metadata.multiplayer
+        ? 'Web client + Node.js server. Run node server.cjs to host.'
+        : 'Offline HTML game. Extract the ZIP and open index.html.',
+    ),
   );
   web.onclick = async () => {
     web.disabled = true;
     status('Building web game…');
     try {
-      const response = await fetch('./runtime-template.html');
-      if (!response.ok)
-        throw new Error('Runtime template is missing. Restart Studio or run npm run build.');
-      const template = await response.text();
-      if (!template.includes('__OPENENGINE_PROJECT_BASE64__'))
-        throw new Error('Invalid runtime template');
-      const bytes = new TextEncoder().encode(JSON.stringify(store.project));
-      let binary = '';
-      for (const byte of bytes) binary += String.fromCharCode(byte);
-      const html = template.replace('__OPENENGINE_PROJECT_BASE64__', btoa(binary));
       download(
         store.metadata.name + '-web.zip',
-        zipSync({
-          'index.html': strToU8(html),
-          'README.txt': strToU8(
-            store.metadata.name +
-              '\n\nOpen index.html in a modern browser.\n' +
-              (store.metadata.controls || '') +
-              '\n\nThird-party notices are embedded in index.html.\n',
-          ),
-        }),
+        await buildWebZip(store.project),
         'application/zip',
       );
       status('Web game built');

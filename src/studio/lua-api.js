@@ -4,7 +4,24 @@ export const API = {
   Vector2: { new: ['x, y', 'Create an immutable two-dimensional value.'] },
   Vector3: { new: ['x, y, z', 'Create an immutable Y-up vector measured in meters.'] },
   game: { GetService: ['name', 'Get an engine service by its registered name.'] },
+  Players: {
+    GetPlayers: ['', 'Snapshot of connected players. Each has a unique session UserId.'],
+    GetPlayerByUserId: ['userId', 'Find a connected player by session ID.'],
+    GetPlayerFromCharacter: ['character', 'Find the player whose Character is this instance.'],
+  },
+  RunService: {
+    IsServer: ['', 'True on the authority.'],
+    IsClient: ['', 'True in a client runtime.'],
+  },
   Object: {
+    SetNetworkOwner: [
+      'player',
+      'Server only. Give an unanchored object to a player; nil returns authority to the server.',
+    ],
+    GetNetworkOwner: ['', 'Current player owner, or nil.'],
+    FireServer: ['...', 'LocalScript: send this RemoteEvent to the host.'],
+    FireClient: ['player, ...', 'ServerScript: send this RemoteEvent to one player.'],
+    FireAllClients: ['...', 'ServerScript: send this RemoteEvent to all players.'],
     GetChildren: ['', 'Snapshot of direct children; use ipairs to iterate.'],
     GetDescendants: ['', 'Snapshot of the entire subtree.'],
     FindFirstChild: ['name, recursive', 'Return a named child, or nil.'],
@@ -100,6 +117,8 @@ export const PROPERTIES = {
     'OnCollision',
     'OnCollisionEnd',
     'OnFallen',
+    'OnServerEvent',
+    'OnClientEvent',
     'Material',
     'TextureScale',
     'Mass',
@@ -119,15 +138,17 @@ export const PROPERTIES = {
   ],
   Workspace: ['Skybox', 'FallenHeight', 'BackgroundColor'],
   RunService: ['Heartbeat', 'Time', 'DeltaTime'],
+  Players: ['PlayerAdded', 'PlayerRemoving', 'OnPlayerAdded', 'OnPlayerRemoving', 'LocalPlayer'],
   InputService: ['MousePosition', 'Began', 'Ended'],
   UIService: ['OnAction'],
-  Camera: ['Position', 'Follow', 'Zoom', 'Yaw', 'Pitch', 'Distance', 'FirstPerson'],
+  Camera: ['Position', 'Follow', 'Offset', 'Zoom', 'Yaw', 'Pitch', 'Distance', 'FirstPerson'],
   Vector: ['X', 'Y', 'Z', 'Magnitude', 'Unit'],
 };
 export const SERVICES = [
   'Workspace',
   'ScriptService',
   'RunService',
+  'Players',
   'InputService',
   'AudioService',
   'UIService',
@@ -165,7 +186,11 @@ export function completionContext(receiver, source, node, workspace) {
     ),
   );
   if (service) type = service[1];
-  if (/\.OnCollision(?:End)?$|\.Heartbeat$|\.OnAction$|\.Began$|\.Ended$/.test(receiver || ''))
+  if (
+    /\.OnCollision(?:End)?$|\.Heartbeat$|\.OnAction$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
+      receiver || '',
+    )
+  )
     type = 'Signal';
   if (/\.(Position|Velocity|Size|Unit)$/.test(receiver || '')) type = 'Vector';
   if (!API[type] && !PROPERTIES[type]) type = 'Object';

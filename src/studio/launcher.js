@@ -58,9 +58,14 @@ export class ProjectLauncher {
       opt.value = value;
       template.append(opt);
     }
+    const online = el('label', 'network-option');
+    const multiplayer = el('input');
+    multiplayer.type = 'checkbox';
+    multiplayer.setAttribute('aria-label', 'Enable multiplayer');
+    online.append(multiplayer, document.createTextNode(' Enable multiplayer'));
     const create = el('button', 'primary', 'Create project');
     create.type = 'submit';
-    form.append(name, modes, template, create);
+    form.append(name, modes, template, online, create);
     form.onsubmit = (event) => {
       event.preventDefault();
       const dimension = form.querySelector('input[name=dimension]:checked').value;
@@ -70,6 +75,7 @@ export class ProjectLauncher {
           dimension,
           template.value !== 'empty',
           template.value === 'platformer',
+          multiplayer.checked,
         ),
       );
     };

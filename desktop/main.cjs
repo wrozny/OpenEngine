@@ -3,7 +3,8 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { ProjectRegistry, MAX_PROJECT_BYTES } = require('./projects.cjs');
 const { buildNativeGame } = require('./export.cjs');
-let window;
+let window, testServer;
+const isServer = require('../package.json').openengineMode === 'server';
 const mode = require('../package.json').openengineMode || 'studio';
 const appRoot = path.resolve(__dirname, '..');
 
@@ -28,7 +29,46 @@ function projectText(text) {
     throw new Error('Invalid project');
   return project;
 }
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  if (isServer) {
+    try {
+      const { runServer } = require('../dist/network/cli.cjs');
+      testServer = await runServer(appRoot);
+      window = new BrowserWindow({
+        width: 760,
+        height: 550,
+        minWidth: 640,
+        minHeight: 480,
+        title: 'OpenEngine Dedicated Server',
+        autoHideMenuBar: true,
+        backgroundColor: '#171b22',
+        webPreferences: {
+          preload: path.join(__dirname, 'preload.cjs'),
+          nodeIntegration: false,
+          contextIsolation: true,
+          sandbox: true,
+        },
+      });
+      window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+      window.webContents.on('will-navigate', (event) => event.preventDefault());
+      window.on('closed', () => app.quit());
+      ipcMain.handle('network:status', (event) => {
+        trusted(event);
+        return { ...testServer.status(), port: testServer.port };
+      });
+      ipcMain.handle('network:stop', async (event) => {
+        trusted(event);
+        await testServer.close();
+        testServer = null;
+        app.quit();
+      });
+      window.loadFile(path.join(__dirname, 'server.html'));
+    } catch (error) {
+      console.error(error);
+      app.quit();
+    }
+    return;
+  }
   session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) =>
     callback(false),
   );
@@ -37,7 +77,7 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'",
+          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' ws: wss:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'",
         ],
       },
     }),
@@ -66,6 +106,23 @@ app.whenReady().then(() => {
     return JSON.parse(await fs.readFile(path.join(appRoot, 'project.json'), 'utf8'));
   });
   if (mode !== 'studio') return;
+  ipcMain.handle('network:start', async (event, text) => {
+    trusted(event);
+    const project = projectText(text);
+    await testServer?.close();
+    const { hostGame } = require('../dist/network/host.cjs');
+    testServer = await hostGame(project);
+    return { url: 'ws://127.0.0.1:' + testServer.port + '/socket' };
+  });
+  ipcMain.handle('network:stop', async (event) => {
+    trusted(event);
+    await testServer?.close();
+    testServer = null;
+  });
+  ipcMain.handle('network:status', (event) => {
+    trusted(event);
+    return testServer?.status() || {};
+  });
   const registry = new ProjectRegistry(path.join(app.getPath('userData'), 'recent-projects.json'));
   ipcMain.handle('project:recents', async (event) => {
     trusted(event);
@@ -148,4 +205,10 @@ app.whenReady().then(() => {
     return output;
   });
 });
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => {
+  if (!isServer) app.quit();
+});
+app.on('before-quit', () => {
+  testServer?.close();
+  testServer = null;
+});

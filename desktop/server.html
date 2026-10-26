@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'"
+    />
+    <title>OpenEngine Server</title>
+    <link rel="stylesheet" href="server.css" />
+  </head>
+  <body>
+    <h1>Dedicated server</h1>
+    <p id="address"></p>
+    <p id="status" role="status">Starting…</p>
+    <pre id="logs"></pre>
+    <button id="stop">Stop server and exit</button>
+    <script src="server-ui.js"></script>
+  </body>
+</html>

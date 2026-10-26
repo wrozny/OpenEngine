@@ -1,3 +1,4 @@
+import { loadProject } from './project.mjs';
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname, sep } from 'node:path';
@@ -6,8 +7,14 @@ import { existsSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const root = resolve('dist');
+const previewProject = await loadProject('examples/zombie/project.openengine');
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.url === '/project.json') {
+      response.setHeader('Content-Type', 'application/json');
+      response.end(JSON.stringify(previewProject));
+      return;
+    }
     const path = resolve(
       root,
       '.' + decodeURIComponent(new URL(request.url, 'http://localhost').pathname),

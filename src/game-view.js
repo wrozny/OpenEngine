@@ -11,9 +11,10 @@ function element(tag, className, text) {
 
 /** Owns DOM, input subscriptions and animation lifetime for one Play session. */
 export class GameView {
-  constructor(container, project, { onLog, onStop } = {}) {
+  constructor(container, project, { onLog, onStop, engine, network } = {}) {
     this.container = container;
-    this.engine = new Engine(project, { onLog });
+    this.engine = engine || new Engine(project, { onLog });
+    this.network = network;
     this.root = element('div', 'game-view');
     this.canvas = element('canvas', 'game-canvas');
     this.canvas.setAttribute(
@@ -59,10 +60,24 @@ export class GameView {
     const frame = (now) => {
       if (this.disposed) return;
       this.engine.input.updatePointer();
-      this.engine.update(document.hidden ? 0 : (now - this.lastTime) / 1000);
+      (this.network || this.engine).update(document.hidden ? 0 : (now - this.lastTime) / 1000);
       this.lastTime = now;
+      if (this.network) {
+        const camera = this.engine.camera,
+          follow = camera.Follow;
+        this.renderer.camera = {
+          ...camera,
+          Position:
+            follow && !follow.Destroyed
+              ? this.engine.dimension === '3D'
+                ? this.network.transform(follow).Position.Add(camera.Offset)
+                : this.network.transform(follow).Position
+              : camera.Position,
+        };
+      }
       this.renderer.draw(this.engine.workspace.GetDescendants(), {
         workspace: this.engine.workspace,
+        transform: this.network ? (node) => this.network.transform(node) : undefined,
       });
       if (this.dirtyUI) {
         this.renderUI();

@@ -1,3 +1,4 @@
+import { StudioNetworkSession } from './network-session.js';
 import '../game.css';
 import './studio.css';
 import { StudioStore } from './store.js';
@@ -29,7 +30,7 @@ app.innerHTML = `
   <button id="insert-object">Insert</button><div class="toolbar-spacer"></div><button id="build-project">Build game</button><button id="play" class="primary"><span>Play</span><kbd>F5</kbd></button>
 </nav>
 <main id="dock-host"></main>
-<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.2</span></footer>
+<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.3</span></footer>
 <div id="play-host" hidden></div><div id="launch-host" hidden></div><div id="dialog-host"></div><input type="file" id="open-file" accept=".openengine,.json" hidden>
 `;
 const $ = (id) => document.getElementById(id);
@@ -256,10 +257,14 @@ function play() {
   try {
     $('play-host').hidden = false;
     viewport.active = false;
-    gameView = new GameView($('play-host'), store.project, {
-      onLog: (entry) => log(entry.level, entry.message),
-      onStop: stopPlay,
-    });
+    gameView = new (store.metadata.multiplayer ? StudioNetworkSession : GameView)(
+      $('play-host'),
+      store.project,
+      {
+        onLog: (entry) => log(entry.level, entry.message),
+        onStop: stopPlay,
+      },
+    );
     $('play').querySelector('span').textContent = 'Stop';
     status('Playing');
   } catch (error) {

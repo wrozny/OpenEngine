@@ -41,6 +41,7 @@ const citySource = Object.fromEntries(
 );
 citySource['LICENSE'] = new Uint8Array(await readFile('LICENSE'));
 citySource['MULTIPLAYER.md'] = new Uint8Array(await readFile('docs/MULTIPLAYER.md'));
+citySource['UI_EDITOR.md'] = new Uint8Array(await readFile('docs/UI_EDITOR.md'));
 citySource['API.md'] = new Uint8Array(await readFile('docs/API.md'));
 await writeFile('release/NeonBorough-source.zip', zipSync(citySource));
 console.log(

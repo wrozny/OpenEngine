@@ -427,3 +427,11 @@ ui:SetColor("badge", "#ffe4a1")
 ```
 
 `CreateWorldLabel(id, text, target, offset?)` follows an Object3D with a world-space Vector3 offset (default `(0, 2, 0)`). Labels use the rendered camera and smoothed replica pose. They hide behind solid geometry, behind/outside the camera, beyond 80 meters, or when their target is invisible, destroyed or outside Workspace. Text is plain text, not HTML. Reuse SetText, SetColor and Remove; normal screen anchors/SetPosition apply to screen widgets. Unchanged text/color updates do not rebuild the UI every frame.
+
+## Authored UI and collision transitions (0.5)
+
+UIService is a hierarchy service containing ScreenGui roots. Frame, TextLabel, TextButton, ImageLabel and TextInput are editable scene instances. They support `Instance.new`, `FindFirstChild`, `Clone`, `Destroy`, child Scripts/LocalScripts and serialization. `UDim2.new(xScale, xOffset, yScale, yOffset)` provides responsive Position/Size; AnchorPoint uses Vector2. UI elements expose OnClick, OnHoverStart, OnHoverEnd and OnValueChanged (text inputs). `element:Tween(goals, seconds, easing)` returns a cancellable tween with Playing and Completed(completed). `SetSiblingIndex(index)` and `GetSiblingIndex()` use one-based indices and control flow/stacking order.
+
+`OnCollisionStart` aliases `OnCollision`; `OnCollisionEnd` handles separation and body teardown. `object:GetTouchingObjects()` returns an instance array.
+
+See [Visual UI authoring](UI_EDITOR.md) for layout rules, properties, animation presets and full examples. Legacy CreateLabel/CreateButton/widget APIs remain available.

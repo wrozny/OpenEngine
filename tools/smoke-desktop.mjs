@@ -39,6 +39,16 @@ try {
   await page.locator('.example-card').filter({ hasText: 'Dead Signal' }).click();
   await expect(page.locator('#project-name')).toHaveText('Dead Signal');
   await page
+    .locator('.tree-name')
+    .filter({ hasText: /^UIService$/ })
+    .click();
+  await page
+    .locator('.ui-palette')
+    .getByRole('button', { name: 'TextButton', exact: true })
+    .click();
+  await page.getByLabel('Text', { exact: true }).fill('Native UI');
+  await page.getByLabel('Text', { exact: true }).press('Tab');
+  await page
     .locator('.tree-row')
     .filter({ has: page.locator('.tree-name', { hasText: /^Survival$/ }) })
     .click();
@@ -72,6 +82,7 @@ try {
   expect(recent.some((item) => item.path === savePath && item.exists)).toBe(true);
   await page.locator('#play').click();
   await expect(page.locator('.hud-health')).toContainText('100 / 100');
+  await expect(page.locator('.game-view [data-ui-class=TextButton]')).toHaveText('Native UI');
   await page.getByRole('button', { name: /Stop play/ }).click();
   await exportGame(page);
   await page.getByRole('button', { name: 'Close dialog' }).click();
@@ -103,6 +114,8 @@ try {
     gamePage.on('pageerror', (error) => errors.push(error.message));
     await expect(gamePage).toHaveTitle(title);
     await expect(gamePage.locator(selector)).toContainText(text);
+    if (prefix === 'NativeSmoke-')
+      await expect(gamePage.locator('[data-ui-class=TextButton]')).toHaveText('Native UI');
     expect(errors).toEqual([]);
     await game.close();
     game = null;

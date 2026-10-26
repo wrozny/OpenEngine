@@ -157,7 +157,18 @@ end
 remote.OnServerEvent:Connect(function(player, action, value, steer)
     local data = state[player.UserId]
     if not data then return end
-    if action == "shoot" then shoot(player, value)
+    if action == "heal" then
+        local actor = player.Character
+        if not actor or actor.Destroyed or data.respawnAt or data.car then return end
+        local health = actor:GetAttribute("Health") or 0
+        if health <= 0 or actor.Position:Distance(workspace.ClinicZone.Position) > 5 then return end
+        if health >= config.Health then notify(player, "You are already at full health."); return end
+        if data.swag < 25 then notify(player, "Clinic treatment costs 25 SWAG."); return end
+        data.swag = data.swag - 25
+        actor:SetAttribute("Swag", data.swag)
+        actor:SetAttribute("Health", config.Health)
+        notify(player, "Clinic treatment complete.")
+    elseif action == "shoot" then shoot(player, value)
     elseif action == "interact" then interact(player)
     elseif action == "drive" and data.car and type(value) == "number" and type(steer) == "number" then
         if math.abs(value) > 1 or math.abs(steer) > 1 then return end

@@ -130,3 +130,13 @@ large because they include Chromium; exported code/data remain inspectable.
 Character movement stays in a shared headless helper, with explicit GetGround/MoveCharacter APIs consumed by editable Lua defaults and server-side arcade actors. Footprint probes respect collision masks; low-step lifting checks the raised sweep and destination envelope. Cannon uses a reusable probe body with a separate Narrowphase for overlap tests, so queries never enter the simulation or generate gameplay contacts; Planck uses its shape-overlap query. Wedge vertices/faces are shared by rendering and convex physics. Exact legacy default sources are recorded for safe controller migration; custom source is not rewritten.
 
 RunService.PostSimulation is the transform-following boundary after contact dispatch. Car decorations/passengers and character appearance follow there. WorldLabels is a rendering-layer DOM helper: the headless UI service only stores text/target/offset data. It projects the renderer's camera and smoothed replica pose, then applies range/visibility/occlusion checks. Swag remains server state; client UI reads replicated character attributes. Vehicle and resident rules are separate private Lua modules under the city server script.
+
+## Authored UI
+
+UIService is also a SceneNode at the root, with a compatibility facade for the legacy HUD/widget methods. `ui-schema.js` defines public defaults and validation; `ui-types.js` defines immutable UDim2. ScreenGui and element data serialize in the same project/replication graph as other instances. Old two-service documents normalize to a stable third service without changing version 1.
+
+`src/ui/layout.js` is a pure shared layout function. `src/ui/renderer.js` incrementally reconciles native DOM controls for runtime and Studio; it preserves focus/caret and DOM identities while properties animate. Studio's `ui-editor.js` owns canvas gestures, selection overlays and device previews; `ui-inspector.js` derives property controls from the public schema. `templates.js` supplies an editable responsive dialog, also used by the clinic example. No UI framework or remote code dependency was added.
+
+Tweens live in the engine's fixed simulation step and are cancelled with their target/script. Native entrance/hover/click presets are presentation effects. Multiplayer reconciliation retains local UI property changes unless that property changes on the authority. RemoteEvents carry requests, never client-decided clinic rewards.
+
+`collision-events.js` aggregates fixture/body callbacks into instance-level transitions. Engine teardown synthesizes leaves; physics adapter body identities filter queued callbacks from removed/rebuilt bodies. Query probes remain outside this event stream.

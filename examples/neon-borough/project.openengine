@@ -8024,6 +8024,76 @@
           "name": "CityAction",
           "attributes": {},
           "children": []
+        },
+        {
+          "id": "city-227",
+          "className": "Object3D",
+          "name": "Clinic marker",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 4,
+            "Y": 0.12,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 11,
+            "Y": 0.3,
+            "Z": 24
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "city-228",
+          "className": "Object3D",
+          "name": "ClinicZone",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#c4c9d2",
+          "Size": {
+            "X": 6,
+            "Y": 4,
+            "Z": 6
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": false,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 11,
+            "Y": 2,
+            "Z": 24
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
         }
       ],
       "settings": {
@@ -8168,6 +8238,365 @@
           "children": [],
           "Enabled": true,
           "SourceFile": "scripts/Client.lua"
+        }
+      ]
+    },
+    {
+      "id": "ui-service",
+      "className": "UIService",
+      "name": "UIService",
+      "attributes": {},
+      "children": [
+        {
+          "id": "city-clinic-ui",
+          "className": "ScreenGui",
+          "name": "Clinic",
+          "attributes": {},
+          "children": [
+            {
+              "id": "city-ui-Clinic-Panel",
+              "className": "Frame",
+              "name": "Panel",
+              "attributes": {},
+              "children": [
+                {
+                  "id": "city-ui-Clinic-Panel-Title",
+                  "className": "TextLabel",
+                  "name": "Title",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 24,
+                    "YScale": 0,
+                    "YOffset": 24
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": 0,
+                    "YScale": 0,
+                    "YOffset": 36
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "PLAZA CLINIC",
+                  "TextColor": "#edf1fa",
+                  "TextSize": 26,
+                  "FontWeight": 700,
+                  "FontFamily": "System",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "city-ui-Clinic-Panel-Description",
+                  "className": "TextLabel",
+                  "name": "Description",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 24,
+                    "YScale": 0,
+                    "YOffset": 24
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": 0,
+                    "YScale": 0,
+                    "YOffset": 80
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 1,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "Restore your health for 25 SWAG. Walk away to close this panel.",
+                  "TextColor": "#edf1fa",
+                  "TextSize": 16,
+                  "FontWeight": 400,
+                  "FontFamily": "System",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Top",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "city-ui-Clinic-Panel-Actions",
+                  "className": "Frame",
+                  "name": "Actions",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "id": "city-ui-Clinic-Panel-Actions-Confirm",
+                      "className": "TextButton",
+                      "name": "Confirm",
+                      "attributes": {},
+                      "children": [],
+                      "Position": {
+                        "XScale": 0,
+                        "XOffset": 24,
+                        "YScale": 0,
+                        "YOffset": 24
+                      },
+                      "Size": {
+                        "XScale": 0.5,
+                        "XOffset": -6,
+                        "YScale": 1,
+                        "YOffset": 0
+                      },
+                      "AnchorPoint": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "Visible": true,
+                      "Opacity": 1,
+                      "BackgroundColor": "#4777c3",
+                      "BackgroundOpacity": 1,
+                      "BorderColor": "#49546a",
+                      "BorderWidth": 0,
+                      "CornerRadius": 8,
+                      "ZIndex": 0,
+                      "ClipChildren": false,
+                      "MinSize": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "MaxSize": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "AspectRatio": 0,
+                      "FlexGrow": 0,
+                      "Interactable": true,
+                      "Disabled": false,
+                      "EnterEffect": "None",
+                      "HoverEffect": "Glow",
+                      "ClickEffect": "Press",
+                      "Text": "Heal · 25 SWAG",
+                      "TextColor": "#edf1fa",
+                      "TextSize": 16,
+                      "FontWeight": 600,
+                      "FontFamily": "System",
+                      "TextAlign": "Center",
+                      "TextVAlign": "Center",
+                      "TextWrapped": true
+                    },
+                    {
+                      "id": "city-ui-Clinic-Panel-Actions-Close",
+                      "className": "TextButton",
+                      "name": "Close",
+                      "attributes": {},
+                      "children": [],
+                      "Position": {
+                        "XScale": 0,
+                        "XOffset": 24,
+                        "YScale": 0,
+                        "YOffset": 24
+                      },
+                      "Size": {
+                        "XScale": 0.5,
+                        "XOffset": -6,
+                        "YScale": 1,
+                        "YOffset": 0
+                      },
+                      "AnchorPoint": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "Visible": true,
+                      "Opacity": 1,
+                      "BackgroundColor": "#39455a",
+                      "BackgroundOpacity": 1,
+                      "BorderColor": "#49546a",
+                      "BorderWidth": 0,
+                      "CornerRadius": 8,
+                      "ZIndex": 0,
+                      "ClipChildren": false,
+                      "MinSize": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "MaxSize": {
+                        "X": 0,
+                        "Y": 0
+                      },
+                      "AspectRatio": 0,
+                      "FlexGrow": 0,
+                      "Interactable": true,
+                      "Disabled": false,
+                      "EnterEffect": "None",
+                      "HoverEffect": "Grow",
+                      "ClickEffect": "Press",
+                      "Text": "Close",
+                      "TextColor": "#edf1fa",
+                      "TextSize": 16,
+                      "FontWeight": 600,
+                      "FontFamily": "System",
+                      "TextAlign": "Center",
+                      "TextVAlign": "Center",
+                      "TextWrapped": true
+                    }
+                  ],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 24,
+                    "YScale": 0,
+                    "YOffset": 24
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": 0,
+                    "YScale": 0,
+                    "YOffset": 44
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 8,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Layout": "Row",
+                  "Padding": 0,
+                  "Gap": 12,
+                  "Align": "Start",
+                  "Justify": "Start",
+                  "Wrap": false
+                }
+              ],
+              "Position": {
+                "XScale": 0.5,
+                "XOffset": 0,
+                "YScale": 0.5,
+                "YOffset": 0
+              },
+              "Size": {
+                "XScale": 1,
+                "XOffset": -48,
+                "YScale": 0,
+                "YOffset": 300
+              },
+              "AnchorPoint": {
+                "X": 0.5,
+                "Y": 0.5
+              },
+              "Visible": true,
+              "Opacity": 1,
+              "BackgroundColor": "#202b3c",
+              "BackgroundOpacity": 1,
+              "BorderColor": "#49546a",
+              "BorderWidth": 1,
+              "CornerRadius": 8,
+              "ZIndex": 0,
+              "ClipChildren": false,
+              "MinSize": {
+                "X": 0,
+                "Y": 0
+              },
+              "MaxSize": {
+                "X": 520,
+                "Y": 0
+              },
+              "AspectRatio": 0,
+              "FlexGrow": 0,
+              "Interactable": false,
+              "Disabled": false,
+              "EnterEffect": "Pop",
+              "HoverEffect": "None",
+              "ClickEffect": "None",
+              "Layout": "Column",
+              "Padding": 24,
+              "Gap": 12,
+              "Align": "Start",
+              "Justify": "Start",
+              "Wrap": false
+            },
+            {
+              "id": "city-clinic-script",
+              "className": "LocalScript",
+              "name": "Clinic UI",
+              "attributes": {},
+              "children": [],
+              "Enabled": true,
+              "SourceFile": "scripts/Clinic.lua"
+            }
+          ],
+          "Enabled": false,
+          "DesignWidth": 1280,
+          "DesignHeight": 720,
+          "ScaleMode": "Responsive",
+          "DisplayOrder": 0,
+          "SafeArea": true
         }
       ]
     }

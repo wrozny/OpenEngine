@@ -173,3 +173,7 @@ Multiplayer web builds contain a web client and a self-contained Node.js host: e
 Default 3D and 2D platformer controllers now climb walkable ramps and low steps. StepHeight and MaxSlopeAngle are editable, and Wedge is available as an Object3D shape. Ground, ceiling, diagonal-corner and destination checks keep characters from climbing through obstacles. Untouched old default controller scripts migrate automatically; custom Lua is preserved.
 
 Neon Borough has lower curbs, improved car handling, and server-controlled swag: residents award 10, players 50. Swag appears above player heads and survives respawns within a connection. Cars can cross pathways, fast impacts earn takedowns, and pedestrians recover when lost. The release includes ready-to-run game builds and **NeonBorough-source.zip**. See the [new traversal and world-label APIs](docs/API.md#traversal-and-wedges-04).
+
+### Visual UI editor
+
+Select **UIService** in Explorer to open the **UI** tab. Drag frames, labels, buttons, images and text inputs onto a ScreenGui; move/resize with handles, edit properties and preview Desktop/Tablet/Phone layouts. A responsive dialog preset gets you started. UI supports percentage-plus-pixel sizing, anchors, constraints, flow layouts, Lua click/hover/input events and animation presets/tweens. Neon Borough includes a proximity clinic example. See [UI editor documentation](docs/UI_EDITOR.md).

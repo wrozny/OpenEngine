@@ -1,3 +1,4 @@
+import { createDialog } from '../src/ui/templates.js';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { SceneNode, serializeNode } from '../src/engine/scene.js';
 import { Vector3 } from '../src/engine/math.js';
@@ -174,6 +175,23 @@ for (const name of ['Vehicles', 'Residents']) {
   module.SourceFile = 'scripts/' + name + '.lua';
   module.Parent = scripts.FindFirstChild('City Server');
 }
+const uiService = new SceneNode('UIService', 'UIService', 'ui-service');
+const screen = createDialog('Clinic');
+screen.Id = 'city-clinic-ui';
+for (const node of screen.GetDescendants())
+  node.Id = 'city-ui-' + node.GetFullName().replaceAll('.', '-');
+screen.Enabled = false;
+screen.Parent = uiService;
+const panel = screen.FindFirstChild('Panel');
+panel.FindFirstChild('Title').Text = 'PLAZA CLINIC';
+panel.FindFirstChild('Description').Text =
+  'Restore your health for 25 SWAG. Walk away to close this panel.';
+panel.FindFirstChild('Actions').FindFirstChild('Confirm').Text = 'Heal · 25 SWAG';
+const clinicScript = new SceneNode('LocalScript', 'Clinic UI', 'city-clinic-script');
+clinicScript.SourceFile = 'scripts/Clinic.lua';
+clinicScript.Parent = screen;
+object('Clinic marker', [11, 0.3, 24], [4, 0.12, 4], { Color: '#86dacf', Sensor: true });
+object('ClinicZone', [11, 2, 24], [6, 4, 6], { Sensor: true, Visible: false });
 const project = {
   format: 'openengine',
   version: 1,
@@ -183,11 +201,10 @@ const project = {
   description:
     'An original online city sandbox. Meet at the plaza, explore streets, drive coupes, and try server-validated arcade combat.',
   controls: 'WASD move · Space jump · Right drag look · Left click shoot · E enter / exit car',
-  services: [workspace, scripts].map(serializeNode),
+  services: [workspace, scripts, uiService].map(serializeNode),
 };
 const sourceFiles = new Map(
-  scripts
-    .GetDescendants()
+  [...scripts.GetDescendants(), ...uiService.GetDescendants()]
     .filter((node) => node.SourceFile)
     .map((node) => [node.Id, node.SourceFile]),
 );

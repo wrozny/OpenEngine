@@ -6,6 +6,7 @@ import { Vector2, Vector3, math } from './math.js';
 import { LuaRuntime } from './lua.js';
 import { InputService } from './input.js';
 import { AudioService } from './audio.js';
+import { PlayersService } from '../network/players.js';
 
 export class UIService {
   constructor() {
@@ -102,6 +103,9 @@ export class Engine {
   constructor(project, options = {}) {
     validateProject(project);
     this.project = structuredClone(project);
+    this.role = options.role || 'standalone';
+    this.network = options.network || null;
+    this.players = new PlayersService((error) => this.log('error', error.message));
     this.logs = [];
     this.onLog = options.onLog || (() => {});
     this.dimension = project.dimension || '2D';
@@ -124,6 +128,7 @@ export class Engine {
     this.camera = {
       Position: this.dimension === '3D' ? new Vector3(0, 4, 10) : new Vector2(),
       Zoom: 1,
+      Offset: this.dimension === '3D' ? new Vector3(0, 1, 0) : new Vector2(),
       Follow: null,
       Yaw: 0,
       Pitch: -0.2,
@@ -138,6 +143,8 @@ export class Engine {
       Heartbeat: new Signal((error) => this.log('error', error.message)),
       Time: 0,
       DeltaTime: this.stepSize,
+      IsServer: () => this.role !== 'client',
+      IsClient: () => this.role !== 'server',
     };
     this.assets = {
       Has: (name) => typeof project.assets?.[name]?.data === 'string',
@@ -148,6 +155,7 @@ export class Engine {
       },
     };
     this.services = {
+      Players: this.players,
       AssetService: this.assets,
       Workspace: this.workspace,
       ScriptService: this.scriptService,
@@ -196,7 +204,14 @@ export class Engine {
         node.OnFallen.onError =
           (error) => this.log('error', error.message);
 
-      if (this.running && isRunnableScript(node) && node.Enabled) this.lua.run(node);
+      if (node.ClassName === 'RemoteEvent') {
+        node.OnServerEvent.onError = node.OnClientEvent.onError = (error) =>
+          this.log('error', error.message);
+      }
+      if (this.running && this.shouldRun(node) && node.Enabled) {
+        this.lua.run(node);
+        this.network?.runningScripts?.add(node.Id);
+      }
     }
     if (this.isPhysical(node)) {
       if (this.isInWorkspace(node) && !node._body) this.createBody(node);
@@ -208,15 +223,37 @@ export class Engine {
     for (const child of node.GetChildren()) this.attach(child);
   }
   detach(node) {
-    if (isRunnableScript(node)) this.lua?.stopScript(node);
+    if (isRunnableScript(node)) {
+      this.lua?.stopScript(node);
+      this.network?.runningScripts?.delete(node.Id);
+    }
     for (const child of node.GetChildren()) this.detach(child);
     if (node._body) this.physicsWorld.remove(node);
     node._body = null;
     node._engine = null;
     this.nodes.delete(node);
   }
+  shouldRun(node) {
+    if (!isRunnableScript(node)) return false;
+    if (this.role === 'standalone') return node.ClassName !== 'LocalScript';
+    if (this.role === 'server')
+      return node.ClassName !== 'LocalScript' && !node.ClassName.startsWith('PlayerController');
+    if (node.ClassName === 'LocalScript') {
+      for (let parent = node.Parent; parent; parent = parent.Parent)
+        if (this.isPhysical(parent) && parent._networkOwnerSet)
+          return parent._networkOwner === this.players.LocalPlayer?.UserId;
+      return true;
+    }
+    if (node.ClassName.startsWith('PlayerController'))
+      return node.Parent?._networkOwner === this.players.LocalPlayer?.UserId;
+    return false;
+  }
   createBody(node) {
+    const anchored = node.Anchored;
+    if (this.role === 'client' && node._networkOwner !== this.players.LocalPlayer?.UserId)
+      node.Anchored = true;
     this.physicsWorld.create(node);
+    node.Anchored = anchored;
   }
   rebuildBody(node) {
     this.physicsWorld.remove(node);
@@ -230,7 +267,7 @@ export class Engine {
     this.running = true;
     this.lua = new LuaRuntime(this);
     // Snapshot: scripts spawned during startup are started by attach, not twice here.
-    const scripts = [...this.nodes].filter((node) => isRunnableScript(node) && node.Enabled);
+    const scripts = [...this.nodes].filter((node) => this.shouldRun(node) && node.Enabled);
     for (const script of scripts) if (!script.Destroyed) this.lua.run(script);
   }
   update(elapsed) {
@@ -261,15 +298,18 @@ export class Engine {
     if (this.camera.Follow && !this.camera.Follow.Destroyed)
       this.camera.Position =
         this.dimension === '3D'
-          ? this.camera.Follow.Position.Add(new Vector3(0, 1, 0))
+          ? this.camera.Follow.Position.Add(this.camera.Offset)
           : this.camera.Follow.Position;
   }
   dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
     this.running = false;
     this.lua?.dispose();
     this.runService.Heartbeat.Clear();
     this.input.dispose();
     this.audio.dispose();
+    this.players.dispose();
     this.ui.OnAction.Clear();
     this.ui.Changed.Clear();
     for (const child of this.root.GetChildren()) child.Destroy();

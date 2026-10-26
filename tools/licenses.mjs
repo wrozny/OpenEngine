@@ -1,5 +1,6 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 const packages = [
+  'ws',
   'fengari',
   'fengari-interop',
   'planck',

@@ -8,6 +8,7 @@ const { lua, lauxlib, lualib, to_luastring, to_jsstring } = fengari;
 const BOOTSTRAP = `
 local host = __host
 __host = nil
+typeof = function(value) return host:TypeOf(value) end
 Vector2 = { new = function(x, y) return host:Vector(x or 0, y or 0) end }
 Vector3 = { new = function(x, y, z) return host:Vector3(x or 0, y or 0, z or 0) end }
 Instance = { new = function(className, parent) return host:Create(className, parent) end }
@@ -56,6 +57,16 @@ export class LuaRuntime {
     lauxlib.luaL_requiref(this.state, to_luastring('js'), interop.luaopen_js, 0);
     lua.lua_pop(this.state, 1);
     this.setGlobal('__host', {
+      TypeOf: (value) => {
+        value = this.unwrap(value);
+        return value instanceof Vector3
+          ? 'Vector3'
+          : value instanceof Vector2
+            ? 'Vector2'
+            : value instanceof SceneNode
+              ? 'Instance'
+              : typeof value;
+      },
       Vector: (x, y) => new Vector2(x, y),
       Vector3: (x, y, z) => new Vector3(x, y, z),
       Create: (className, parent) => {
@@ -96,7 +107,8 @@ export class LuaRuntime {
     return value;
   }
   wrap(value) {
-    if (value == null || typeof value !== 'object') return value;
+    if (value == null) return undefined;
+    if (typeof value !== 'object') return value;
     if (this.proxies.has(value)) return this.proxies.get(value);
     const runtime = this;
     const proxy = new Proxy(value, {
@@ -144,6 +156,11 @@ export class LuaRuntime {
             target.SetAttribute(args[0], runtime.attributeValue(args[1]));
             return;
           }
+          if (
+            target instanceof SceneNode &&
+            ['FireServer', 'FireClient', 'FireAllClients'].includes(key)
+          )
+            args = args.map((arg) => runtime.attributeValue(arg));
           return runtime.wrap(
             result.apply(
               target,
@@ -180,7 +197,7 @@ export class LuaRuntime {
           target._engine?.running
         ) {
           runtime.stopScript(target);
-          if (target.Enabled) runtime.run(target);
+          if (target.Enabled && runtime.engine.shouldRun(target)) runtime.run(target);
         }
         if (
           target._body &&

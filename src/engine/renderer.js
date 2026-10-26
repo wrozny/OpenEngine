@@ -66,7 +66,8 @@ export class Renderer {
       .filter((n) => n.ClassName === 'Object2D' && n.Visible && !n.Destroyed)
       .sort((a, b) => a.Layer - b.Layer);
     for (const node of objects) {
-      const { X: x, Y: y } = node.Position;
+      const pose = options.transform?.(node) || node;
+      const { X: x, Y: y } = pose.Position;
       if (
         x + node.Size.X < topLeft.X ||
         x - node.Size.X > bottomRight.X ||
@@ -76,7 +77,7 @@ export class Renderer {
         continue;
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(node.Rotation || 0);
+      ctx.rotate(pose.Rotation || 0);
       ctx.fillStyle = node.Color;
       ctx.shadowColor = '#0007';
       ctx.shadowBlur = 12;

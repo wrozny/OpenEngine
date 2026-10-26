@@ -15,6 +15,9 @@ export const CLASSES = [
   'Object2D',
   'Object3D',
   'Script',
+  'ServerScript',
+  'LocalScript',
+  'RemoteEvent',
   'ModuleScript',
   'PlayerController2D',
   'PlayerController3D',
@@ -84,6 +87,13 @@ export class SceneNode {
     this.OnCollision = new Signal();
     this.OnCollisionEnd = new Signal();
     this.OnFallen = new Signal();
+    this._networkOwner = null;
+    this._networkOwnerSet = false;
+    this._networkEpoch = 0;
+    if (className === 'RemoteEvent') {
+      this.OnServerEvent = new Signal();
+      this.OnClientEvent = new Signal();
+    }
     if (isObject(this)) Object.assign(this, structuredClone(objectDefaults(this)));
     if (className === 'Folder' && name === 'Workspace') Object.assign(this, WORKSPACE_DEFAULTS);
     if (isScriptNode(this)) {
@@ -126,6 +136,7 @@ export class SceneNode {
   }
   set Position(value) {
     this._position = this.vector(value);
+    if (this._engine?.role === 'server' && !this._engine._applyingPhysics) this._networkEpoch++;
     this._engine?.physicsWorld.setPosition(this, this._position);
   }
   get Velocity() {
@@ -145,6 +156,33 @@ export class SceneNode {
       this._rotation = value;
     }
     this._engine?.physicsWorld.setRotation(this);
+  }
+  SetNetworkOwner(player) {
+    if (!this._engine?.network || this._engine.role !== 'server')
+      throw new Error('SetNetworkOwner is a multiplayer server operation');
+    if (!isObject(this) || this.Anchored) throw new Error('Only unanchored objects can be owned');
+    if (player && !this._engine.players.GetPlayers().includes(player))
+      throw new Error('Unknown player');
+    this._networkOwnerSet = true;
+    this._networkOwner = player?.UserId || null;
+    this._engine.network.sendSnapshot();
+  }
+  GetNetworkOwner() {
+    return this._engine?.players.GetPlayerByUserId(this._networkOwner) || null;
+  }
+  FireServer(...args) {
+    this.remote('server', null, args);
+  }
+  FireClient(player, ...args) {
+    this.remote('client', player, args);
+  }
+  FireAllClients(...args) {
+    this.remote('all', null, args);
+  }
+  remote(direction, player, args) {
+    if (this.ClassName !== 'RemoteEvent' || !this._engine?.network)
+      throw new Error('RemoteEvent requires a multiplayer session');
+    this._engine.network.remote(this, direction, player, args);
   }
   GetChildren() {
     return [...this._children];
@@ -173,6 +211,8 @@ export class SceneNode {
   SetAttribute(name, value) {
     if (typeof name !== 'string' || !name)
       throw new Error('Attribute name must be a nonempty string');
+    if (value !== undefined && this._engine?.role === 'server' && this._engine.network)
+      encodeAttribute(value);
     if (value === undefined) delete this._attributes[name];
     else this._attributes[name] = value;
   }
@@ -193,6 +233,8 @@ export class SceneNode {
     this.OnCollision.Clear();
     this.OnCollisionEnd.Clear();
     this.OnFallen.Clear();
+    this.OnServerEvent?.Clear();
+    this.OnClientEvent?.Clear();
   }
 }
 export function serializeNode(node) {
@@ -250,6 +292,8 @@ export function validateProject(project) {
   if (!project.name || typeof project.name !== 'string') throw new Error('Project needs a name');
   if (!['2D', '3D'].includes(project.dimension || '2D'))
     throw new Error('Project dimension must be 2D or 3D');
+  if (project.multiplayer !== undefined && typeof project.multiplayer !== 'boolean')
+    throw new Error('Multiplayer must be enabled or disabled');
   if (project.assets !== undefined) {
     if (!project.assets || Array.isArray(project.assets) || typeof project.assets !== 'object')
       throw new Error('Invalid asset collection');

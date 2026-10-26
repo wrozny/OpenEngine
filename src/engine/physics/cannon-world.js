@@ -13,9 +13,11 @@ export class CannonWorld {
       ['beginContact', 'begin-contact'],
       ['endContact', 'end-contact'],
     ])
-      this.world.addEventListener(event, ({ bodyA, bodyB }) =>
-        onContact({ a: bodyA.userData, b: bodyB.userData, event: name }),
-      );
+      this.world.addEventListener(event, ({ bodyA, bodyB }) => {
+        // Cannon can retire an overlap after one body has already been removed.
+        if (bodyA?.userData && bodyB?.userData)
+          onContact({ a: bodyA.userData, b: bodyB.userData, event: name });
+      });
   }
   setGravity(v) {
     this.world.gravity.copy(vector(v));

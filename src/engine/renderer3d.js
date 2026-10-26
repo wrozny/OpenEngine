@@ -21,7 +21,7 @@ export class Renderer3D {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio || 1, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.scene = new THREE.Scene();
     this.viewCamera = new THREE.PerspectiveCamera(60, 1, 0.1, 2000);
@@ -81,7 +81,7 @@ export class Renderer3D {
     if (node.Shape === 'Cylinder') return new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
     return new THREE.BoxGeometry(1, 1, 1);
   }
-  draw(nodes, { workspace, selected = [], grid = false } = {}) {
+  draw(nodes, { workspace, selected = [], grid = false, transform = (node) => node } = {}) {
     this.resize();
     const sky = workspace?.Skybox ?? 'builtin:sky';
     const skyKey = sky + '|' + workspace?.BackgroundColor;
@@ -111,12 +111,7 @@ export class Renderer3D {
       if (entry?.key !== key) {
         if (entry) this.removeMesh(node.Id);
         const source = this.resolve(node.Texture) || MATERIALS[node.Material] || '';
-        const base = this.texture(source),
-          map = base?.clone();
-        if (map) {
-          map.needsUpdate = true;
-          map.repeat.set(1, 1);
-        }
+        const map = this.texture(source);
         const material = new THREE.MeshStandardMaterial({
           color: node.Color,
           map,
@@ -133,8 +128,9 @@ export class Renderer3D {
       const mesh = entry.mesh;
       mesh.userData.node = node;
       mesh.visible = node.Visible;
-      mesh.position.set(node.Position.X, node.Position.Y, node.Position.Z);
-      mesh.rotation.set(node.Rotation.X, node.Rotation.Y, node.Rotation.Z, 'YZX');
+      const pose = transform(node);
+      mesh.position.set(pose.Position.X, pose.Position.Y, pose.Position.Z);
+      mesh.rotation.set(pose.Rotation.X, pose.Rotation.Y, pose.Rotation.Z, 'YZX');
       mesh.scale.set(node.Size.X, node.Size.Y, node.Size.Z);
     }
     for (const id of this.meshes.keys()) if (!active.has(id)) this.removeMesh(id);
@@ -230,7 +226,6 @@ export class Renderer3D {
     if (!entry) return;
     this.scene.remove(entry.mesh);
     entry.mesh.geometry.dispose();
-    entry.mesh.material.map?.dispose();
     entry.mesh.material.dispose();
     this.meshes.delete(id);
   }

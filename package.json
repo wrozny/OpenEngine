@@ -1,25 +1,27 @@
 {
   "name": "openengine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Lua game engine and dockable Studio for 2D and 3D projects.",
   "main": "desktop/main.cjs",
   "scripts": {
     "dev": "vite",
-    "build": "node tools/build-runtime.mjs && vite build",
+    "build": "node tools/build-server.mjs && node tools/build-runtime.mjs && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "studio": "node tools/install-electron.mjs && npm run build && electron .",
     "test": "node --test tests/*.test.js",
     "test:browser": "playwright test",
     "package:game": "node tools/package.mjs game",
     "package:studio": "node tools/package.mjs studio",
-    "predev": "node tools/build-runtime.mjs",
+    "predev": "node tools/build-server.mjs && node tools/build-runtime.mjs",
     "desktop:prepare": "node tools/install-electron.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:production": "npm run build && node tools/smoke-production.mjs",
     "test:desktop": "node tools/smoke-desktop.mjs",
     "package:source": "node tools/package-source.mjs",
-    "package:examples": "node tools/package-examples.mjs"
+    "package:examples": "node tools/package-examples.mjs",
+    "build:server": "node tools/build-server.mjs",
+    "test:multiplayer": "npm run build && node tools/smoke-network.mjs"
   },
   "repository": {
     "type": "git",
@@ -42,17 +44,22 @@
     "lucide": "1.61.0",
     "monaco-editor": "0.57.0",
     "planck": "1.5.1",
-    "three": "0.186.1"
+    "three": "0.186.1",
+    "ws": "8.22.0"
   },
   "devDependencies": {
     "@electron/get": "5.1.0",
     "@electron/packager": "20.3.0",
     "@playwright/test": "1.64.1",
     "electron": "45.0.0",
+    "esbuild": "0.28.2",
     "prettier": "3.9.10",
     "vite": "8.3.5"
   },
   "engines": {
     "node": ">=24.0.0"
+  },
+  "overrides": {
+    "dompurify": "3.4.17"
   }
 }

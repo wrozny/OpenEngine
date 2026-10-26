@@ -7,3 +7,5 @@ test-results/
 *.log
 public/runtime-template.html
 .cache/
+
+public/network/

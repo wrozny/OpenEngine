@@ -239,6 +239,33 @@ export class StudioStore {
     });
     this.selectMany(clones.map((item) => item.clone));
   }
+  saveTemplate() {
+    const node = this.selected;
+    if (!this.canRemove(node)) throw new Error('Select a scene object first');
+    this.transact(() => {
+      const templates = (this.metadata.editorTemplates ||= []);
+      let name = node.Name,
+        index = 2;
+      while (templates.some((t) => t.name === name)) name = node.Name + ' ' + index++;
+      templates.push({ name, data: serializeNode(node) });
+    });
+  }
+  insertTemplate(name) {
+    const entry = this.metadata.editorTemplates?.find((t) => t.name === name);
+    if (!entry) throw new Error('Missing template');
+    const node = deserializeNode(entry.data, false);
+    let parent = this.selected;
+    if (node.ClassName === 'ScreenGui') parent = this.uiService;
+    else if (isUIElement(node)) {
+      while (parent && !['Frame', 'ScreenGui'].includes(parent.ClassName)) parent = parent.Parent;
+      if (!parent) throw new Error('Select a ScreenGui or Frame');
+    } else if (!parent || isScriptNode(parent) || isUINode(parent) || parent === this.uiService)
+      parent = this.workspace;
+    this.transact(() => (node.Parent = parent));
+    this.expanded.add(parent.Id);
+    this.select(node);
+    return node;
+  }
   rename(node, name) {
     if (!this.canRemove(node)) return;
     if (!name.trim()) throw new Error('Name cannot be empty');

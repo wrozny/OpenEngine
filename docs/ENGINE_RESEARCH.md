@@ -21,3 +21,9 @@ This is a working comparison, not a claim that OpenEngine matches mature engines
 Deep feature sets can obscure basic authoring operations. Keep search, undo, keyboard shortcuts and clear property descriptions available before adding more panels. Reusable-content systems need transparent override rules; networking helpers need visible authority and measurable limits. Automatic behavior that hides those rules can make debugging harder.
 
 This comparison identifies workflow patterns and gaps in OpenEngine, rather than asserting that another engine lacks a feature. Revisit priorities with actual project feedback and accessible primary documentation.
+
+## Project-local reusable templates
+
+Explorer's **Save as reusable template** captures the selected subtree into the project document. **Library** lists it as `Template: name`; click or drag to instantiate a fresh independent copy. Scripts, component tuning, UI and serializable attributes are preserved, with fresh instance IDs. Save/reopen retains the collection. Template editor metadata is stripped from multiplayer client documents so private script content is not exposed through this catalog.
+
+These are deliberately independent copies, not linked prefabs: changes to a source template do not update previous instances. Linked updates/overrides remain future work. UI elements require a selected Frame/ScreenGui as insertion parent.

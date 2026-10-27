@@ -45,3 +45,22 @@ test('Lua diagnostics compile without executing and completion context includes 
   assert.ok(context.methods.IsKeyDown);
   assert.ok(completionContext('workspace', '', script, store.workspace).methods.Raycast);
 });
+
+test('project-local reusable templates create isolated copies and survive document history', () => {
+  const store = new StudioStore(createProject('Templates'));
+  const original = store.add('Object2D');
+  original.Name = 'Crate';
+  original.SetAttribute('Health', 50);
+  store.saveTemplate();
+  store.select(store.workspace);
+  const copy = store.insertTemplate('Crate');
+  assert.notEqual(copy.Id, original.Id);
+  assert.equal(copy.GetAttribute('Health'), 50);
+  copy.SetAttribute('Health', 1);
+  assert.equal(original.GetAttribute('Health'), 50);
+  const saved = store.project;
+  const reopened = new StudioStore(saved);
+  assert.equal(reopened.metadata.editorTemplates.length, 1);
+  reopened.select(reopened.workspace);
+  assert.equal(reopened.insertTemplate('Crate').Name, 'Crate');
+});

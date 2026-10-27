@@ -74,6 +74,11 @@ export function sceneMenu(store, { frame, insert, onError, rename }, position) {
       disabled: !store.canRemove(store.selected),
       action: () => rename?.(),
     },
+    {
+      label: 'Save as reusable template',
+      disabled: !store.canRemove(store.selected),
+      action: safe(() => store.saveTemplate()),
+    },
     ...[
       object,
       store.dimension === '3D' ? 'Car3D' : 'Car2D',

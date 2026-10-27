@@ -45,7 +45,11 @@ export class InsertLibrary {
     ];
     const render = () => {
       list.replaceChildren();
-      for (const name of this.items.filter((n) =>
+      const entries = [
+        ...this.items,
+        ...(store.metadata.editorTemplates || []).map((t) => 'Template: ' + t.name),
+      ];
+      for (const name of entries.filter((n) =>
         n.toLowerCase().includes(search.value.toLowerCase()),
       )) {
         const b = el('button', 'library-item', name);
@@ -60,6 +64,7 @@ export class InsertLibrary {
         list.append(b);
       }
     };
+    this.render = render;
     search.oninput = render;
     render();
     this.abort = new AbortController();
@@ -74,7 +79,7 @@ export class InsertLibrary {
       'drop',
       (e) => {
         const name = e.dataTransfer.getData('text/openengine-insert');
-        if (!this.items.includes(name)) return;
+        if (!this.items.includes(name) && !name.startsWith('Template: ')) return;
         e.preventDefault();
         const row = e.target.closest('.tree-row');
         if (row) {
@@ -89,7 +94,8 @@ export class InsertLibrary {
   }
   insert(name) {
     try {
-      if (snippets[name]) {
+      if (name.startsWith('Template: ')) this.store.insertTemplate(name.slice(10));
+      else if (snippets[name]) {
         const node = this.store.add(this.store.metadata.multiplayer ? 'LocalScript' : 'Script');
         this.store.transact(() => {
           node.Name = name;
@@ -101,6 +107,7 @@ export class InsertLibrary {
     }
   }
   show() {
+    this.render();
     this.host.show();
     this.host.querySelector('input').focus();
   }

@@ -4,7 +4,8 @@ import { SceneNode } from '../engine/scene.js';
 import { el } from './dom.js';
 const choices = {
   ScaleMode: ['Responsive', 'Fit'],
-  Layout: ['Absolute', 'Row', 'Column'],
+  Layout: ['Absolute', 'Row', 'Column', 'Grid'],
+  Direction: ['Row', 'Column'],
   Align: ['Start', 'Center', 'End', 'Stretch'],
   Justify: ['Start', 'Center', 'End', 'SpaceBetween'],
   TextAlign: ['Left', 'Center', 'Right'],
@@ -53,7 +54,7 @@ export function renderUIInspector(container, store, node, { section, field }) {
         choices[key],
       );
   }
-  if (node.ClassName === 'ScreenGui') return;
+  if (node.ClassName === 'ScreenGui' || node.ClassName.startsWith('UI')) return;
   section('Events');
   container.append(
     el(

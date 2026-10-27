@@ -1,6 +1,6 @@
 export const UI_ELEMENTS = ['Frame', 'TextLabel', 'TextButton', 'ImageLabel', 'TextInput'];
 export const isUIElement = (node) => UI_ELEMENTS.includes(node?.ClassName);
-export const isUINode = (node) => isUIElement(node) || node?.ClassName === 'ScreenGui';
+export const isUINode = (node) => !!UI_DEFAULTS[node?.ClassName];
 const dimension = (xScale, xOffset, yScale, yOffset) => ({
   XScale: xScale,
   XOffset: xOffset,
@@ -41,6 +41,17 @@ const text = {
   TextWrapped: true,
 };
 export const UI_DEFAULTS = {
+  UIListLayout: {
+    Direction: 'Column',
+    Padding: 12,
+    Gap: 12,
+    Align: 'Start',
+    Justify: 'Start',
+    Wrap: false,
+  },
+  UIGridLayout: { Columns: 0, CellWidth: 160, CellHeight: 44, Padding: 12, Gap: 12 },
+  UICorner: { Radius: 12 },
+  UIPadding: { Padding: 16 },
   ScreenGui: {
     Enabled: true,
     DesignWidth: 1280,
@@ -123,6 +134,10 @@ export function validateUIData(data) {
     'FlexGrow',
     'AspectRatio',
     'MaxLength',
+    'Columns',
+    'CellWidth',
+    'CellHeight',
+    'Radius',
   ])
     if (data[key] !== undefined && data[key] < 0) throw new Error(key + ' must be nonnegative');
   for (const key of ['DesignWidth', 'DesignHeight'])
@@ -133,7 +148,8 @@ export function validateUIData(data) {
       throw new Error('UI constraints must be nonnegative');
   const enums = {
     ScaleMode: ['Responsive', 'Fit'],
-    Layout: ['Absolute', 'Row', 'Column'],
+    Layout: ['Absolute', 'Row', 'Column', 'Grid'],
+    Direction: ['Row', 'Column'],
     Align: ['Start', 'Center', 'End', 'Stretch'],
     Justify: ['Start', 'Center', 'End', 'SpaceBetween'],
     TextAlign: ['Left', 'Center', 'Right'],

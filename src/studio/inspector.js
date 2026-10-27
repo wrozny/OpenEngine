@@ -1,3 +1,4 @@
+import { CAR_DEFAULTS } from '../engine/vehicles.js';
 import { validateProject } from '../engine/scene.js';
 import { renderUIInspector } from './ui-inspector.js';
 import { el } from './dom.js';
@@ -10,6 +11,7 @@ import { renderAttributes } from './attribute-inspector.js';
 
 export function renderInspector(container, store, onError) {
   const scroll = container.scrollTop;
+  const searchText = container.dataset.search || '';
   container.replaceChildren();
   const node = store.selected;
   if (!node) {
@@ -31,6 +33,38 @@ export function renderInspector(container, store, onError) {
     ),
   );
   container.append(header);
+  const search = el('input', 'property-search');
+  search.placeholder = 'Search properties…';
+  search.setAttribute('aria-label', 'Search properties');
+  search.value = searchText;
+  container.append(search);
+  const filter = () => {
+    const query = search.value.toLowerCase().trim();
+    container.dataset.search = search.value;
+    let visible = 0;
+    for (const row of container.querySelectorAll('.property-row')) {
+      row.hidden = !row.textContent.toLowerCase().includes(query);
+      if (!row.hidden) visible++;
+    }
+    for (const heading of container.querySelectorAll('.property-section')) {
+      let next = heading.nextElementSibling,
+        found = false;
+      while (next && !next.classList.contains('property-section')) {
+        if (next.classList.contains('property-row') && !next.hidden) found = true;
+        next = next.nextElementSibling;
+      }
+      heading.hidden = !!query && !found;
+    }
+    container.dataset.matches = String(visible);
+  };
+  search.oninput = filter;
+  search.onkeydown = (e) => {
+    if (e.key === 'Escape') {
+      search.value = '';
+      filter();
+    }
+  };
+
   function section(name) {
     container.append(el('h3', 'property-section', name));
   }
@@ -220,6 +254,11 @@ export function renderInspector(container, store, onError) {
           : undefined,
       );
   }
+  if (CAR_DEFAULTS[node.ClassName]) {
+    section('Vehicle');
+    set('Enabled', 'checkbox');
+    for (const key of Object.keys(CAR_DEFAULTS[node.ClassName])) set(key, 'number');
+  }
   renderUIInspector(container, store, node, { section, field });
   if (node.ClassName === 'ImageLabel')
     texturePicker(container, store, node, 'Image', 'Upload UI image', onError);
@@ -233,6 +272,7 @@ export function renderInspector(container, store, onError) {
     actions.append(duplicate, remove);
     container.append(actions);
   }
+  filter();
   container.scrollTop = scroll;
 }
 function round(value) {

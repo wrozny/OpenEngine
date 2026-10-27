@@ -4,6 +4,38 @@ import { isScriptNode } from '../engine/scene.js';
 export function renderHierarchy(container, store, onError, onMenu = () => {}) {
   container.replaceChildren();
   const visible = [];
+  function rename(node, item) {
+    if (!store.canRemove(node)) return;
+    const input = el('input', 'tree-rename');
+    input.value = node.Name;
+    input.setAttribute('aria-label', 'Rename ' + node.Name);
+    item.querySelector('.tree-name').replaceWith(input);
+    input.focus();
+    input.select();
+    let done = false;
+    const finish = (commit) => {
+      if (done) return;
+      done = true;
+      try {
+        if (commit) store.rename(node, input.value);
+      } catch (error) {
+        onError(error.message);
+      }
+      renderHierarchy(container, store, onError, onMenu);
+    };
+    input.onclick = (e) => e.stopPropagation();
+    input.onkeydown = (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter') finish(true);
+      if (e.key === 'Escape') finish(false);
+    };
+    input.onblur = () => finish(true);
+  }
+  container.onrename = () => {
+    const node = store.selected,
+      item = container.querySelector('[data-id="' + node?.Id + '"]');
+    if (item) rename(node, item);
+  };
   function row(node, depth) {
     visible.push(node);
     const children = node.GetChildren();
@@ -44,8 +76,14 @@ export function renderHierarchy(container, store, onError, onMenu = () => {}) {
       store.select(node, event.ctrlKey || event.metaKey);
     };
     item.onkeydown = (event) => {
+      if (event.key === 'F2') {
+        event.preventDefault();
+        rename(node, item);
+        return;
+      }
       if (event.key === 'Enter') store.select(node, event.ctrlKey || event.metaKey);
     };
+    item.ondblclick = () => rename(node, item);
     item.oncontextmenu = (event) => {
       event.preventDefault();
       event.stopPropagation();

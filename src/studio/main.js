@@ -1,3 +1,4 @@
+import { InsertLibrary } from './library.js';
 import { UIEditor } from './ui-editor.js';
 import { isUINode } from '../engine/ui-schema.js';
 import { StudioNetworkSession } from './network-session.js';
@@ -29,10 +30,10 @@ app.innerHTML = `
 <nav class="toolbar" aria-label="Studio toolbar">
   <div class="toolbar-group"><button id="new-project">New</button><button id="open-project">Open</button><button id="save-project" title="Save · Ctrl+S">Save</button></div>
   <div class="toolbar-group"><button id="undo" title="Undo · Ctrl+Z" aria-label="Undo"></button><button id="redo" title="Redo · Ctrl+Shift+Z" aria-label="Redo"></button></div>
-  <button id="insert-object">Insert</button><div class="toolbar-spacer"></div><button id="build-project">Build game</button><button id="play" class="primary"><span>Play</span><kbd>F5</kbd></button>
+  <button id="insert-object">Insert</button><button id="insert-library">Library</button><div class="toolbar-spacer"></div><button id="build-project">Build game</button><button id="play" class="primary"><span>Play</span><kbd>F5</kbd></button>
 </nav>
 <main id="dock-host"></main>
-<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.5</span></footer>
+<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.6</span></footer>
 <div id="play-host" hidden></div><div id="launch-host" hidden></div><div id="dialog-host"></div><input type="file" id="open-file" accept=".openengine,.json" hidden>
 `;
 const $ = (id) => document.getElementById(id);
@@ -96,6 +97,8 @@ function log(level, message) {
 const onError = (message) => log('error', message),
   files = new ProjectFiles(status),
   menu = new ContextMenu();
+const library = new InsertLibrary(store, onError);
+$('insert-library').onclick = () => library.show();
 const viewport = new SceneViewport(find('viewport'), store, {
   onMenu: (x, y, position) => openContext(x, y, position),
   onStatus: status,
@@ -151,7 +154,16 @@ function openContext(x, y, position) {
   menu.show(
     x,
     y,
-    sceneMenu(store, { frame: () => viewport.frameSelection(), insert, onError }, position),
+    sceneMenu(
+      store,
+      {
+        frame: () => viewport.frameSelection(),
+        insert,
+        onError,
+        rename: () => find('tree').onrename?.(),
+      },
+      position,
+    ),
   );
 }
 function render() {
@@ -348,6 +360,11 @@ window.addEventListener('keydown', (event) => {
     save(event.shiftKey);
   }
   if (typing || $('dialog-host').childElementCount) return;
+  if (event.key === 'F2') {
+    event.preventDefault();
+    find('tree').onrename?.();
+    return;
+  }
   if (mod && event.key.toLowerCase() === 'z') {
     event.preventDefault();
     event.shiftKey ? store.redo() : store.undo();
@@ -372,6 +389,7 @@ window.addEventListener('beforeunload', () => {
   gameView?.dispose();
   viewport.dispose();
   code.dispose();
+  library.dispose();
   uiEditor.dispose();
   dock.dispose();
 });

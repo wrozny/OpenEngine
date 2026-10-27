@@ -58,7 +58,7 @@ export class ContextMenu {
   }
 }
 
-export function sceneMenu(store, { frame, insert, onError }, position) {
+export function sceneMenu(store, { frame, insert, onError, rename }, position) {
   const safe = (action) => () => {
     try {
       action();
@@ -68,8 +68,19 @@ export function sceneMenu(store, { frame, insert, onError }, position) {
   };
   const object = store.dimension === '3D' ? 'Object3D' : 'Object2D';
   return [
+    {
+      label: 'Rename',
+      shortcut: 'F2',
+      disabled: !store.canRemove(store.selected),
+      action: () => rename?.(),
+    },
     ...[
       object,
+      store.dimension === '3D' ? 'Car3D' : 'Car2D',
+      'UIListLayout',
+      'UIGridLayout',
+      'UICorner',
+      'UIPadding',
       'ScreenGui',
       'Frame',
       'TextLabel',

@@ -53,9 +53,9 @@ export class LuaEditor {
       scrollBeyondLastLine: false,
       tabSize: 4,
       insertSpaces: true,
-      wordBasedSuggestions: 'currentDocument',
       quickSuggestions: true,
       suggestOnTriggerCharacters: true,
+      wordBasedSuggestions: 'off',
       ariaLabel: 'Lua script source',
       padding: { top: 14 },
       fixedOverflowWidgets: true,
@@ -156,15 +156,24 @@ export class LuaEditor {
     };
     const receiver = before.match(/([\w.]+)[:.]\w*$/)?.[1];
     const suggestions = [];
-    const add = (label, kind, insertText = label, documentation = '') =>
+    const seen = new Set();
+    const add = (label, kind, insertText = label, documentation = '') => {
+      if (seen.has(label)) return;
+      seen.add(label);
       suggestions.push({
         label,
         kind,
         insertText,
         documentation,
+        detail:
+          documentation ||
+          (kind === monaco.languages.CompletionItemKind.Property
+            ? 'Instance property or named child'
+            : 'Lua identifier'),
         range,
         insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       });
+    };
     if (receiver) {
       const context = completionContext(receiver, source, this.node, this.store.workspace);
       for (const [name, [params, description]] of Object.entries(context.methods)) {
@@ -180,7 +189,20 @@ export class LuaEditor {
         ...context.properties,
         ...context.children.filter((name) => /^[A-Za-z_]\w*$/.test(name)),
       ])
-        add(name, monaco.languages.CompletionItemKind.Property);
+        add(
+          name,
+          monaco.languages.CompletionItemKind.Property,
+          name,
+          context.children.includes(name)
+            ? 'Named child instance: ' + name
+            : {
+                Position: 'World Vector2/Vector3, or UI UDim2. Assign the complete value.',
+                Size: 'Full extents, or responsive UI UDim2.',
+                Rotation: 'Radians: number in 2D, Vector3 in 3D.',
+                Velocity: 'World velocity in units per second.',
+                Enabled: 'Boolean: enables this script, screen or component.',
+              }[name] || 'Property ' + name + '; see the Lua reference for type and defaults.',
+        );
     } else {
       for (const name of [
         'game',
@@ -188,6 +210,7 @@ export class LuaEditor {
         'script',
         'Vector2',
         'Vector3',
+        'UDim2',
         'Instance',
         'print',
         'warn',

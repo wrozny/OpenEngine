@@ -73,6 +73,10 @@ export class UIEditor {
       'TextButton',
       'ImageLabel',
       'TextInput',
+      'UIListLayout',
+      'UIGridLayout',
+      'UICorner',
+      'UIPadding',
     ]) {
       const b = el('button', '', type);
       b.draggable = true;
@@ -120,7 +124,18 @@ export class UIEditor {
       while (hit && !['Frame', 'ScreenGui'].includes(hit.ClassName)) hit = hit.Parent;
       if (hit) store.select(hit);
       if (
-        !['ScreenGui', 'Frame', 'TextLabel', 'TextButton', 'ImageLabel', 'TextInput'].includes(type)
+        ![
+          'ScreenGui',
+          'Frame',
+          'TextLabel',
+          'TextButton',
+          'ImageLabel',
+          'TextInput',
+          'UIListLayout',
+          'UIGridLayout',
+          'UICorner',
+          'UIPadding',
+        ].includes(type)
       )
         return;
       const node = store.addUI(type);

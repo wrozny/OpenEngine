@@ -35,15 +35,55 @@ export function computeUILayout(
     result.set(node.Id, { ...rect, node });
     const items = children(node);
     if (!items.length) return;
-    const padding = (node.Padding || 0) * rect.scale,
-      gap = (node.Gap || 0) * rect.scale;
+    const list = node.GetChildren().find((n) => n.ClassName === 'UIListLayout'),
+      grid = node.GetChildren().find((n) => n.ClassName === 'UIGridLayout'),
+      pad = node.GetChildren().find((n) => n.ClassName === 'UIPadding');
+    const config = {
+      ...node,
+      ...(list ? { ...list, Layout: list.Direction } : {}),
+      ...(grid ? { ...grid, Layout: 'Grid' } : {}),
+      ...(pad ? { Padding: pad.Padding } : {}),
+    };
+    const padding = (config.Padding || 0) * rect.scale,
+      gap = (config.Gap || 0) * rect.scale;
     const innerW = Math.max(0, rect.width - padding * 2),
       innerH = Math.max(0, rect.height - padding * 2);
     const specs = items.map((child) => ({
       node: child,
       ...dimensions(child, innerW, innerH, rect.scale),
     }));
-    const flow = node.Layout && node.Layout !== 'Absolute';
+    if (config.Layout === 'Grid') {
+      const columns = Math.max(
+        1,
+        Math.min(
+          100,
+          Math.floor(
+            config.Columns || (innerW + gap) / ((config.CellWidth || 160) * rect.scale + gap),
+          ) || 1,
+        ),
+      );
+      const cellWidth = Math.max(0, (innerW - gap * (columns - 1)) / columns),
+        cellHeight = (config.CellHeight || 44) * rect.scale;
+      items
+        .filter((child) => child.Visible)
+        .forEach((child, index) => {
+          const x = padding + (index % columns) * (cellWidth + gap),
+            y = padding + Math.floor(index / columns) * (cellHeight + gap);
+          visit(child, {
+            x: rect.x + x,
+            y: rect.y + y,
+            left: x,
+            top: y,
+            width: cellWidth,
+            height: cellHeight,
+            scale: rect.scale,
+            parentId: node.Id,
+            visible: rect.visible,
+          });
+        });
+      return;
+    }
+    const flow = config.Layout && config.Layout !== 'Absolute';
     if (!flow) {
       for (const item of specs) {
         const n = item.node,
@@ -71,14 +111,14 @@ export function computeUILayout(
       }
       return;
     }
-    const row = node.Layout === 'Row',
+    const row = config.Layout === 'Row',
       extent = row ? innerW : innerH,
       crossExtent = row ? innerH : innerW;
     const lines = [[]];
     let used = 0;
     for (const item of specs.filter((item) => item.node.Visible)) {
       const main = row ? item.width : item.height;
-      if (node.Wrap && row && lines.at(-1).length && used + gap + main > extent) {
+      if (config.Wrap && row && lines.at(-1).length && used + gap + main > extent) {
         lines.push([]);
         used = 0;
       }
@@ -117,16 +157,16 @@ export function computeUILayout(
         Math.max(0, line.length - 1) * gap;
       const remaining = Math.max(0, extent - total),
         lineCross =
-          node.Wrap && row ? Math.max(0, ...line.map((item) => item.height)) : crossExtent;
+          config.Wrap && row ? Math.max(0, ...line.map((item) => item.height)) : crossExtent;
       let cursor =
-        node.Justify === 'Center' ? remaining / 2 : node.Justify === 'End' ? remaining : 0;
+        config.Justify === 'Center' ? remaining / 2 : config.Justify === 'End' ? remaining : 0;
       const spacing =
-        node.Justify === 'SpaceBetween' && line.length > 1
+        config.Justify === 'SpaceBetween' && line.length > 1
           ? gap + remaining / (line.length - 1)
           : gap;
       for (const item of line) {
         let cross = row ? item.height : item.width;
-        if (node.Align === 'Stretch') {
+        if (config.Align === 'Stretch') {
           const axis = row ? 'Y' : 'X';
           cross = limit(
             lineCross,
@@ -139,9 +179,9 @@ export function computeUILayout(
           else item.width = cross;
         }
         const shift =
-          node.Align === 'Center'
+          config.Align === 'Center'
             ? (lineCross - cross) / 2
-            : node.Align === 'End'
+            : config.Align === 'End'
               ? lineCross - cross
               : 0;
         const x = padding + (row ? cursor : crossCursor + shift),

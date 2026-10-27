@@ -1,3 +1,5 @@
+import { UI_DEFAULTS } from '../engine/ui-schema.js';
+import { CAR_DEFAULTS } from '../engine/vehicles.js';
 /** Shared completion/hover descriptions for the public scripting API. */
 export const API = {
   Instance: { new: ['className, parent', 'Create a detached instance, or parent it immediately.'] },
@@ -17,6 +19,15 @@ export const API = {
     IsClient: ['', 'True in a client runtime.'],
   },
   Object: {
+    SetInput: [
+      'throttle, steering, brake',
+      'Car2D/Car3D: normalized throttle/steering -1..1 and brake 0..1.',
+    ],
+    GetWheelPosition: [
+      'index',
+      'Car: one-based suspension wheel position in world coordinates, or nil.',
+    ],
+    ApplyImpulse: ['impulse', 'Apply a center impulse to a live physical object.'],
     SetNetworkOwner: [
       'player',
       'Server only. Give an unanchored object to a player; nil returns authority to the server.',
@@ -232,6 +243,18 @@ export function completionContext(receiver, source, node, workspace) {
     ),
   );
   if (service) type = service[1];
+  const alias = source.match(
+    new RegExp('local\\s+' + escaped + '\\s*=\\s*(script\\.Parent|workspace(?:\\.\\w+)*)'),
+  );
+  if (alias) {
+    if (alias[1] === 'script.Parent') instance = node?.Parent;
+    else
+      instance = alias[1]
+        .split('.')
+        .slice(1)
+        .reduce((n, key) => n?.FindFirstChild(key), workspace);
+  }
+
   if (
     /\.OnCollision(?:Start|End)?$|\.Heartbeat$|\.PostSimulation$|\.OnAction$|\.OnClick$|\.OnHoverStart$|\.OnHoverEnd$|\.OnValueChanged$|\.Completed$|\.Began$|\.Ended$|\.OnServerEvent$|\.OnClientEvent$|\.PlayerAdded$|\.PlayerRemoving$|\.CharacterAdded$/.test(
       receiver || '',
@@ -251,7 +274,20 @@ export function completionContext(receiver, source, node, workspace) {
   return {
     type,
     methods,
-    properties,
+    properties: [
+      ...new Set([
+        ...properties,
+        ...Object.keys(UI_DEFAULTS[instance?.ClassName] || CAR_DEFAULTS[instance?.ClassName] || {}),
+      ]),
+    ],
+    propertyDocumentation: Object.fromEntries(
+      Object.entries(
+        UI_DEFAULTS[instance?.ClassName] || CAR_DEFAULTS[instance?.ClassName] || {},
+      ).map(([key, value]) => [
+        key,
+        `${typeof value === 'object' ? 'Dimension/vector' : typeof value}; default ${JSON.stringify(value)}`,
+      ]),
+    ),
     children: instance?.GetChildren().map((child) => child.Name) || [],
   };
 }

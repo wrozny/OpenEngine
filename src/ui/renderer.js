@@ -144,7 +144,10 @@ export class UIRenderer {
       wrapper.style.opacity = String(node.Opacity);
       wrapper.style.backgroundColor = alpha(node.BackgroundColor, node.BackgroundOpacity);
       wrapper.style.border = `${node.BorderWidth * rect.scale}px solid ${node.BorderColor}`;
-      wrapper.style.borderRadius = node.CornerRadius * rect.scale + 'px';
+      wrapper.style.borderRadius =
+        (node.GetChildren().find((n) => n.ClassName === 'UICorner')?.Radius ?? node.CornerRadius) *
+          rect.scale +
+        'px';
       wrapper.style.overflow = node.ClipChildren ? 'hidden' : 'visible';
       wrapper.dataset.hoverEffect = node.HoverEffect;
       wrapper.disabled = !!node.Disabled;

@@ -1,0 +1,1345 @@
+{
+  "format": "openengine",
+  "version": 1,
+  "name": "Apex Circuit",
+  "dimension": "3D",
+  "multiplayer": true,
+  "description": "Round-based raycast car racing with ordered checkpoints and rolling terrain.",
+  "controls": "WASD drive · Space brake · R recover",
+  "services": [
+    {
+      "id": "workspace",
+      "className": "Folder",
+      "name": "Workspace",
+      "attributes": {},
+      "children": [
+        {
+          "id": "race-0",
+          "className": "Object3D",
+          "name": "Ground",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#5c8065",
+          "Size": {
+            "X": 210,
+            "Y": 2,
+            "Z": 210
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Grass",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": -1,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-1",
+          "className": "Object3D",
+          "name": "Asphalt",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#303947",
+          "Size": {
+            "X": 15,
+            "Y": 0.04,
+            "Z": 108
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Rock",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.02,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-2",
+          "className": "Object3D",
+          "name": "Asphalt",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#303947",
+          "Size": {
+            "X": 15,
+            "Y": 0.04,
+            "Z": 108
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Rock",
+          "TextureScale": 1,
+          "Position": {
+            "X": 90,
+            "Y": 0.02,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-3",
+          "className": "Object3D",
+          "name": "Asphalt",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#303947",
+          "Size": {
+            "X": 105,
+            "Y": 0.04,
+            "Z": 15
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Rock",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": 0.02,
+            "Z": -90
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-4",
+          "className": "Object3D",
+          "name": "Asphalt",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#303947",
+          "Size": {
+            "X": 105,
+            "Y": 0.04,
+            "Z": 15
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Rock",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": 0.02,
+            "Z": 0
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-5",
+          "className": "Object3D",
+          "name": "Infield",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#58745c",
+          "Size": {
+            "X": 62,
+            "Y": 2,
+            "Z": 62
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Grass",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": 1,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-6",
+          "className": "Object3D",
+          "name": "Rolling ramp",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#3c485a",
+          "Size": {
+            "X": 12,
+            "Y": 0.5,
+            "Z": 5
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.25,
+            "Z": -30
+          },
+          "Rotation": {
+            "X": -0.06,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-7",
+          "className": "Object3D",
+          "name": "Rolling ramp",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#3c485a",
+          "Size": {
+            "X": 12,
+            "Y": 0.5,
+            "Z": 5
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.25,
+            "Z": -35
+          },
+          "Rotation": {
+            "X": 0.06,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-8",
+          "className": "Object3D",
+          "name": "Rolling ramp",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#3c485a",
+          "Size": {
+            "X": 12,
+            "Y": 0.5,
+            "Z": 5
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.25,
+            "Z": -40
+          },
+          "Rotation": {
+            "X": -0.06,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-9",
+          "className": "Object3D",
+          "name": "Rolling ramp",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#3c485a",
+          "Size": {
+            "X": 12,
+            "Y": 0.5,
+            "Z": 5
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.25,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0.06,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-10",
+          "className": "Object3D",
+          "name": "Outer barrier",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#c9d4d9",
+          "Size": {
+            "X": 1,
+            "Y": 1.2,
+            "Z": 110
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": -9,
+            "Y": 0.6,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-11",
+          "className": "Object3D",
+          "name": "Outer barrier",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#c9d4d9",
+          "Size": {
+            "X": 1,
+            "Y": 1.2,
+            "Z": 110
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 99,
+            "Y": 0.6,
+            "Z": -45
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-12",
+          "className": "Object3D",
+          "name": "Outer barrier",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#c9d4d9",
+          "Size": {
+            "X": 110,
+            "Y": 1.2,
+            "Z": 1
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": 0.6,
+            "Z": 9
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-13",
+          "className": "Object3D",
+          "name": "Outer barrier",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#c9d4d9",
+          "Size": {
+            "X": 110,
+            "Y": 1.2,
+            "Z": 1
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 45,
+            "Y": 0.6,
+            "Z": -99
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-14",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -80
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-15",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -70
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-16",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -60
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-17",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -50
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-18",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -40
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-19",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -30
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-20",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -20
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-21",
+          "className": "Object3D",
+          "name": "Road stripe",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f1cf80",
+          "Size": {
+            "X": 0.2,
+            "Y": 0.03,
+            "Z": 4
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "CollisionGroup": "world",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 0.06,
+            "Z": -10
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-22",
+          "className": "Folder",
+          "name": "Checkpoints",
+          "attributes": {},
+          "children": [
+            {
+              "id": "race-23",
+              "className": "Object3D",
+              "name": "1",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#c4c9d2",
+              "Size": {
+                "X": 1,
+                "Y": 1,
+                "Z": 1
+              },
+              "Anchored": true,
+              "Sensor": true,
+              "Visible": false,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 2,
+                "Z": -86
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "race-26",
+              "className": "Object3D",
+              "name": "2",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#c4c9d2",
+              "Size": {
+                "X": 1,
+                "Y": 1,
+                "Z": 1
+              },
+              "Anchored": true,
+              "Sensor": true,
+              "Visible": false,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 86,
+                "Y": 2,
+                "Z": -90
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "race-29",
+              "className": "Object3D",
+              "name": "3",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#c4c9d2",
+              "Size": {
+                "X": 1,
+                "Y": 1,
+                "Z": 1
+              },
+              "Anchored": true,
+              "Sensor": true,
+              "Visible": false,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 90,
+                "Y": 2,
+                "Z": -4
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            },
+            {
+              "id": "race-32",
+              "className": "Object3D",
+              "name": "4",
+              "attributes": {},
+              "children": [],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#c4c9d2",
+              "Size": {
+                "X": 1,
+                "Y": 1,
+                "Z": 1
+              },
+              "Anchored": true,
+              "Sensor": true,
+              "Visible": false,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.5,
+              "Mass": 1,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 2,
+                "Z": 0
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "race-24",
+          "className": "Object3D",
+          "name": "Gate 1",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": -6,
+            "Y": 2,
+            "Z": -86
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-25",
+          "className": "Object3D",
+          "name": "Gate 1",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 6,
+            "Y": 2,
+            "Z": -86
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-27",
+          "className": "Object3D",
+          "name": "Gate 2",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 86,
+            "Y": 2,
+            "Z": -96
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-28",
+          "className": "Object3D",
+          "name": "Gate 2",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 86,
+            "Y": 2,
+            "Z": -84
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-30",
+          "className": "Object3D",
+          "name": "Gate 3",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 84,
+            "Y": 2,
+            "Z": -4
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-31",
+          "className": "Object3D",
+          "name": "Gate 3",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#86dacf",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 96,
+            "Y": 2,
+            "Z": -4
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-33",
+          "className": "Object3D",
+          "name": "Gate 4",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f8cb68",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 2,
+            "Z": -6
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-34",
+          "className": "Object3D",
+          "name": "Gate 4",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "Shape": "Box",
+          "Color": "#f8cb68",
+          "Size": {
+            "X": 0.3,
+            "Y": 4,
+            "Z": 0.3
+          },
+          "Anchored": true,
+          "Sensor": false,
+          "Visible": true,
+          "CollisionGroup": "decoration",
+          "Restitution": 0.1,
+          "Friction": 0.5,
+          "Mass": 1,
+          "FixedRotation": false,
+          "Material": "Default",
+          "TextureScale": 1,
+          "Position": {
+            "X": 0,
+            "Y": 2,
+            "Z": 6
+          },
+          "Rotation": {
+            "X": 0,
+            "Y": 0,
+            "Z": 0
+          }
+        },
+        {
+          "id": "race-35",
+          "className": "Folder",
+          "name": "RaceState",
+          "attributes": {},
+          "children": []
+        },
+        {
+          "id": "race-36",
+          "className": "RemoteEvent",
+          "name": "Recover",
+          "attributes": {},
+          "children": []
+        }
+      ],
+      "settings": {
+        "Skybox": "builtin:sky",
+        "BackgroundColor": "#000000",
+        "FallenHeight": -50
+      }
+    },
+    {
+      "id": "scripts",
+      "className": "Folder",
+      "name": "ScriptService",
+      "attributes": {},
+      "children": [
+        {
+          "id": "race-37",
+          "className": "Folder",
+          "name": "Templates",
+          "attributes": {},
+          "children": [
+            {
+              "id": "race-38",
+              "className": "Object3D",
+              "name": "Racer",
+              "attributes": {},
+              "children": [
+                {
+                  "id": "race-39",
+                  "className": "Car3D",
+                  "name": "Drive",
+                  "attributes": {},
+                  "children": [],
+                  "WheelRadius": 0.38,
+                  "WheelBase": 2.5,
+                  "TrackWidth": 1.65,
+                  "SuspensionRestLength": 0.45,
+                  "SuspensionStiffness": 35,
+                  "DampingCompression": 4.4,
+                  "DampingRelaxation": 5.2,
+                  "FrictionSlip": 3,
+                  "EngineForce": 3200,
+                  "MaxSpeed": 42,
+                  "ReverseSpeed": 12,
+                  "BrakeForce": 60,
+                  "MaxSteer": 0.48,
+                  "SteerSpeed": 3,
+                  "HighSpeedSteer": 0.35,
+                  "Enabled": true
+                }
+              ],
+              "Texture": "",
+              "Shape": "Box",
+              "Color": "#f2a65e",
+              "Size": {
+                "X": 1.8,
+                "Y": 0.65,
+                "Z": 3.6
+              },
+              "Anchored": false,
+              "Sensor": false,
+              "Visible": true,
+              "CollisionGroup": "world",
+              "Restitution": 0.1,
+              "Friction": 0.2,
+              "Mass": 700,
+              "FixedRotation": false,
+              "Material": "Default",
+              "TextureScale": 1,
+              "Position": {
+                "X": 0,
+                "Y": 2,
+                "Z": 0
+              },
+              "Rotation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "race-40",
+          "className": "ServerScript",
+          "name": "Round manager",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/Server.lua"
+        },
+        {
+          "id": "race-41",
+          "className": "LocalScript",
+          "name": "Driver",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/Client.lua"
+        },
+        {
+          "id": "race-42",
+          "className": "ServerScript",
+          "name": "Recovery",
+          "attributes": {},
+          "children": [],
+          "Source": "local run = game:GetService(\"RunService\")\nlocal nextAllowed = {}\nworkspace.Recover.OnServerEvent:Connect(function(player)\n if run.Time < (nextAllowed[player.UserId] or 0) then return end\n local car = player.Character\n if not car or car.Destroyed then return end\n nextAllowed[player.UserId] = run.Time + 5\n local index = math.max(1, (car:GetAttribute(\"Checkpoint\") or 1)-1)\n local gate = workspace.Checkpoints:FindFirstChild(tostring(index))\n car.Position = (car:GetAttribute(\"Checkpoint\") or 1) > 1 and gate.Position:Add(Vector3.new(0,2,0)) or Vector3.new(0,2,4)\n car.Rotation = Vector3.new()\n car.Velocity = Vector3.new()\nend)\ngame:GetService(\"Players\").PlayerRemoving:Connect(function(player) nextAllowed[player.UserId] = nil end)",
+          "Enabled": true
+        }
+      ]
+    },
+    {
+      "id": "ui-service",
+      "className": "UIService",
+      "name": "UIService",
+      "attributes": {},
+      "children": []
+    }
+  ]
+}

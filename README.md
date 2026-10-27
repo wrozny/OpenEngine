@@ -178,3 +178,9 @@ Neon Borough has lower curbs, improved car handling, and server-controlled swag:
 ### Visual UI editor
 
 Select **UIService** in Explorer to open the **UI** tab. Drag frames, labels, buttons, images and text inputs onto a ScreenGui; move/resize with handles, edit properties and preview Desktop/Tablet/Phone layouts. A responsive dialog preset gets you started. UI supports percentage-plus-pixel sizing, anchors, constraints, flow layouts, Lua click/hover/input events and animation presets/tweens. Neon Borough includes a proximity clinic example. See [UI editor documentation](docs/UI_EDITOR.md).
+
+### Editor comfort, raycast cars and racing
+
+Right-click **Rename**, F2 and inline rename work in Explorer. Properties has a search field. **Library** offers searchable draggable objects, UI list/grid layouts, corner/padding modifiers and behavior snippets. Lua completions suppress duplicate word suggestions and describe engine calls.
+
+**Car3D** supplies native four-wheel raycast suspension, dampers, traction, braking and speed-sensitive steering. **Car2D** supplies side-view two-ray suspension and driving. The **Apex Circuit** multiplayer example uses owned car prediction and server-managed countdowns, ordered checkpoints, winners and round resets. See [vehicles and racing](docs/VEHICLES.md).

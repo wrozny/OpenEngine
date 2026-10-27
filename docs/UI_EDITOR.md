@@ -78,3 +78,14 @@ end)
 ```
 
 Neon Borough's mint-colored clinic marker at the plaza demonstrates a responsive panel, collision start/end, button click/hover, tweens, and a server-validated treatment purchase. Its LocalScript lives at UIService → Clinic → Clinic UI. Treatment costs 25 SWAG; the server checks proximity, health, balance and driving state before charging. The example also closes when a character dies or is replaced.
+
+## Layout and styling modifiers (0.6)
+
+Drag **UIListLayout**, **UIGridLayout**, **UICorner**, or **UIPadding** onto a Frame/ScreenGui, or insert from Library/Explorer. Each modifier is an editable child instance and serializes with the project. Use one modifier of each kind per parent; the first is used. UIGridLayout takes precedence over UIListLayout when both are present.
+
+- UIListLayout: Direction Row/Column, Padding=12, Gap=12, Align Start/Center/End/Stretch, Justify Start/Center/End/SpaceBetween, Wrap=false. It arranges visual siblings, not itself.
+- UIGridLayout: Columns=0 means automatic columns from available width and CellWidth=160; explicit Columns sets their count. Rows use CellHeight=44. Padding=12, Gap=12. Cells divide available horizontal space evenly and wrap to further rows.
+- UICorner: Radius=12 pixels overrides a parent's CornerRadius.
+- UIPadding: Padding=16 pixels overrides the parent's layout padding.
+
+Properties now has a persistent search field; Escape clears it. Explorer supports right-click Rename, F2 and double-click rename, with undo. The searchable Library includes physical objects, car components, UI modifiers and ready-to-edit behavior snippets. It inserts local project data and never downloads scripts from an external catalog.

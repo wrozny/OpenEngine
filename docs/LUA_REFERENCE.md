@@ -1,6 +1,6 @@
-# OpenEngine Lua reference — 0.5.0
+# OpenEngine Lua reference — 0.6.0
 
-This is a self-contained reference for writing OpenEngine game scripts, including use as context for a coding model. It describes the public gameplay API implemented in **OpenEngine 0.5.0**. OpenEngine uses **Lua 5.3 through Fengari**, with a Roblox-inspired instance hierarchy. It does not implement Roblox or Luau. Examples use ordinary Lua, not JavaScript.
+This is a self-contained reference for writing OpenEngine game scripts, including use as context for a coding model. It describes the public gameplay API implemented in **OpenEngine 0.6.0**. OpenEngine uses **Lua 5.3 through Fengari**, with a Roblox-inspired instance hierarchy. It does not implement Roblox or Luau. Examples use ordinary Lua, not JavaScript.
 
 For visual editor instructions see [UI_EDITOR.md](UI_EDITOR.md); for hosting see [MULTIPLAYER.md](MULTIPLAYER.md). Everything needed to understand the scripting API is below. Functions on internal JavaScript implementation objects are not public gameplay contracts.
 
@@ -32,7 +32,7 @@ For visual editor instructions see [UI_EDITOR.md](UI_EDITOR.md); for hosting see
 Attach **this entire file** to the model, then use this template. Fill in the project facts: the model cannot infer your scene tree from the engine API.
 
 ```text
-Help me write Lua for OpenEngine 0.5.0. The attached LUA_REFERENCE.md is
+Help me write Lua for OpenEngine 0.6.0. The attached LUA_REFERENCE.md is
 my API contract. Use only APIs documented there and ordinary Lua 5.3.
 Do not substitute Roblox/Luau APIs or invent missing engine functionality.
 
@@ -741,7 +741,7 @@ Do not generate these unless you explicitly implement your own Lua helper or cha
 - `WaitForChild`, `FindFirstAncestor`, `GetService` on scene instances, `Touched`/`TouchEnded`, `MouseButton1Click`, `MouseEnter`/`MouseLeave`, `GetPropertyChangedSignal`, Changed on arbitrary instances, AttributeChanged signals, ChildAdded/ChildRemoved, signal Wait/Once.
 - `task.wait`, `task.spawn`, `task.delay`, `wait`, `spawn`, `delay`, tick/time wall-clock helpers, Luau type annotations, `+=`, optional types or Luau `continue` syntax.
 - `UDim2.fromScale/fromOffset`, `Vector3.zero`, vector arithmetic metamethods, Vector3.Magnitude as a function, automatic transform inheritance or automatic controller creation.
-- Welds/joints, impulses/forces/constraints through a public API, skeletal animation, mesh import, navigation/pathfinding, spatial audio, native save files, persistence across server restarts, authenticated accounts or built-in NPC combat/health rules.
+- Welds/joints, continuous force/constraint APIs, skeletal animation, mesh import, navigation/pathfinding, spatial audio, native save files, persistence across server restarts, authenticated accounts or built-in NPC combat/health rules.
 
 | Symptom                              | Check                                                                                                                                               |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -760,7 +760,7 @@ Do not generate these unless you explicitly implement your own Lua helper or cha
 
 ## 20. Source map and maintenance
 
-This reference was checked against the 0.5.0 implementation. When APIs change, update it alongside the source. Relevant files:
+This reference was checked against the 0.6.0 implementation. When APIs change, update it alongside the source. Relevant files:
 
 | Source                                                                                         | Contract                                                                               |
 | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -777,3 +777,15 @@ This reference was checked against the 0.5.0 implementation. When APIs change, u
 | `examples/neon-borough/scripts/`, `examples/zombie/scripts/`, `examples/parcel-panic/scripts/` | Complete game-defined rules using these APIs.                                          |
 
 For a model with a small context window, provide sections 1–6 and 19 plus the sections relevant to the task. Include 12 for multiplayer and 14–15 for authored UI. Keep the execution-side and unsupported-API rules when shortening context.
+
+## 0.6 additions: vehicles, impulse and modifiers
+
+The APIs above remain supported. The supported classes additionally include `Car2D`, `Car3D`, `UIListLayout`, `UIGridLayout`, `UICorner`, `UIPadding`. See [VEHICLES.md](VEHICLES.md) for complete tuning defaults, coordinate conventions and multiplayer behavior.
+
+Car2D/Car3D are native components under matching unanchored physical objects. `motor:SetInput(throttle, steering=0, brake=0)` clamps finite inputs to −1..1, −1..1 and 0..1. `motor.Speed` reports world units/second; `motor:GetWheelPosition(index)` returns a Vector2/Vector3 or nil (two wheels in 2D, four in 3D). Enabled=true by default. Car2D is side-view suspension/lean, Car3D is four-wheel suspension with front steering. Do not attach a PlayerController to a car chassis. Use Script for standalone input or LocalScript in a multiplayer owned chassis.
+
+`physicalObject:ApplyImpulse(vector)` applies a finite center impulse. Use the correct world dimension. It requires a live body under Workspace.
+
+UI modifiers are nonvisual instances parented under a Frame or ScreenGui. UIListLayout defaults: Direction="Column", Padding=12, Gap=12, Align="Start", Justify="Start", Wrap=false. UIGridLayout defaults: Columns=0 (automatic), CellWidth=160, CellHeight=44, Padding=12, Gap=12. Grid cells distribute available width, then wrap rows. UICorner.Radius=12 overrides CornerRadius; UIPadding.Padding=16 overrides layout padding. Modifiers affect sibling layout/parent styling; they do not create additional visible elements. The first of each kind is used; grid takes precedence over list.
+
+Remote presentation now buffers 100 ms and extrapolates at most 150 ms on missing snapshots. Small owner corrections are visually eased; large teleports snap. This does not introduce input-history rollback or change physics/query authority.

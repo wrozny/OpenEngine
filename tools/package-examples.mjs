@@ -8,6 +8,7 @@ const output = 'release/Example Projects';
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 for (const [source, name] of [
+  ['apex-circuit', 'Apex Circuit'],
   ['zombie', 'Dead Signal'],
   ['neon-borough', 'Neon Borough'],
   ['parcel-panic', 'Parcel Panic'],
@@ -20,7 +21,7 @@ for (const [source, name] of [
 await cp('LICENSE', join(output, 'LICENSE'));
 await writeFile(
   join(output, 'START HERE.txt'),
-  'OpenEngine example projects\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\nNeon Borough/Neon Borough.openengine - online 3D city, cars, shooting and pedestrians\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
+  'OpenEngine example projects\n\nApex Circuit/Apex Circuit.openengine - online raycast racing\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\nNeon Borough/Neon Borough.openengine - online 3D city, cars, shooting and pedestrians\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
 );
 const files = {};
 async function collect(directory) {
@@ -43,8 +44,24 @@ citySource['LICENSE'] = new Uint8Array(await readFile('LICENSE'));
 citySource['MULTIPLAYER.md'] = new Uint8Array(await readFile('docs/MULTIPLAYER.md'));
 citySource['LUA_REFERENCE.md'] = new Uint8Array(await readFile('docs/LUA_REFERENCE.md'));
 citySource['UI_EDITOR.md'] = new Uint8Array(await readFile('docs/UI_EDITOR.md'));
+citySource['VEHICLES.md'] = new Uint8Array(await readFile('docs/VEHICLES.md'));
 citySource['API.md'] = new Uint8Array(await readFile('docs/API.md'));
 await writeFile('release/NeonBorough-source.zip', zipSync(citySource));
 console.log(
   'Packaged release/Example Projects.zip, release/Example.Projects.zip and release/NeonBorough-source.zip',
 );
+
+const raceSource = Object.fromEntries(
+  Object.entries(files)
+    .filter(([name]) => name.startsWith('Apex Circuit/'))
+    .map(([name, data]) => [name.slice('Apex Circuit/'.length), data]),
+);
+for (const file of [
+  'LICENSE',
+  'docs/LUA_REFERENCE.md',
+  'docs/VEHICLES.md',
+  'docs/MULTIPLAYER.md',
+  'docs/UI_EDITOR.md',
+])
+  raceSource[file.split('/').at(-1)] = new Uint8Array(await readFile(file));
+await writeFile('release/ApexCircuit-source.zip', zipSync(raceSource));

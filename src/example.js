@@ -42,6 +42,11 @@ export function loadExample(folder) {
 export const exampleProject = () => loadExample('zombie');
 export const exampleProjects = [
   {
+    name: 'Apex Circuit',
+    description: '3D · Multiplayer checkpoint racing with raycast cars',
+    load: () => loadExample('apex-circuit'),
+  },
+  {
     name: 'Neon Borough',
     description: '3D · Online city, shooting, pedestrians and drivable cars',
     load: () => loadExample('neon-borough'),

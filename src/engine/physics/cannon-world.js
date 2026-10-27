@@ -23,6 +23,9 @@ export class CannonWorld {
           onContact({ a: bodyA.userData, b: bodyB.userData, bodyA, bodyB, event: name });
       });
   }
+  applyImpulse(node, v) {
+    node._body.applyImpulse(vector(v));
+  }
   setGravity(v) {
     this.world.gravity.copy(vector(v));
   }

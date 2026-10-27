@@ -142,6 +142,29 @@ export class StudioStore {
   }
   add(className, { position } = {}) {
     if (isUINode({ ClassName: className })) return this.addUI(className);
+    if (className === 'Car2D' || className === 'Car3D') {
+      const required = className === 'Car3D' ? 'Object3D' : 'Object2D';
+      if ((this.dimension === '3D') !== (required === 'Object3D'))
+        throw new Error('Car must match project dimension');
+      if (this.selected?.ClassName !== required) {
+        this.select(this.workspace);
+        const actor = this.add(required);
+        this.transact(() => {
+          actor.Name = 'Car';
+          actor.Anchored = false;
+          actor.Size = required === 'Object3D' ? new Vector3(1.8, 0.65, 3.6) : new Vector2(100, 30);
+          if (required === 'Object3D') {
+            actor.Mass = 700;
+            actor.Position = new Vector3(0, 2, 0);
+          }
+        });
+      }
+      const component = new SceneNode(className);
+      this.transact(() => (component.Parent = this.selected));
+      this.expanded.add(this.selected.Id);
+      this.select(component);
+      return component;
+    }
     if (className === 'PhysicsObject') className = 'Object2D';
     if (
       (className === 'Object2D' && this.dimension === '3D') ||
@@ -215,6 +238,11 @@ export class StudioStore {
       for (const { clone, parent } of clones) clone.Parent = parent;
     });
     this.selectMany(clones.map((item) => item.clone));
+  }
+  rename(node, name) {
+    if (!this.canRemove(node)) return;
+    if (!name.trim()) throw new Error('Name cannot be empty');
+    this.transact(() => (node.Name = name.trim()));
   }
   reparent(node, parent) {
     if (!this.canRemove(node) || isScriptNode(parent)) return;

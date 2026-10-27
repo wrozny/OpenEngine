@@ -1,3 +1,4 @@
+import { CAR_DEFAULTS } from './vehicles.js';
 import { UI_DEFAULTS, isUIElement, isUINode, validateUIData } from './ui-schema.js';
 import { UDim2 } from './ui-types.js';
 import { Signal } from './signal.js';
@@ -15,6 +16,8 @@ let nextId = 1;
 export const canonicalClass = (name) => (name === 'PhysicsObject' ? 'Object2D' : name);
 export const CLASSES = [
   'Folder',
+  'Car2D',
+  'Car3D',
   'UIService',
   ...Object.keys(UI_DEFAULTS),
   'Object2D',
@@ -113,6 +116,11 @@ export class SceneNode {
         this.AnchorPoint = new Vector2(this.AnchorPoint.X, this.AnchorPoint.Y);
       }
     }
+    if (CAR_DEFAULTS[className]) {
+      Object.assign(this, CAR_DEFAULTS[className]);
+      this.Enabled = true;
+      this.Speed = 0;
+    }
     if (isObject(this)) Object.assign(this, structuredClone(objectDefaults(this)));
     if (className === 'Folder' && name === 'Workspace') Object.assign(this, WORKSPACE_DEFAULTS);
     if (isScriptNode(this)) {
@@ -134,6 +142,12 @@ export class SceneNode {
       throw new Error('Parent must be an Instance or nil');
     if (parent && this.ClassName === 'ScreenGui' && parent.ClassName !== 'UIService')
       throw new Error('ScreenGui belongs under UIService');
+    if (
+      parent &&
+      ['UIListLayout', 'UIGridLayout', 'UICorner', 'UIPadding'].includes(this.ClassName) &&
+      !['Frame', 'ScreenGui'].includes(parent.ClassName)
+    )
+      throw new Error('UI modifiers belong under Frame or ScreenGui');
     if (parent && isUIElement(this) && !['Frame', 'ScreenGui'].includes(parent.ClassName))
       throw new Error('UI elements belong under a ScreenGui or Frame');
     if (parent && this.ClassName === 'UIService' && parent.Name !== 'game')
@@ -185,6 +199,25 @@ export class SceneNode {
       this._rotation = value;
     }
     this._engine?.physicsWorld.setRotation(this);
+  }
+  SetInput(throttle, steering = 0, brake = 0) {
+    if (!CAR_DEFAULTS[this.ClassName]) throw new Error('SetInput requires a car component');
+    if (![throttle, steering, brake].every(Number.isFinite))
+      throw new Error('Car input must be finite');
+    this._driveInput = {
+      throttle: Math.max(-1, Math.min(1, throttle)),
+      steering: Math.max(-1, Math.min(1, steering)),
+      brake: Math.max(0, Math.min(1, brake)),
+    };
+  }
+  GetWheelPosition(index) {
+    return this._engine?.vehicles.wheel(this, index);
+  }
+  ApplyImpulse(impulse) {
+    if (!isObject(this) || !this._body)
+      throw new Error('ApplyImpulse needs a live physical object');
+    const v = this.vector(impulse);
+    this._engine.physicsWorld.applyImpulse(this, v);
   }
   Tween(goals, duration = 0.25, easing = 'OutCubic') {
     if (!isUIElement(this) || !this._engine)
@@ -294,6 +327,10 @@ export function serializeNode(node) {
     attributes: encodeAttribute(node._attributes),
     children: node.GetChildren().map(serializeNode),
   };
+  if (CAR_DEFAULTS[node.ClassName]) {
+    for (const key of Object.keys(CAR_DEFAULTS[node.ClassName])) data[key] = node[key];
+    data.Enabled = node.Enabled;
+  }
   if (isUINode(node))
     for (const key of Object.keys(UI_DEFAULTS[node.ClassName]))
       data[key] = structuredClone(node[key]);
@@ -323,6 +360,11 @@ export function deserializeNode(data, preserveIds = true) {
       node.Size = UDim2.from(node.Size);
       node.AnchorPoint = new Vector2(node.AnchorPoint.X, node.AnchorPoint.Y);
     }
+  }
+  if (CAR_DEFAULTS[node.ClassName]) {
+    for (const key of Object.keys(CAR_DEFAULTS[node.ClassName]))
+      if (data[key] !== undefined) node[key] = data[key];
+    node.Enabled = data.Enabled !== false;
   }
   if (data.attributes) node._attributes = decodeAttribute(data.attributes);
   if (isObject(node)) {
@@ -380,7 +422,16 @@ export function validateProject(project) {
       throw new Error('Missing or duplicate instance id');
     ids.add(node.id);
     if (node.attributes) encodeAttribute(node.attributes);
+    if (
+      ['UIListLayout', 'UIGridLayout', 'UICorner', 'UIPadding'].includes(className) &&
+      !['Frame', 'ScreenGui'].includes(parentClass)
+    )
+      throw new Error('UI modifiers require a UI parent');
     validateUIData(node);
+    if (CAR_DEFAULTS[className])
+      for (const key of Object.keys(CAR_DEFAULTS[className]))
+        if (node[key] !== undefined && (!Number.isFinite(node[key]) || node[key] < 0))
+          throw new Error('Invalid car property: ' + key);
     if (isObject({ ClassName: className })) {
       const three = className === 'Object3D';
       if (three !== (project.dimension === '3D'))

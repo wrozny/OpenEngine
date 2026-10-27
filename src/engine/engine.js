@@ -1,3 +1,4 @@
+import { VehicleSystem } from './vehicles.js';
 import { initializeUIService } from './ui-service.js';
 export { UIService } from './ui-service.js';
 import { UITweens } from './ui-tweens.js';
@@ -37,6 +38,7 @@ export class Engine {
     );
     this.world = this.physicsWorld.world;
     this.nodes = new Set();
+    this.vehicles = new VehicleSystem(this);
     this.running = false;
     this.accumulator = 0;
     this.stepSize = 1 / 60;
@@ -159,6 +161,8 @@ export class Engine {
       this.network?.runningScripts?.delete(node.Id);
     }
     for (const child of node.GetChildren()) this.detach(child);
+    this.vehicles.remove(node);
+    for (const child of node.GetChildren()) this.vehicles.remove(child);
     this.collisions.remove(node);
     this.uiTweens.cancelTarget(node);
     if (node._body) this.physicsWorld.remove(node);
@@ -210,6 +214,7 @@ export class Engine {
     while (this.accumulator >= this.stepSize) {
       this.runService.Time += this.stepSize;
       this.runService.Heartbeat.Fire(this.stepSize);
+      this.vehicles.update(this.stepSize);
       this.physicsWorld.step(this.stepSize);
       for (const node of this.nodes) if (node._body) this.physicsWorld.sync(node);
       if (this.dimension === '3D')
@@ -237,6 +242,7 @@ export class Engine {
     if (this.disposed) return;
     this.disposed = true;
     this.running = false;
+    this.vehicles.dispose();
     this.uiTweens.dispose();
     this.collisions.clear();
     this.lua?.dispose();

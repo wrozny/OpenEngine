@@ -22,6 +22,9 @@ export class PlanckWorld {
   vector(v) {
     return planck.Vec2(v.X / SCALE, v.Y / SCALE);
   }
+  applyImpulse(node, v) {
+    node._body.applyLinearImpulse(this.vector(v), node._body.getWorldCenter(), true);
+  }
   setGravity(v) {
     this.world.setGravity(this.vector(v));
   }

@@ -1,3 +1,4 @@
+import { CAR_DEFAULTS } from '../engine/vehicles.js';
 import { isUINode, UI_DEFAULTS } from '../engine/ui-schema.js';
 import { UDim2 } from '../engine/ui-types.js';
 import { Vector2 } from '../engine/math.js';
@@ -114,17 +115,25 @@ export class NetworkClient {
           }
         }
         if (!locallyOwned || ownerChanged || corrected || !wasRunning) {
+          if (locallyOwned && corrected && !ownerChanged && wasRunning)
+            this.presentation.correct(node, fresh.Position);
           this.presentation.capture(
             node,
             fresh.Position,
             fresh.Rotation,
             ownerChanged || corrected || !wasRunning,
+            performance.now(),
+            data.Velocity ? fresh.vector(data.Velocity) : fresh.Velocity,
           );
           node.Position = fresh.Position;
           node.Rotation = fresh.Rotation;
           if (data.Velocity) node.Velocity = data.Velocity;
         }
         if (rebuild && node._body) engine.rebuildBody(node);
+      } else if (CAR_DEFAULTS[node.ClassName]) {
+        for (const key of Object.keys(CAR_DEFAULTS[node.ClassName]))
+          if (data[key] !== undefined) node[key] = data[key];
+        node.Enabled = data.Enabled !== false;
       } else if (isUINode(node)) {
         const previous = this.uiValues.get(node) || {};
         for (const key of Object.keys(UI_DEFAULTS[node.ClassName])) {
@@ -151,6 +160,7 @@ export class NetworkClient {
       if (node !== engine.root && previouslyReplicated.has(node.Id) && !seen.has(node.Id)) {
         node.Destroy();
         this.presentation.samples.delete(node.Id);
+        this.presentation.corrections.delete(node.Id);
         this.runningScripts.delete(node.Id);
       }
     this.replicatedIds = seen;
@@ -191,7 +201,9 @@ export class NetworkClient {
       if (player.Character) player.CharacterAdded.Fire(player.Character);
   }
   transform(node) {
-    return node._networkOwner === this.userId ? node : this.presentation.get(node);
+    return node._networkOwner === this.userId
+      ? this.presentation.owned(node)
+      : this.presentation.get(node);
   }
   remote(event, direction, _player, args) {
     if (direction !== 'server') throw new Error('FireClient/FireAllClients are server-only');
@@ -224,6 +236,8 @@ export class NetworkClient {
   dispose() {
     this.disposed = true;
     this.engine?.dispose();
+    this.presentation.samples.clear();
+    this.presentation.corrections.clear();
   }
 }
 

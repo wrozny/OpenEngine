@@ -4,6 +4,14 @@ import { isScriptNode } from '../engine/scene.js';
 export function renderHierarchy(container, store, onError, onMenu = () => {}) {
   container.replaceChildren();
   const visible = [];
+  const query = (store.hierarchyQuery || '').trim().toLowerCase();
+  const matches = new Set();
+  if (query)
+    for (const node of store.nodes)
+      if ((node.Name + ' ' + node.ClassName).toLowerCase().includes(query))
+        for (let parent = node; parent && parent !== store.root; parent = parent.Parent)
+          matches.add(parent.Id);
+
   function rename(node, item) {
     if (!store.canRemove(node)) return;
     const input = el('input', 'tree-rename');
@@ -37,6 +45,7 @@ export function renderHierarchy(container, store, onError, onMenu = () => {}) {
     if (item) rename(node, item);
   };
   function row(node, depth) {
+    if (query && !matches.has(node.Id)) return;
     visible.push(node);
     const children = node.GetChildren();
     const selected = store.selectedIds.has(node.Id);
@@ -122,7 +131,7 @@ export function renderHierarchy(container, store, onError, onMenu = () => {}) {
       }
     };
     container.append(item);
-    if (store.expanded.has(node.Id)) children.forEach((child) => row(child, depth + 1));
+    if (query || store.expanded.has(node.Id)) children.forEach((child) => row(child, depth + 1));
   }
   store.root.GetChildren().forEach((node) => row(node, 0));
   container.oncontextmenu = (event) => {

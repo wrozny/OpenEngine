@@ -54,7 +54,7 @@ for (const [id, name] of Object.entries({
 
 const explorer = el('section', 'panel explorer-panel');
 explorer.innerHTML =
-  '<div class="panel-subheader"><span>Scene hierarchy</span><span id="object-count"></span></div><div id="tree" role="tree" aria-label="Scene hierarchy" aria-multiselectable="true"></div><div class="panel-footer">Ctrl/Cmd-click to select more · Right-click for actions</div>';
+  '<div class="panel-subheader"><span>Scene hierarchy</span><span id="object-count"></span></div><input id="hierarchy-search" class="property-search" aria-label="Search hierarchy" placeholder="Search names or classes…"><div id="tree" role="tree" aria-label="Scene hierarchy" aria-multiselectable="true"></div><div class="panel-footer">Ctrl/Cmd-click to select more · Right-click for actions</div>';
 const scene = el('section', 'panel scene-panel');
 scene.innerHTML =
   '<div class="scene-toolbar"><div class="transform-tools"><button id="move-tool" title="Move" aria-label="Move tool"></button><button id="rotate-tool" title="Rotate" aria-label="Rotate tool"></button><button id="scale-tool" title="Scale" aria-label="Scale tool"></button></div><span id="breadcrumb">Workspace</span><button id="frame-selection" title="Frame selection · F">Frame</button><button id="grid" class="active">Grid</button><button id="snap">Snap</button></div><div id="viewport"><div id="viewport-hint">Drag objects · Wheel zoom · Middle drag pan</div></div>';
@@ -166,6 +166,17 @@ function openContext(x, y, position) {
     ),
   );
 }
+find('hierarchy-search').oninput = (event) => {
+  store.hierarchyQuery = event.target.value;
+  store.Changed.Fire('filter');
+};
+find('hierarchy-search').onkeydown = (event) => {
+  if (event.key === 'Escape') {
+    event.target.value = '';
+    store.hierarchyQuery = '';
+    store.Changed.Fire('filter');
+  }
+};
 function render() {
   renderHierarchy(find('tree'), store, onError, (event) =>
     openContext(event.clientX, event.clientY),

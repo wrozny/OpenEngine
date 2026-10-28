@@ -42,6 +42,11 @@ export function loadExample(folder) {
 export const exampleProject = () => loadExample('zombie');
 export const exampleProjects = [
   {
+    name: 'Tether Run',
+    description: '2D · Seeded multiplayer grapple races, dashes and rooftop courses',
+    load: () => loadExample('tether-run'),
+  },
+  {
     name: 'Apex Circuit',
     description: '3D · Multiplayer checkpoint racing with raycast cars',
     load: () => loadExample('apex-circuit'),

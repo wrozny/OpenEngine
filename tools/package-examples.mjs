@@ -8,6 +8,7 @@ const output = 'release/Example Projects';
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 for (const [source, name] of [
+  ['tether-run', 'Tether Run'],
   ['apex-circuit', 'Apex Circuit'],
   ['zombie', 'Dead Signal'],
   ['neon-borough', 'Neon Borough'],
@@ -21,7 +22,7 @@ for (const [source, name] of [
 await cp('LICENSE', join(output, 'LICENSE'));
 await writeFile(
   join(output, 'START HERE.txt'),
-  'OpenEngine example projects\n\nApex Circuit/Apex Circuit.openengine - online raycast racing\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\nNeon Borough/Neon Borough.openengine - online 3D city, cars, shooting and pedestrians\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
+  'OpenEngine example projects\n\nTether Run/Tether Run.openengine - multiplayer grapple racing\n\nApex Circuit/Apex Circuit.openengine - online raycast racing\n\nExtract this ZIP. In Studio click Open and select:\n\nDead Signal/Dead Signal.openengine - 2D zombie survival\nParcel Panic/Parcel Panic.openengine - 3D story and football\nNeon Borough/Neon Borough.openengine - online 3D city, cars, shooting and pedestrians\n\nThe named documents embed their Lua and artwork. The project.openengine documents reference the editable scripts/assets alongside them; use the repository CLI to build from those source files.\n',
 );
 const files = {};
 async function collect(directory) {
@@ -65,3 +66,14 @@ for (const file of [
 ])
   raceSource[file.split('/').at(-1)] = new Uint8Array(await readFile(file));
 await writeFile('release/ApexCircuit-source.zip', zipSync(raceSource));
+
+const tetherSource = Object.fromEntries(
+  Object.entries(files)
+    .filter(([name]) => name.startsWith('Tether Run/'))
+    .map(([name, data]) => [name.slice('Tether Run/'.length), data]),
+);
+for (const file of ['LICENSE', 'docs/LUA_REFERENCE.md', 'docs/TETHER_RUN.md'])
+  tetherSource[file.split('/').at(-1)] = new Uint8Array(await readFile(file));
+await writeFile('release/TetherRun-source.zip', zipSync(tetherSource));
+
+console.log('Packaged release/TetherRun-source.zip');

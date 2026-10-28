@@ -1,0 +1,664 @@
+{
+  "format": "openengine",
+  "version": 1,
+  "dimension": "2D",
+  "multiplayer": true,
+  "name": "Tether Run",
+  "hideControlHint": true,
+  "description": "Swing across seeded rooftop courses. Grapple, dash and race the next round.",
+  "controls": "A/D run · Space jump · Mouse grapple · W/S reel · Shift dash · R recover",
+  "services": [
+    {
+      "id": "tether-0",
+      "className": "Folder",
+      "name": "Workspace",
+      "attributes": {},
+      "children": [
+        {
+          "id": "tether-3",
+          "className": "Folder",
+          "name": "Course",
+          "attributes": {},
+          "children": []
+        },
+        {
+          "id": "tether-4",
+          "className": "Folder",
+          "name": "Match",
+          "attributes": {},
+          "children": []
+        },
+        {
+          "id": "tether-5",
+          "className": "RemoteEvent",
+          "name": "Action",
+          "attributes": {},
+          "children": []
+        },
+        {
+          "id": "tether-6",
+          "className": "Object2D",
+          "name": "Night sky",
+          "attributes": {},
+          "children": [],
+          "Texture": "",
+          "ShowHealthBar": false,
+          "Shape": "Box",
+          "Color": "#14252f",
+          "Size": {
+            "X": 6500,
+            "Y": 2300
+          },
+          "Anchored": true,
+          "Sensor": true,
+          "Visible": true,
+          "Layer": -1000,
+          "CollisionGroup": "decoration",
+          "Restitution": 0,
+          "Friction": 0.2,
+          "Position": {
+            "X": 2100,
+            "Y": -100
+          },
+          "Rotation": 0
+        }
+      ],
+      "settings": {
+        "Skybox": "builtin:sky",
+        "BackgroundColor": "#000000",
+        "FallenHeight": -50
+      }
+    },
+    {
+      "id": "tether-1",
+      "className": "Folder",
+      "name": "ScriptService",
+      "attributes": {},
+      "children": [
+        {
+          "id": "tether-7",
+          "className": "Folder",
+          "name": "Templates",
+          "attributes": {},
+          "children": [
+            {
+              "id": "tether-8",
+              "className": "Object2D",
+              "name": "Runner",
+              "attributes": {},
+              "children": [],
+              "Texture": "asset:runner",
+              "ShowHealthBar": false,
+              "Shape": "Box",
+              "Color": "#e8c56b",
+              "Size": {
+                "X": 28,
+                "Y": 38
+              },
+              "Anchored": false,
+              "Sensor": false,
+              "Visible": true,
+              "Layer": 0,
+              "CollisionGroup": "player",
+              "Restitution": 0,
+              "Friction": 0.1,
+              "Position": {
+                "X": 0,
+                "Y": 0
+              },
+              "Rotation": 0
+            }
+          ]
+        },
+        {
+          "id": "tether-19",
+          "className": "ModuleScript",
+          "name": "Course",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/Course.lua"
+        },
+        {
+          "id": "tether-20",
+          "className": "ServerScript",
+          "name": "Race director",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/Server.lua"
+        },
+        {
+          "id": "tether-21",
+          "className": "LocalScript",
+          "name": "Runner controls",
+          "attributes": {},
+          "children": [],
+          "Enabled": true,
+          "SourceFile": "scripts/Client.lua"
+        }
+      ]
+    },
+    {
+      "id": "tether-2",
+      "className": "UIService",
+      "name": "UIService",
+      "attributes": {},
+      "children": [
+        {
+          "id": "tether-9",
+          "className": "ScreenGui",
+          "name": "RaceHUD",
+          "attributes": {},
+          "children": [
+            {
+              "id": "tether-10",
+              "className": "Frame",
+              "name": "Header",
+              "attributes": {},
+              "children": [
+                {
+                  "id": "tether-11",
+                  "className": "TextLabel",
+                  "name": "Brand",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 18,
+                    "YScale": 0,
+                    "YOffset": 8
+                  },
+                  "Size": {
+                    "XScale": 0.6,
+                    "XOffset": 0,
+                    "YScale": 0,
+                    "YOffset": 22
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "TETHER / RUN",
+                  "TextColor": "#20343b",
+                  "TextSize": 18,
+                  "FontWeight": 700,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "tether-12",
+                  "className": "TextLabel",
+                  "name": "Phase",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 18,
+                    "YScale": 0,
+                    "YOffset": 33
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": -105,
+                    "YScale": 0,
+                    "YOffset": 30
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "ASSEMBLING THE GRID",
+                  "TextColor": "#20343b",
+                  "TextSize": 22,
+                  "FontWeight": 700,
+                  "FontFamily": "Serif",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "tether-13",
+                  "className": "TextLabel",
+                  "name": "Course",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 18,
+                    "YScale": 0,
+                    "YOffset": 78
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": -30,
+                    "YScale": 0,
+                    "YOffset": 20
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "PROCEDURAL ROOFTOPS",
+                  "TextColor": "#20343b",
+                  "TextSize": 11,
+                  "FontWeight": 400,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "tether-14",
+                  "className": "TextLabel",
+                  "name": "Clock",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 1,
+                    "XOffset": -118,
+                    "YScale": 0,
+                    "YOffset": 15
+                  },
+                  "Size": {
+                    "XScale": 0,
+                    "XOffset": 100,
+                    "YScale": 0,
+                    "YOffset": 56
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "06",
+                  "TextColor": "#20343b",
+                  "TextSize": 32,
+                  "FontWeight": 700,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Right",
+                  "TextVAlign": "Center",
+                  "TextWrapped": false
+                }
+              ],
+              "Position": {
+                "XScale": 0,
+                "XOffset": 20,
+                "YScale": 0,
+                "YOffset": 20
+              },
+              "Size": {
+                "XScale": 1,
+                "XOffset": -40,
+                "YScale": 0,
+                "YOffset": 110
+              },
+              "AnchorPoint": {
+                "X": 0,
+                "Y": 0
+              },
+              "Visible": true,
+              "Opacity": 1,
+              "BackgroundColor": "#eee7d6",
+              "BackgroundOpacity": 1,
+              "BorderColor": "#49546a",
+              "BorderWidth": 0,
+              "CornerRadius": 0,
+              "ZIndex": 0,
+              "ClipChildren": false,
+              "MinSize": {
+                "X": 0,
+                "Y": 0
+              },
+              "MaxSize": {
+                "X": 0,
+                "Y": 0
+              },
+              "AspectRatio": 0,
+              "FlexGrow": 0,
+              "Interactable": false,
+              "Disabled": false,
+              "EnterEffect": "None",
+              "HoverEffect": "None",
+              "ClickEffect": "None",
+              "Layout": "Absolute",
+              "Padding": 0,
+              "Gap": 12,
+              "Align": "Start",
+              "Justify": "Start",
+              "Wrap": false
+            },
+            {
+              "id": "tether-15",
+              "className": "Frame",
+              "name": "Footer",
+              "attributes": {},
+              "children": [
+                {
+                  "id": "tether-16",
+                  "className": "TextLabel",
+                  "name": "Progress",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 14,
+                    "YScale": 0,
+                    "YOffset": 8
+                  },
+                  "Size": {
+                    "XScale": 0.6,
+                    "XOffset": 0,
+                    "YScale": 0,
+                    "YOffset": 23
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "DECK 01 / 14",
+                  "TextColor": "#e8c56b",
+                  "TextSize": 12,
+                  "FontWeight": 400,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "tether-17",
+                  "className": "TextLabel",
+                  "name": "Dash",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 1,
+                    "XOffset": -180,
+                    "YScale": 0,
+                    "YOffset": 8
+                  },
+                  "Size": {
+                    "XScale": 0,
+                    "XOffset": 165,
+                    "YScale": 0,
+                    "YOffset": 23
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "SHIFT / DASH READY",
+                  "TextColor": "#69d4c0",
+                  "TextSize": 11,
+                  "FontWeight": 400,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Right",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                },
+                {
+                  "id": "tether-18",
+                  "className": "TextLabel",
+                  "name": "Controls",
+                  "attributes": {},
+                  "children": [],
+                  "Position": {
+                    "XScale": 0,
+                    "XOffset": 14,
+                    "YScale": 0,
+                    "YOffset": 38
+                  },
+                  "Size": {
+                    "XScale": 1,
+                    "XOffset": -28,
+                    "YScale": 0,
+                    "YOffset": 28
+                  },
+                  "AnchorPoint": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "Visible": true,
+                  "Opacity": 1,
+                  "BackgroundColor": "#252d3b",
+                  "BackgroundOpacity": 0,
+                  "BorderColor": "#49546a",
+                  "BorderWidth": 0,
+                  "CornerRadius": 0,
+                  "ZIndex": 0,
+                  "ClipChildren": false,
+                  "MinSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "MaxSize": {
+                    "X": 0,
+                    "Y": 0
+                  },
+                  "AspectRatio": 0,
+                  "FlexGrow": 0,
+                  "Interactable": false,
+                  "Disabled": false,
+                  "EnterEffect": "None",
+                  "HoverEffect": "None",
+                  "ClickEffect": "None",
+                  "Text": "A/D move · Space jump · Hold mouse: tether · W/S reel · Shift dash · R recover",
+                  "TextColor": "#c4d0cf",
+                  "TextSize": 11,
+                  "FontWeight": 400,
+                  "FontFamily": "Monospace",
+                  "TextAlign": "Left",
+                  "TextVAlign": "Center",
+                  "TextWrapped": true
+                }
+              ],
+              "Position": {
+                "XScale": 0,
+                "XOffset": 20,
+                "YScale": 1,
+                "YOffset": -20
+              },
+              "Size": {
+                "XScale": 1,
+                "XOffset": -40,
+                "YScale": 0,
+                "YOffset": 74
+              },
+              "AnchorPoint": {
+                "X": 0,
+                "Y": 1
+              },
+              "Visible": true,
+              "Opacity": 1,
+              "BackgroundColor": "#0c1b24",
+              "BackgroundOpacity": 1,
+              "BorderColor": "#3d535c",
+              "BorderWidth": 1,
+              "CornerRadius": 0,
+              "ZIndex": 0,
+              "ClipChildren": false,
+              "MinSize": {
+                "X": 0,
+                "Y": 0
+              },
+              "MaxSize": {
+                "X": 0,
+                "Y": 0
+              },
+              "AspectRatio": 0,
+              "FlexGrow": 0,
+              "Interactable": false,
+              "Disabled": false,
+              "EnterEffect": "None",
+              "HoverEffect": "None",
+              "ClickEffect": "None",
+              "Layout": "Absolute",
+              "Padding": 0,
+              "Gap": 12,
+              "Align": "Start",
+              "Justify": "Start",
+              "Wrap": false
+            }
+          ],
+          "Enabled": true,
+          "DesignWidth": 1280,
+          "DesignHeight": 720,
+          "ScaleMode": "Responsive",
+          "DisplayOrder": 0,
+          "SafeArea": true
+        }
+      ]
+    }
+  ],
+  "assets": {
+    "runner": {
+      "mimeType": "image/svg+xml",
+      "SourceFile": "assets/runner.svg"
+    }
+  }
+}

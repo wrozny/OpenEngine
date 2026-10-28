@@ -184,3 +184,7 @@ Select **UIService** in Explorer to open the **UI** tab. Drag frames, labels, bu
 Right-click **Rename**, F2 and inline rename work in Explorer. Properties has a search field. **Library** offers searchable draggable objects, UI list/grid layouts, corner/padding modifiers and behavior snippets. Lua completions suppress duplicate word suggestions and describe engine calls.
 
 **Car3D** supplies native four-wheel raycast suspension, dampers, traction, braking and speed-sensitive steering. **Car2D** supplies side-view two-ray suspension and driving. The **Apex Circuit** multiplayer example uses owned car prediction and server-managed countdowns, ordered checkpoints, winners and round resets. See [vehicles and racing](docs/VEHICLES.md).
+
+### Tether Run — multiplayer grapple platformer
+
+Choose **Tether Run** in the launcher to race seeded rooftop courses. Hold mouse at gold anchors to swing, W/S to reel, Space to jump, Shift to dash and R to recover. Courses regenerate between rounds, with boost pads, hazards and checkpoint progress. The authored cream-and-ink HUD and original runner sprite are included in the editable template. [Game controls, source structure and hosting](docs/TETHER_RUN.md).

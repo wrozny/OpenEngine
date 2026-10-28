@@ -53,6 +53,7 @@ export class ProjectLauncher {
       ['starter', 'Starter with player controller'],
       ['platformer', 'Platformer starter'],
       ['empty', 'Empty scene'],
+      ['tether-run', 'Tether Run — multiplayer grapple race'],
     ]) {
       const opt = el('option', '', text);
       opt.value = value;
@@ -65,9 +66,24 @@ export class ProjectLauncher {
     online.append(multiplayer, document.createTextNode(' Enable multiplayer'));
     const create = el('button', 'primary', 'Create project');
     create.type = 'submit';
+    template.onchange = () => {
+      const game = template.value === 'tether-run';
+      for (const radio of modes.querySelectorAll('input')) {
+        radio.disabled = game;
+        if (game) radio.checked = radio.value === '2D';
+      }
+      multiplayer.disabled = game;
+      if (game) multiplayer.checked = true;
+    };
     form.append(name, modes, template, online, create);
     form.onsubmit = (event) => {
       event.preventDefault();
+      if (template.value === 'tether-run') {
+        const project = this.examples.find((example) => example.name === 'Tether Run').load();
+        project.name = name.value.trim() || 'My game';
+        this.open(project);
+        return;
+      }
       const dimension = form.querySelector('input[name=dimension]:checked').value;
       this.open(
         createProject(

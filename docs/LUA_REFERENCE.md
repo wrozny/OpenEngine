@@ -789,3 +789,9 @@ Car2D/Car3D are native components under matching unanchored physical objects. `m
 UI modifiers are nonvisual instances parented under a Frame or ScreenGui. UIListLayout defaults: Direction="Column", Padding=12, Gap=12, Align="Start", Justify="Start", Wrap=false. UIGridLayout defaults: Columns=0 (automatic), CellWidth=160, CellHeight=44, Padding=12, Gap=12. Grid cells distribute available width, then wrap rows. UICorner.Radius=12 overrides CornerRadius; UIPadding.Padding=16 overrides layout padding. Modifiers affect sibling layout/parent styling; they do not create additional visible elements. The first of each kind is used; grid takes precedence over list.
 
 Remote presentation now buffers 100 ms and extrapolates at most 150 ms on missing snapshots. Small owner corrections are visually eased; large teleports snap. This does not introduce input-history rollback or change physics/query authority.
+
+## 0.7 render-aligned attachments
+
+`RunService:GetRenderTransform(instance)` returns `{Position, Rotation}` for a live physical instance in the current game. On network clients this is its smoothed/predicted visual pose; on standalone/server it is its physical pose. Use it in PostSimulation for cosmetic ropes/attachments that must meet an interpolated player. Collision checks and gameplay authority still use the instance's physical Position. Returned vectors are immutable; assigning fields on the returned record does not move the instance.
+
+The optional project metadata `hideControlHint=true` suppresses the default bottom control hint when an authored HUD already displays controls. It does not change keyboard input.

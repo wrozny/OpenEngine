@@ -69,6 +69,12 @@ export class Engine {
       GetGravity: () => this.physicsWorld.getGravity(),
     };
     this.runService = {
+      GetRenderTransform: (node) => {
+        if (!this.isPhysical(node) || node._engine !== this)
+          throw new Error('GetRenderTransform requires a physical instance in this game');
+        const pose = this.network?.transform ? this.network.transform(node) : node;
+        return { Position: pose.Position, Rotation: pose.Rotation };
+      },
       Heartbeat: new Signal((error) => this.log('error', error.message)),
       PostSimulation: new Signal((error) => this.log('error', error.message)),
       Time: 0,

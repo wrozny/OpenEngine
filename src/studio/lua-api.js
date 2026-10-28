@@ -15,6 +15,10 @@ export const API = {
     GetPlayerFromCharacter: ['character', 'Find the player whose Character is this instance.'],
   },
   RunService: {
+    GetRenderTransform: [
+      'instance',
+      'Read interpolated visual Position/Rotation for cosmetic attachments; physics uses instance.Position.',
+    ],
     IsServer: ['', 'True on the authority.'],
     IsClient: ['', 'True in a client runtime.'],
   },

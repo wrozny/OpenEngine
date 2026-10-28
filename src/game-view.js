@@ -39,6 +39,7 @@ export class GameView {
       'game-help',
       project.controls || 'Click the canvas to focus · keyboard and mouse',
     );
+    this.help.hidden = !!project.hideControlHint;
     this.root.append(this.help);
     if (onStop) {
       const stop = element('button', 'game-exit', '■  Stop play');

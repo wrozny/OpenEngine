@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag to publish (for example v0.6.0)
+        description: Existing version tag to publish (for example v0.7.0)
         required: true
-        default: v0.6.0
+        default: v0.7.0
         type: string
 
 permissions:
@@ -50,13 +50,16 @@ jobs:
       - run: npm run package:game -- --project examples/neon-borough/project.openengine --platform web
       - run: npm run package:game -- --project examples/apex-circuit/project.openengine --platform win32
       - run: npm run package:game -- --project examples/apex-circuit/project.openengine --platform web
+      - run: npm run package:game -- --project examples/tether-run/project.openengine --platform win32
+      - run: npm run package:game -- --project examples/tether-run/project.openengine --platform web
       - name: Create downloadable ZIPs and checksums
         run: |
           (cd release/OpenEngineStudio-win32-x64 && zip -q -r ../OpenEngineStudio-Windows.zip .)
           (cd release && zip -q -r NeonBorough-Windows.zip NeonBorough-win32-x64 NeonBoroughServer-win32-x64)
           (cd release && zip -q -r ApexCircuit-Windows.zip ApexCircuit-win32-x64 ApexCircuitServer-win32-x64)
+          (cd release && zip -q -r TetherRun-Windows.zip TetherRun-win32-x64 TetherRunServer-win32-x64)
           cd release
-          sha256sum OpenEngineStudio-Windows.zip Example.Projects.zip NeonBorough-Windows.zip NeonBorough-web.zip NeonBorough-source.zip ApexCircuit-Windows.zip ApexCircuit-web.zip ApexCircuit-source.zip > SHA256SUMS.txt
+          sha256sum OpenEngineStudio-Windows.zip Example.Projects.zip NeonBorough-Windows.zip NeonBorough-web.zip NeonBorough-source.zip ApexCircuit-Windows.zip ApexCircuit-web.zip ApexCircuit-source.zip TetherRun-Windows.zip TetherRun-web.zip TetherRun-source.zip > SHA256SUMS.txt
       - name: Upload assets and publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -74,5 +77,8 @@ jobs:
             release/ApexCircuit-Windows.zip \
             release/ApexCircuit-web.zip \
             release/ApexCircuit-source.zip \
+            release/TetherRun-Windows.zip \
+            release/TetherRun-web.zip \
+            release/TetherRun-source.zip \
             release/SHA256SUMS.txt --clobber
           gh release edit "$RELEASE_TAG" --draft=false --latest

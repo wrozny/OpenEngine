@@ -1,29 +1,24 @@
-OpenEngine 0.6.0 adds editor comfort tools, native raycast cars, improved multiplayer presentation and Apex Circuit racing.
+OpenEngine 0.7.0 introduces **Tether Run**, an editable multiplayer 2D grapple-platform racing template.
 
-## Downloads
+## Play Tether Run
 
-- **OpenEngineStudio-Windows.zip**: extract the entire ZIP, run OpenEngineStudio.exe.
-- **ApexCircuit-Windows.zip**: racing client and dedicated Server application folders. Start the Server, then the client; use ws://HOST-IP:7777/socket on other machines.
-- **ApexCircuit-web.zip**: web client and headless server. With Node.js 24, run `node server.cjs`, then open http://localhost:7777.
-- **ApexCircuit-source.zip**: editable racing source, portable Studio document, Lua reference and vehicle documentation.
-- **Example.Projects.zip**: all four portable example projects and source folders.
-- **NeonBorough-Windows.zip**, **NeonBorough-web.zip**, **NeonBorough-source.zip**: updated city builds and source.
-- **SHA256SUMS.txt**: checksums for the published downloads.
+- **TetherRun-Windows.zip**: extract both application folders. Start TetherRunServer, then TetherRun. Other computers join `ws://HOST-IP:7777/socket`. No Node.js installation is needed.
+- **TetherRun-web.zip**: install Node.js 24, extract, run `node server.cjs`, open http://localhost:7777.
+- **TetherRun-source.zip**: editable Lua, original SVG runner, scene/UI and portable `Tether Run.openengine` document.
+- **OpenEngineStudio-Windows.zip**: extract and launch OpenEngineStudio.exe; Tether Run is in the launcher examples.
+- **Example.Projects.zip**: all five examples with editable source and portable documents.
+- Existing Apex Circuit and Neon Borough builds/source remain available. SHA256SUMS.txt covers the exact published filenames.
 
-## Editor
+## Rooftop grapple racing
 
-Right-click Rename, F2 and inline editing improve Explorer naming. Properties has a persistent search field with Escape to clear. Library searches and inserts/drags objects, native car components, layout/style modifiers and behavior snippets. Lua hints deduplicate identifiers, suppress repeated word suggestions and describe methods and inferred component properties/defaults.
+Fourteen seeded decks vary in spacing, height and width each round. Hold mouse at a gold anchor to grapple, W/S to reel, A/D to build movement, release to swing onward. Space jumps with coyote time and input buffering; Shift dashes on a cooldown. Mint launch pads, coral hazards and checkpoint recovery add choices to the race.
 
-UIListLayout and UIGridLayout arrange siblings; UICorner and UIPadding modify parent appearance/layout. They serialize as child instances and are editable from Properties and the UI palette.
+A six-second countdown starts a 110-second race. The first finisher wins; a seven-second results phase generates the next course. Late joins spectate until the next round. The host controls progression, validates hook range/line of sight and handles hazards/boosts/recovery. Owners predict their movement immediately. This is an arcade template using existing coarse physics guards, not competitive anti-cheat.
 
-## Physics and networking
+The authored HUD uses a flat cream timing strip, ink footer, restrained type and gold/mint/coral cues. The scene, Lua and original runner sprite are editable; no external art dependency. See docs/TETHER_RUN.md.
 
-Car3D uses Cannon's four-wheel RaycastVehicle for suspension, damping, traction, rear-wheel drive, braking and speed-sensitive steering. Car2D is a side-view two-ray suspension car with drive/lean controls. Components expose bounded SetInput, Speed and GetWheelPosition. Physical objects gain ApplyImpulse. See docs/VEHICLES.md for tuning and conventions.
+## Editor additions since 0.6
 
-Remote rendering buffers snapshots for 100 ms and extrapolates velocity for at most 150 ms during gaps. Small owner corrections ease visually while query bodies remain authoritative. Large teleports snap. This is bounded presentation smoothing with existing owner physics prediction, not input-history rollback or competitive anti-cheat.
+Explorer searches names/classes while retaining matching ancestors. Save a selected subtree as a reusable project-local template, then click or drag it from Library. Copies receive fresh IDs and remain independent; these are not linked prefabs. Private editor template metadata is omitted from multiplayer client documents.
 
-## Apex Circuit
-
-A multiplayer circuit with rolling terrain, a countdown, ordered checkpoints, first-finisher results, server-validated recovery and round resets. Cars simulate on their owners for immediate controls; the host decides progression/winners. A solo driver can practice; late joins spectate until the next round. WASD drives, Space brakes, R recovers.
-
-Windows applications are cross-packaged in Linux. Car2D is side-view, not a top-down kart. Network leases retain coarse movement guards; competitive anti-cheat and advanced tire/visual animation are outside this release.
+Rope gameplay uses a distance constraint, without wrapping or a multi-body rope solver. Desktop execution is verified on Linux; Windows builds are cross-packaged.

@@ -4,11 +4,19 @@ An editable multiplayer 2D grapple-platform racing template. Choose **Tether Run
 
 ## Controls
 
-A/D runs; Space jumps, including a short coyote-time/jump-buffer window. Aim at a gold overhead anchor and hold left mouse to tether. W/S reels the rope in/out; release the mouse to let go. Shift dashes with a two-second cooldown. R returns to the current checkpoint. Mint pads launch you; coral live wires and falls trigger recovery. Reach the white finish marker before everyone else.
+A/D runs; Space jumps, including a short coyote-time/jump-buffer window. Aim at a gold overhead anchor and hold left mouse to tether. W/S reels the rope in/out; release the mouse to let go. Shift dashes with a two-second cooldown. R returns to the current checkpoint. Mint pads launch you; coral pulse gates and falls trigger recovery. Gates alternate between live coral and safe muted green every 1.6 seconds. Reach the chequered finish marker before everyone else.
 
 ## Rounds and courses
 
-Six-second countdown, up to 110 seconds of racing, seven-second results. The next round receives a new deterministic seed and fresh terrain. Fourteen decks form a continuous reachable spine, each with an overhead hook anchor. Deck heights/widths vary within bounded ranges. Late joins spectate until the next countdown. Checkpoints retain your progress after falls. The HUD shows deck progress, recoveries, dash readiness, course seed and phase.
+Six-second countdown, up to 110 seconds of racing, seven-second results. Each server starts with a fresh random seed; subsequent rounds advance that seed. The deterministic generator creates 14–18 decks, drawing three-deck districts from a shuffled bag:
+
+- **Stairworks**: sustained climbs on tighter terraces.
+- **Skyline gaps**: longer crossings with additional mid-gap grapple relays and lower recovery steps.
+- **Upper express**: raised bypass platforms and high anchors reward a clean swing.
+- **Switchyard**: alternating elevations and timed pulse gates reward timing.
+- **Launch district**: mint pads launch you into longer crossings.
+
+District colors, facade windows, anchor heights, deck widths, sector order and course length vary. Every deck retains an overhead anchor, and the finish deck has no pulse gate. Bounds keep the primary route inside the intended movement/grapple envelope. Late joins spectate until the next countdown. Checkpoints also register from the upper route and retain progress after falls. The HUD shows current district, seed, deck count, recoveries, dash readiness and phase.
 
 The cream timing strip, monospaced course notation, flat ink footer and limited gold/mint/coral colors are authored UI instances under UIService/RaceHUD. Edit their typography/layout directly in Studio. The runner sprite is original embedded SVG artwork; no external art service or dependency is required.
 

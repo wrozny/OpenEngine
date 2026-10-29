@@ -29,12 +29,14 @@ test('Tether Run generates courses, validates hooks, recovers falls and resets s
       .FindFirstChild('Course')
       .GetChildren()
       .filter((n) => n.Name.startsWith('Deck'));
-    assert.equal(decks.length, 14);
+    assert.ok(decks.length >= 14 && decks.length <= 18);
+    assert.equal(match.GetAttribute('DeckCount'), decks.length);
+    assert.equal(new Set(decks.slice(1).map((deck) => deck.GetAttribute('District'))).size, 5);
     for (let i = 1; i < decks.length; i++) {
-      assert.ok(Math.abs(decks[i].Position.Y - decks[i - 1].Position.Y) <= 45.001);
+      assert.ok(Math.abs(decks[i].Position.Y - decks[i - 1].Position.Y) <= 70.001);
       assert.ok(
-        decks[i].Position.X - decks[i - 1].Position.X >= 284.999 &&
-          decks[i].Position.X - decks[i - 1].Position.X <= 370.001,
+        decks[i].Position.X - decks[i - 1].Position.X >= 269.999 &&
+          decks[i].Position.X - decks[i - 1].Position.X <= 425.001,
       );
     }
     const anchor = server.engine.workspace.FindFirstChild('Course').FindFirstChild('Anchor 1');
@@ -79,6 +81,56 @@ test('Tether Run generates courses, validates hooks, recovers falls and resets s
   } finally {
     peer.close();
     client.dispose();
+    server.dispose();
+  }
+});
+
+test('course seeds reproduce varied traversal patterns within the grapple envelope', async () => {
+  const server = new GameServer(await loadProject('examples/tether-run/project.openengine'));
+  const signatures = new Set();
+  try {
+    for (let seed = 1; seed <= 64; seed++) {
+      server.engine.lua.evaluate(
+        `
+        local Course=require(game:GetService("ScriptService").Course)
+        local a,b=Course.Generate(${seed}),Course.Generate(${seed})
+        assert(#a>=14 and #a<=18 and #a==#b)
+        local signature={}
+        for i,s in ipairs(a) do
+            assert(s.x==b[i].x and s.y==b[i].y and s.district==b[i].district)
+            assert(s.y>=-100 and s.y<=260 and s.width>=190)
+            if i>1 then
+                local previous=a[i-1]
+                assert(s.x-previous.x>=270 and s.x-previous.x<=425)
+                assert(math.abs(s.y-previous.y)<=70)
+                local dx=s.x+s.anchorX-previous.x
+                local dy=s.y-s.anchorHeight-(previous.y-50)
+                assert(math.sqrt(dx*dx+dy*dy)<600)
+            end
+            signature[#signature+1]=s.x..":"..s.y..":"..s.district
+        end
+        assert(not a[#a].hazard)
+        workspace:SetAttribute("CourseSignature",table.concat(signature,";"))
+      `,
+        'course variety',
+      );
+      signatures.add(server.engine.workspace.GetAttribute('CourseSignature'));
+    }
+    assert.equal(signatures.size, 64);
+    const terrain = server.engine.workspace.FindFirstChild('Course');
+    assert.ok(terrain.GetChildren().some((n) => n.Name.startsWith('Gap relay')));
+    assert.ok(terrain.GetChildren().some((n) => n.Name.startsWith('Upper express')));
+    const gate = terrain.FindFirstChild('Pulse gate');
+    assert.ok(gate);
+    server.update(1 / 60);
+    const initial = gate.GetAttribute('Active');
+    for (let frame = 0; frame < 100; frame++) server.update(1 / 60);
+    assert.notEqual(gate.GetAttribute('Active'), initial);
+    assert.deepEqual(
+      server.engine.logs.filter((e) => e.level === 'error'),
+      [],
+    );
+  } finally {
     server.dispose();
   }
 });

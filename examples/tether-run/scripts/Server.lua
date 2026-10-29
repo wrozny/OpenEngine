@@ -8,7 +8,8 @@ local terrain = workspace.Course
 local action = workspace.Action
 local racers = {}
 local segments = {}
-local phase, deadline, round, seed, winner = "Waiting", 0, 0, 104729, ""
+local gates = {}
+local phase, deadline, round, seed, winner = "Waiting", 0, 0, math.random(1, 1000000), ""
 Physics:SetGravity(Vector2.new(0,980))
 
 local function object(name, x, y, width, height, color, sensor)
@@ -18,29 +19,63 @@ local function object(name, x, y, width, height, color, sensor)
     node.Parent = terrain
     return node
 end
+local function decoration(name, x, y, width, height, color, layer)
+    local node=object(name,x,y,width,height,color,true)
+    node.Layer=layer or -10;node.CollisionGroup="decoration"
+    return node
+end
+local function anchor(name,x,y)
+    local node=object(name,x,y,22,22,"#e8c56b")
+    node.Shape="Circle";node:SetAttribute("Hookable",true)
+    return node
+end
 local function build()
     for _, child in ipairs(terrain:GetChildren()) do child:Destroy() end
+    gates={}
     segments = Course.Generate(seed)
+    local palettes={{"#354d5a","#1c303b","#41636b"},{"#586061","#303f44","#739689"},{"#685970","#302c40","#907b92"}}
     for i, segment in ipairs(segments) do
-        local platform = object("Deck "..i, segment.x, segment.y, segment.width, 22, "#354d5a")
+        local palette=palettes[segment.palette]
+        local platform = object("Deck "..i, segment.x, segment.y, segment.width, 22, palette[1])
         platform:SetAttribute("Deck", i)
-        local building=object("Rooftop support",segment.x,segment.y+365,segment.width-12,700,"#1c303b",true)
-        building.Layer=-20;building.CollisionGroup="decoration"
-        local mast=object("Anchor mast",segment.x+40,segment.y-260,3,85,"#354d5a",true)
-        mast.Layer=-10;mast.CollisionGroup="decoration"
-        local anchor = object("Anchor "..i, segment.x+40, segment.y-205, 22, 22, "#e8c56b")
-        anchor.Shape = "Circle"
-        anchor:SetAttribute("Hookable", true)
+        platform:SetAttribute("District",segment.district)
+        decoration("Rooftop support",segment.x,segment.y+365,segment.width-12,700,palette[2],-20)
+        decoration("Roof trim",segment.x,segment.y+16,segment.width+10,5,palette[3])
+        -- Seeded facade silhouettes make districts recognizable without external artwork.
+        for floor=1,3 do
+            for column=-1,1 do
+                decoration("Window",segment.x+column*48,segment.y+floor*60,16,24,palette[3],-15)
+            end
+        end
+        decoration("Anchor mast",segment.x+segment.anchorX,segment.y-segment.anchorHeight-55,3,85,palette[3])
+        anchor("Anchor "..i,segment.x+segment.anchorX,segment.y-segment.anchorHeight)
+        if segment.bridge then
+            anchor("Gap relay "..i,segment.x-195,segment.y-230)
+            object("Service step",segment.x-180,segment.y+75,74,14,palette[1])
+        end
+        if segment.shortcut then
+            object("Upper express "..i,segment.x-45,segment.y-115,115,14,palette[3])
+            anchor("Express relay "..i,segment.x-135,segment.y-300)
+        end
         if segment.boost then
             local pad = object("Boost", segment.x+55, segment.y-16, 70, 10, "#69d4c0", true)
             pad:SetAttribute("Boost", true)
         end
         if segment.hazard then
-            local hazard=object("Live wire",segment.x+70,segment.y-29,28,35,"#ef746c",true)
+            local hazard=object("Pulse gate",segment.x+70,segment.y-42,18,65,"#ef746c",true)
             hazard:SetAttribute("Hazard",true)
+            gates[#gates+1]={node=hazard,segment=segment}
         end
     end
-    object("Finish", segments[#segments].x+45, segments[#segments].y-70, 8, 120, "#f4eee1", true)
+    local finish=segments[#segments]
+    decoration("Finish pole",finish.x+45,finish.y-75,7,140,"#f4eee1",2)
+    for row=0,2 do
+        for column=0,3 do
+            decoration("Chequered flag",finish.x+59+column*12,finish.y-140+row*12,12,12,
+                (row+column)%2==0 and "#f4eee1" or "#14252f",3)
+        end
+    end
+    state:SetAttribute("DeckCount",#segments)
 end
 local function reset(player, checkpoint)
     local data = racers[player.UserId]
@@ -60,6 +95,7 @@ local function reset(player, checkpoint)
     actor:SetAttribute("BoostSerial",0)
     actor:SetAttribute("HookActive",false)
     actor:SetAttribute("Checkpoint", checkpoint or 1)
+    actor:SetAttribute("District",segment.district)
     actor:SetAttribute("Finished",false)
     data.checkpoint, data.lastHook = checkpoint or 1, -10
 end
@@ -106,22 +142,29 @@ Run.Heartbeat:Connect(function()
             player.Character:SetAttribute("Spectating",false)
         end
     end
+    for _, gate in ipairs(gates) do
+        local active=(Run.Time+gate.segment.offset)%3.2<1.6
+        gate.segment.active=active
+        gate.node.Color=active and "#ef746c" or "#477066"
+        gate.node:SetAttribute("Active",active)
+    end
     for _, player in ipairs(Players:GetPlayers()) do
         local data, actor = racers[player.UserId], player.Character
         if data and actor and not actor.Destroyed then
             local active=phase=="Racing" and not actor:GetAttribute("Spectating") and not actor:GetAttribute("Finished")
             actor:SetAttribute("CanRace",active)
+            if not active then actor:SetAttribute("HookActive",false) end
             if active then
                 local pos=actor.Position
                 if pos.Y>600 or pos.X < -300 then
                     data.falls=data.falls+1;reset(player,data.checkpoint)
                 else
                     for i, segment in ipairs(segments) do
-                        if math.abs(pos.X-segment.x)<100 and math.abs(pos.Y-segment.y)<100 then
+                        if math.abs(pos.X-segment.x)<110 and pos.Y>segment.y-200 and pos.Y<segment.y+70 then
                             if i>data.checkpoint and i<=data.checkpoint+3 then
-                                data.checkpoint=i;actor:SetAttribute("Checkpoint",i)
+                                data.checkpoint=i;actor:SetAttribute("Checkpoint",i);actor:SetAttribute("District",segment.district)
                             end
-                            if segment.hazard and math.abs(pos.X-segment.x-70)<30 and math.abs(pos.Y-segment.y+29)<42 then
+                            if segment.hazard and segment.active and math.abs(pos.X-segment.x-70)<25 and math.abs(pos.Y-segment.y+42)<52 then
                                 data.falls=data.falls+1;reset(player,data.checkpoint)
                             elseif segment.boost and math.abs(pos.X-segment.x-55)<45 and Run.Time-data.lastBoost>1 then
                                 data.lastBoost=Run.Time;actor:SetAttribute("BoostSerial",(actor:GetAttribute("BoostSerial") or 0)+1);actor.Velocity=Vector2.new(650,-420)

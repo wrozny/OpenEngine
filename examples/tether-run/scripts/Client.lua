@@ -58,11 +58,11 @@ Run.Heartbeat:Connect(function(dt)
     lastPosition=actor.Position
     Camera.Follow=actor
     local phase=state:GetAttribute("Phase") or "Waiting"
-    panel.Phase.Text=phase=="Results" and ((state:GetAttribute("Winner") or "").." takes the round") or phase:upper()
+    panel.Phase.Text=phase=="Results" and ((state:GetAttribute("Winner") or "").." takes the round") or (actor:GetAttribute("Spectating") and "NEXT ROUND / SPECTATING" or phase:upper())
     local seconds=state:GetAttribute("Seconds") or 0
     panel.Clock.Text=string.format("%d:%02d",math.floor(seconds/60),seconds%60)
-    panel.Course.Text=string.format("COURSE %d   /   ROUND %d",state:GetAttribute("Seed") or 0,state:GetAttribute("Round") or 0)
-    screen.Footer.Progress.Text=string.format("DECK %02d / 14     %d RECOVERIES",actor:GetAttribute("Checkpoint") or 1,actor:GetAttribute("Falls") or 0)
+    panel.Course.Text=string.format("%s / SEED %d",(actor:GetAttribute("District") or "Departure"):upper(),state:GetAttribute("Seed") or 0)
+    screen.Footer.Progress.Text=string.format("DECK %02d / %02d     %d RECOVERIES",actor:GetAttribute("Checkpoint") or 1,state:GetAttribute("DeckCount") or 14,actor:GetAttribute("Falls") or 0)
     screen.Footer.Dash.Text=Run.Time-dashAt>=2 and "SHIFT  /  DASH READY" or "DASH RECHARGING"
     if not actor:GetAttribute("CanRace") then
         actor.Velocity=Vector2.new(0,actor.Velocity.Y);hook=nil;return

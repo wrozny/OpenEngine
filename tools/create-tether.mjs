@@ -16,8 +16,8 @@ make('Folder', 'Course', world);
 make('Folder', 'Match', world);
 make('RemoteEvent', 'Action', world);
 make('Object2D', 'Night sky', world, {
-  Position: new Vector2(2100, -100),
-  Size: new Vector2(6500, 2300),
+  Position: new Vector2(3400, -100),
+  Size: new Vector2(10500, 2300),
   Layer: -1000,
   Color: '#14252f',
   Sensor: true,
@@ -110,7 +110,7 @@ const project = {
   multiplayer: true,
   name: 'Tether Run',
   hideControlHint: true,
-  description: 'Swing across seeded rooftop courses. Grapple, dash and race the next round.',
+  description: 'Race shuffled rooftop districts: stair climbs, skyline gaps, upper routes and pulse gates.',
   controls: 'A/D run · Space jump · Mouse grapple · W/S reel · Shift dash · R recover',
   services: [world, scripts, ui].map(serializeNode),
   assets: { runner: { mimeType: 'image/svg+xml', SourceFile: 'assets/runner.svg' } },

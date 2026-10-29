@@ -5,7 +5,7 @@
   "multiplayer": true,
   "name": "Tether Run",
   "hideControlHint": true,
-  "description": "Swing across seeded rooftop courses. Grapple, dash and race the next round.",
+  "description": "Race shuffled rooftop districts: stair climbs, skyline gaps, upper routes and pulse gates.",
   "controls": "A/D run · Space jump · Mouse grapple · W/S reel · Shift dash · R recover",
   "services": [
     {
@@ -46,7 +46,7 @@
           "Shape": "Box",
           "Color": "#14252f",
           "Size": {
-            "X": 6500,
+            "X": 10500,
             "Y": 2300
           },
           "Anchored": true,
@@ -57,7 +57,7 @@
           "Restitution": 0,
           "Friction": 0.2,
           "Position": {
-            "X": 2100,
+            "X": 3400,
             "Y": -100
           },
           "Rotation": 0

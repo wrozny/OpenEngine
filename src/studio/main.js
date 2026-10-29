@@ -33,7 +33,7 @@ app.innerHTML = `
   <button id="insert-object">Insert</button><button id="insert-library">Library</button><div class="toolbar-spacer"></div><button id="build-project">Build game</button><button id="play" class="primary"><span>Play</span><kbd>F5</kbd></button>
 </nav>
 <main id="dock-host"></main>
-<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.7</span></footer>
+<footer class="statusbar"><span id="status">Ready</span><span id="selection-info">No selection</span><span>OpenEngine 0.7.1</span></footer>
 <div id="play-host" hidden></div><div id="launch-host" hidden></div><div id="dialog-host"></div><input type="file" id="open-file" accept=".openengine,.json" hidden>
 `;
 const $ = (id) => document.getElementById(id);

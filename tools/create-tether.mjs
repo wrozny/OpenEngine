@@ -110,7 +110,8 @@ const project = {
   multiplayer: true,
   name: 'Tether Run',
   hideControlHint: true,
-  description: 'Race shuffled rooftop districts: stair climbs, skyline gaps, upper routes and pulse gates.',
+  description:
+    'Race shuffled rooftop districts: stair climbs, skyline gaps, upper routes and pulse gates.',
   controls: 'A/D run · Space jump · Mouse grapple · W/S reel · Shift dash · R recover',
   services: [world, scripts, ui].map(serializeNode),
   assets: { runner: { mimeType: 'image/svg+xml', SourceFile: 'assets/runner.svg' } },

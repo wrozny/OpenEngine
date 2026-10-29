@@ -1,4 +1,5 @@
 import { chromium, expect } from '@playwright/test';
+import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -25,7 +26,9 @@ try {
     .toBeTruthy();
   const port = output.match(/http:\/\/localhost:(\d+)/)[1];
   browser = await chromium.launch({
-    executablePath: process.env.CHROMIUM_PATH || '/usr/bin/chromium',
+    executablePath:
+      process.env.CHROMIUM_PATH ||
+      (existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined),
     args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   });
   const context = await browser.newContext({ viewport: { width: 1200, height: 800 } }),
@@ -39,6 +42,14 @@ try {
     await page.getByLabel('Player name').fill(name);
     await page.getByRole('button', { name: 'Join server', exact: true }).click();
     await expect(page.getByText('TETHER / RUN', { exact: true })).toBeVisible({ timeout: 15000 });
+    // Text existing in the DOM did not catch extracted CSS being lost in web exports.
+    await expect(page.locator('.authored-ui')).toHaveCSS('position', 'absolute');
+    const header = page.getByLabel('Header', { exact: true });
+    await expect(header).toHaveCSS('position', 'absolute');
+    await expect(header).toHaveCSS('background-color', 'rgb(238, 231, 214)');
+    const bounds = await header.boundingBox();
+    assert.ok(bounds.width > 1000 && bounds.height > 100 && bounds.y < 50);
+    await expect(page.getByText('TETHER / RUN', { exact: true })).toHaveCSS('display', 'flex');
   }
   const page = pages[0];
   await page.bringToFront();

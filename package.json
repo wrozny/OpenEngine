@@ -1,6 +1,6 @@
 {
   "name": "openengine",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A Lua game engine and dockable Studio for 2D and 3D projects.",
   "main": "desktop/main.cjs",
   "scripts": {

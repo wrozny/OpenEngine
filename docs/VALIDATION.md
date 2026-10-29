@@ -1,4 +1,4 @@
-# Validation and platform coverage — 0.7.1
+# Validation and platform coverage — 0.7.2
 
 Verification runs in the Linux cloud workspace. Windows executables are cross-packaged, not launch-tested on Windows.
 
@@ -47,4 +47,4 @@ node tools/smoke-native-network.mjs --executable release/OpenEngineStudio-linux-
 
 Tether Run verifies seeded layout bounds, valid/invalid gameplay progression, hook acceptance/release, fall recovery, winners/new seeds, owned rope/reeling cleanup and boost delivery. The browser scenario exercises two actual clients, the authored HUD, jump/dash controls and aiming at an anchor. The course is generated at runtime rather than baked into the authoring scene.
 
-0.7.1 adds deterministic course checks across 64 seeds, traversal envelope and district coverage assertions, pulse-gate phase changes, and variable-length round progression. The actual ZIP web export is extracted, hosted and joined by two Chromium clients. HUD checks assert absolute positioning, nonzero header bounds, background color and text layout, rather than only checking that text exists. Both focused Tether Run Studio browser tests passed. The release workflow now runs the same exported-game smoke check before publishing.
+0.7.2 adds deterministic course checks across 64 seeds, traversal envelope and district coverage assertions, pulse-gate phase changes, and variable-length round progression. The actual ZIP web export is extracted, hosted and joined by two Chromium clients. HUD checks assert absolute positioning, nonzero header bounds, background color and text layout, rather than only checking that text exists. Both focused Tether Run Studio browser tests passed. The release workflow now runs the same exported-game smoke check before publishing.

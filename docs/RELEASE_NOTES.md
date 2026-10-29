@@ -1,4 +1,4 @@
-OpenEngine 0.7.1 makes **Tether Run** courses more varied and fixes authored UI in single-file web exports.
+OpenEngine 0.7.2 makes **Tether Run** courses more varied and fixes authored UI in single-file web exports.
 
 ## Tether Run course update
 
